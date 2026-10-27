@@ -6,8 +6,6 @@
 
 > **Submission for the Meta Global AI Developer Hackathon (Co-hosted with Cerebral Valley)**  
 > **Tracks:** Push the Frontier (Advanced AI, Robotics, Systems) & Indie Developer / Startup Track  
-> **Target Bonus Awards:** *Best Build on Meta Open Weight Models* ($10,000) & *Best Agentic Use-Case* ($5,000)  
-> **Empirical Validation Archive:** 88 longitudinal benchmark runs, 22,000 cognitive cycles across 11 foundation models (`v1`–`v7` in [`benchmark_evolution.csv`](file:///home/ultraxav/projects/jamesian_loop/benchmark_evolution.csv)).
 
 ---
 
