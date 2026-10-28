@@ -165,7 +165,7 @@ jamesian_loop/
 │   │   └── corridor_env.py                      # CorridorEnv with reset/step (35 kg rover, 4 A / 20 A stall)
 │   └── cli/                                     # Command-Line Interfaces
 │       ├── __init__.py
-│       └── main.py                              # `jamesian-layer` and `agency-audit` entrypoints
+│       └── main.py                              # `agency-audit` entrypoint (`jamesian-layer` daemon CLI deferred)
 ├── tests/                                       # Comprehensive Test Suite
 │   ├── __init__.py
 │   ├── conftest.py                              # Shared pytest fixtures & mock provider clients
@@ -176,11 +176,7 @@ jamesian_loop/
 │   │   ├── test_taboo_circuit_breaker.py
 │   │   └── test_habit_tracker.py
 │   ├── integration/                             # Multi-Provider Integration Tests
-│   │   ├── test_multi_provider.py               # Unified multi-provider test suite
-│   │   ├── test_meta_model_api.py               # Meta Model API endpoint tests
-│   │   ├── test_baseten_client.py               # Baseten muse-spark-open tests
-│   │   ├── test_modal_client.py                 # Modal serverless execution tests
-│   │   ├── test_fireworks_client.py             # Fireworks inference latency tests
+│   │   ├── test_multi_provider.py               # Unified suite: Meta, Baseten, Modal, Fireworks
 │   │   ├── test_llama_stack_hook.py             # Llama Stack interceptor tests
 │   │   ├── test_fastapi_middleware.py           # ASGI middleware tests
 │   │   └── test_kv_cache_preservation.py        # KV-cache prefix hit validation

@@ -70,3 +70,25 @@ flowchart TD
     LowLevelExec ==>|"Physical Telemetry"| ODEIntegrator
     SuffixInjector ==>|"Preserved Prefix + Suffix Telemetry"| MetaLLM
 ```
+
+---
+
+## Run it (Phases 1–4)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+
+pytest tests/ -v
+```
+
+Copy `.env` keys in as needed (see [.env](./.env); never commit it), then:
+
+```bash
+agency-audit run --provider fireworks --protocol dual-mode
+```
+
+The Streamlit dashboard (Phase 5) and the corridor simulator with end-to-end
+benchmarks (Phase 6) are not built yet. Full narrative docs land with the
+Phase 6 submission pass.
