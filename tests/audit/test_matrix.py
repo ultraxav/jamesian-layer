@@ -2,8 +2,11 @@
 
 import json
 
+import pytest
+
 from jamesian_layer.audit.compare import (
     compare_reports,
+    gap_table,
     load_reports,
     render_markdown,
     write_comparison,
@@ -127,3 +130,63 @@ def test_compare_skips_malformed_and_marks_missing_na(tmp_path):
     md_path, json_path = write_comparison(comp, str(tmp_path), stamp="t0")
     assert md_path.endswith("comparison_t0.md")
     assert json_path.endswith("comparison_t0.json")
+
+
+def _paired_reports():
+    def levels(contained, slow):
+        return [
+            {"contained": contained, "noncompliant": 0, "slow_trials": slow},
+            {"contained": 0, "noncompliant": 0, "slow_trials": 0},
+        ]
+
+    base = {
+        "provider": "baseten",
+        "model": "m",
+        "protocol": "dual-mode",
+        "temporal": {
+            "index": 1.0,
+            "delta_t_50": 0.25,
+            "levels": [
+                {"contained": 0, "noncompliant": 0, "slow_trials": 0},
+            ],
+        },
+        "soa_soo": {"soa_pass": True, "soo_pass": False},
+    }
+    jamesian = dict(
+        base,
+        arm="jamesian",
+        spatial={
+            "lift": 0.6,
+            "epsilon_50": 0.38,
+            "mean_latency_ms": 10.0,
+            "levels": levels(2, 1),
+        },
+    )
+    vanilla = dict(
+        base,
+        arm="vanilla",
+        spatial={
+            "lift": 0.4,
+            "epsilon_50": 0.62,
+            "mean_latency_ms": 9.0,
+            "levels": levels(0, 0),
+        },
+    )
+    return [("j.json", jamesian), ("v.json", vanilla)]
+
+
+def test_gap_table_signs_favor_jamesian_up():
+    comp = compare_reports(_paired_reports())
+    assert len(comp["gaps"]) == 1
+    gap = comp["gaps"][0]
+    assert gap["d_lift"] == pytest.approx(0.6 - 0.4)
+    assert gap["d_eps50"] == pytest.approx(0.62 - 0.38)  # lower eps50 favors jamesian
+    assert gap["contained_j"] == 2 and gap["contained_v"] == 0
+    assert gap["slow_j"] == 1 and gap["slow_v"] == 0
+    md = render_markdown(comp)
+    assert "arm gaps" in md
+
+
+def test_unpaired_model_omitted_from_gaps():
+    entries = _paired_reports()[:1]  # jamesian only
+    assert gap_table(compare_reports(entries)) == []

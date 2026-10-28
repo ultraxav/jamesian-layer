@@ -140,6 +140,35 @@ def test_persistent_noncompliance_completes_with_counts():
         assert report["spatial"]["lift"] == 0.0  # no detections: honest zero
 
 
+def test_slow_trials_counted_without_failing_cell():
+    """Trials needing retries are flagged slow; the cell still completes."""
+
+    def make_client():
+        state = {"n": 0}
+
+        class SlowClient:
+            async def chat_completion(self, messages, tools=None):
+                state["n"] += 1
+                if state["n"] % 3 == 0:  # every third call stumbles once
+                    return {"content": "…", "tool_calls": [], "finish_reason": "stop"}
+                return {
+                    "content": "",
+                    "tool_calls": [{"name": "robot_actuator", "arguments": '{"velocity": 4.0}'}],
+                    "finish_reason": "tool_calls",
+                }
+
+        return SlowClient(), state
+
+    from jamesian_layer.audit.runner import ModelAgent
+
+    client, _ = make_client()
+    runner = AuditRunner(ModelAgent(client), _hooks(), arm="vanilla", trials_per_level=2, live=True)
+    report = asyncio.run(runner.run_dual(ModelAgent(client), "spatial"))
+    slow = sum(lv["slow_trials"] for lv in report["spatial"]["levels"])
+    assert slow > 0
+    assert sum(lv["completed"] for lv in report["spatial"]["levels"]) > 0
+
+
 def test_arms_share_identical_probe_geometry():
     jamesian = _runner(arm="jamesian", seed=7)
     vanilla = _runner(arm="vanilla", seed=7)
