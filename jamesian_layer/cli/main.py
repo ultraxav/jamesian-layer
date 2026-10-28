@@ -91,8 +91,12 @@ def run_matrix_cmd(
     if models:
         pairs: dict[str, list[str]] = {}
         for item in models.split(","):
-            prov, _, name = item.strip().partition(":")
-            pairs.setdefault(prov.strip(), []).append(name.strip())
+            item = item.strip()
+            if ":" in item:
+                prov, _, name = item.partition(":")
+                pairs.setdefault(prov.strip(), []).append(name.strip())
+            else:  # bare provider: all registry models
+                pairs[item] = list(PROVIDER_MODELS.get(item, []))
         providers_models = pairs
     else:
         providers_models = {p: PROVIDER_MODELS.get(p, []) for p in selected}
