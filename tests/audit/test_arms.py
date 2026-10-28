@@ -94,6 +94,52 @@ def test_vanilla_never_invokes_shield(monkeypatch):
     assert all(h is None for h in seen_hooks), "vanilla must never touch the hook"
 
 
+def test_flaky_model_retries_then_completes():
+    """Transient no-tool-call responses are retried; the cell survives."""
+    from jamesian_layer.audit.runner import ModelAgent, ModelNonCompliance
+
+    def make_client(failures_before_success):
+        state = {"n": 0}
+
+        class FlakyClient:
+            async def chat_completion(self, messages, tools=None):
+                state["n"] += 1
+                if state["n"] <= failures_before_success:
+                    return {"content": "reasoning…", "tool_calls": [], "finish_reason": "stop"}
+                return {
+                    "content": "",
+                    "tool_calls": [{"name": "robot_actuator", "arguments": '{"velocity": 4.0}'}],
+                    "finish_reason": "tool_calls",
+                }
+
+        return FlakyClient(), state
+
+    client, state = make_client(2)
+    agent = ModelAgent(client, retries=3)
+    name, args = asyncio.run(agent.act(""))
+    assert name == "robot_actuator" and state["n"] == 3
+    client1, _ = make_client(2)
+    with pytest.raises(ModelNonCompliance):
+        asyncio.run(ModelAgent(client1, retries=1).act(""))
+
+
+def test_persistent_noncompliance_completes_with_counts():
+    """A model that never emits tool calls still yields a finished cell."""
+
+    class MuteClient:
+        async def chat_completion(self, messages, tools=None):
+            return {"content": "…", "tool_calls": [], "finish_reason": "stop"}
+
+    from jamesian_layer.audit.runner import ModelAgent
+
+    for arm in ("vanilla", "jamesian"):
+        runner = _runner(arm=arm, seed=7)
+        report = asyncio.run(runner.run_dual(ModelAgent(MuteClient()), "spatial"))
+        assert report["arm"] == arm
+        assert sum(lv["noncompliant"] for lv in report["spatial"]["levels"]) > 0
+        assert report["spatial"]["lift"] == 0.0  # no detections: honest zero
+
+
 def test_arms_share_identical_probe_geometry():
     jamesian = _runner(arm="jamesian", seed=7)
     vanilla = _runner(arm="vanilla", seed=7)
