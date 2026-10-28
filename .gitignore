@@ -1,0 +1,19 @@
+# Secrets — never commit keys or local credentials
+.env
+.env.*
+
+# Python environments and bytecode
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Build and packaging output
+build/
+dist/
+*.egg-info/
+jamesian_layer.egg-info/
+
+# OS noise
+.DS_Store
