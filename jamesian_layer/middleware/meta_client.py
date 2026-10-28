@@ -5,7 +5,7 @@ import httpx
 from jamesian_layer.config import Settings
 from jamesian_layer.middleware.base_provider import OpenAICompatibleClient
 
-DEFAULT_MODEL = "meta-llama/Llama-3.3-70B-Instruct"
+DEFAULT_MODEL = "muse-spark-1.3"
 DEFAULT_BASE_URL = "https://api.meta.ai/v1"
 
 
