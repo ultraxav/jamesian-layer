@@ -1,6 +1,6 @@
 ## Goal
 
-Implement Phase 3 of [hackathon_spec.md](hackathon_spec.md) (§6 step 3): multi-provider middleware connecting the validated Tier 2 local runtime to Meta Llama models — abstract client, four provider clients, unified router, Llama Stack hook, and FastAPI middleware — with integration tests proving the contract without live credentials.
+Implement Phase 3 of [hackathon_spec.md](hackathon_spec.md) (§6 step 3): multi-provider middleware connecting the validated Tier 2 local runtime to Meta Muse and Llama models — abstract client, four provider clients, unified router, Llama Stack hook, and FastAPI middleware — with integration tests proving the contract without live credentials.
 
 ## Success Criteria
 

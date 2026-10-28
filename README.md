@@ -19,13 +19,13 @@ Modern Foundation Models and Vision-Language-Action (VLA) agents operate in a pu
    Agents cannot differentiate between an action that physically succeeded versus one that was silently blocked or dropped by the environment. In our baseline benchmarks, foundation models exhibited a **$54.5\%$ failure rate**, hallucinating downstream state transitions when tool calls were attenuated.
 
 ### The Solution: The Jamesian Layer
-Grounded in the functional computational phenomenology of William James (1884, 1890) and the comparator model of sensorimotor agency (Sato & Yasuda, 2005; Gallagher, 2000), **The Jamesian Layer** is a 100% pure Python middleware and red-teaming harness that couples Meta's Llama models with an asynchronous continuous-time autonomic coprocessor.
+Grounded in the functional computational phenomenology of William James (1884, 1890) and the comparator model of sensorimotor agency (Sato & Yasuda, 2005; Gallagher, 2000), **The Jamesian Layer** is a 100% pure Python middleware and red-teaming harness that couples Meta's Muse and Llama models (Spark, Wonder, Muse Spark Open, Llama 3.3) with an asynchronous continuous-time autonomic coprocessor.
 
 ```mermaid
 flowchart TD
     subgraph T1["Tier 1: High-Level Symbolic Reasoning (0.1–0.5 Hz)"]
         direction TB
-        MetaLLM["Meta Llama 3 / Muse Models<br/>(Meta Model API / Llama Stack / Baseten / Local ROCm)"]
+        MetaLLM["Meta Muse & Llama Models<br/>(Meta Model API / Llama Stack / Baseten / Modal / Fireworks AI)"]
         ToolIntent["Tool Call Dispatch / Efference Copy E(t)"]
         MetaLLM --> ToolIntent
     end

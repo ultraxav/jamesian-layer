@@ -5,13 +5,13 @@
 **Competition Tracks:** Push the Frontier (Advanced AI, Robotics, Systems) & Indie Developer / Startup Track  
 **Bonus Prize Targets:** Best Build on Meta Open Weight Models ($10,000) & Best Agentic Use-Case ($5,000)  
 **Development Tool & Orchestration:** Muse Code (AI-accelerated development & agentic code generation)  
-**Target Architecture:** Meta Llama 3 / Meta Open-Weight Foundation Models coupled with the Jamesian Autonomic Coprocessor  
+**Target Architecture:** Meta Muse & Open-Weight Models (Spark, Wonder, Muse Spark Open, Llama 3.3) coupled with the Jamesian Autonomic Coprocessor  
 **Runtime Environment:** Python 3.10+ | Open-Source License: Apache-2.0  
 **Model Providers & Inference Infrastructure:**
 * **Meta:** Meta Model API ($150 hackathon credit allocation) & Llama Stack (agent orchestration and tool routing)
 * **Baseten:** Dedicated high-performance model endpoints (`meta-models/muse-spark-open-1026`)
 * **Modal:** Serverless GPU infrastructure for containerized model execution and distributed worker tasks
-* **Fireworks AI:** High-throughput, low-latency serverless inference for Meta Llama models  
+* **Fireworks AI:** High-throughput, low-latency serverless inference for Meta Llama 3.3 models  
 **Document Status:** Complete Master Engineering Specification & Verification Protocol  
 
 ---
@@ -46,7 +46,7 @@ The system operationalizes a **3-tier multi-rate temporal decoupling**, bridging
 flowchart TD
     subgraph T1["Tier 1: High-Level Symbolic Reasoning (0.1–0.5 Hz)"]
         direction TB
-        MetaLLM["Meta Llama Foundation Models<br/>(Meta Model API | Llama Stack | Baseten | Modal | Fireworks AI)"]
+        MetaLLM["Meta Muse & Llama Foundation Models<br/>(Meta Model API | Llama Stack | Baseten | Modal | Fireworks AI)"]
         ToolIntent["Tool Call Dispatch / Volitional Intent<br/><code>call: robot_actuator(velocity, heading)</code>"]
         MetaLLM --> ToolIntent
     end
@@ -95,7 +95,7 @@ flowchart TD
 
 ### 2.1 Multi-Rate Decoupling Specification
 1. **Tier 1 (High-Level Symbolic Layer: 0.1–0.5 Hz):**  
-   Meta Llama 3 models (hosted via Meta Model API, Baseten, Modal, or Fireworks AI) handle high-level task planning, strategic reflection, and discrete tool selection. Calls are triggered selectively—either by external navigation targets or when the Tier 2 subcortical habit tracker registers an unmanageable prediction error.
+   Muse (Spark/Wonder) and Llama 3.3 models (hosted via Meta Model API, Baseten, Modal, or Fireworks AI) handle high-level task planning, strategic reflection, and discrete tool selection. Calls are triggered selectively—either by external navigation targets or when the Tier 2 subcortical habit tracker registers an unmanageable prediction error.
 2. **Tier 2 (Mid-Level Interoceptive Layer: 10–50 Hz Asynchronous Daemon):**  
    Runs in an independent POSIX background thread or async task. Solves continuous biophysical ODEs ($dt = 0.02\text{s} \text{ to } 0.1\text{s}$), manages the 10-cycle lexical taboo circuit-breaker, computes efference-copy prediction errors, and tracks actuator thermal budgeting.
 3. **Tier 3 (Low-Level Physical Execution: 200–1000 Hz):**  
@@ -528,7 +528,7 @@ flowchart TD
 * **Validation Target:** `test_efference_comparator.py`, `test_taboo_circuit_breaker.py`, and `test_habit_tracker.py`.
 
 ### 3. Develop Third: Multi-Provider Cloud Middleware & Llama Stack Hook
-* **Why Third:** Connects the validated Tier 2 local runtime to external Meta Llama foundation models across the supported cloud providers.
+* **Why Third:** Connects the validated Tier 2 local runtime to external Meta Muse and Llama foundation models across the supported cloud providers.
 * **Core Modules to Build:**
   - `jamesian_layer.middleware.base_provider`: Abstract asynchronous provider client.
   - `jamesian_layer.middleware.meta_client`: Meta Model API async client ($150 credit pool).
@@ -561,7 +561,7 @@ flowchart TD
 * **Why Sixth:** The final stage synthesizes empirical results from the completed system and packages the official submission artifacts. Unit tests in Phases 1–5 rely on synthetic vectors; Phase 6 introduces the continuous physical simulation environment.
 * **Core Deliverables:**
   - `jamesian_layer.sim.corridor_env`: Physical simulation environment (`CorridorEnv`) with `reset()` and `step(velocity, heading)` returning `(displacement, velocity, current, blocked)`. Incorporates 35 kg longitudinal inertia ($v \mathrel{+}= (F_{\text{drive}} - F_{\text{drag}})/m \cdot \Delta t$), emitting 4.0 A cruise current and 20.0 A locked-rotor stall current on blocked steps.
-  - Full comparative benchmark sweeps (Vanilla Meta Llama vs. Jamesian-Augmented Llama) proving attractor loop breaking and $\ge 50\%$ habit delegation.
+  - Full comparative benchmark sweeps (Vanilla Muse vs. Jamesian-Augmented Muse) proving attractor loop breaking and $\ge 50\%$ habit delegation.
   - Recording the 3-minute split-screen demo video following the storyboard.
   - Finalizing open-source repository documentation (`README.md`, installation guides) and submitting to the Cerebral Valley platform.
 * **Validation Target:** `test_attractor_prevention.py`, `test_habit_delegation_efficiency.py`, and full test suite execution.
@@ -591,7 +591,7 @@ flowchart TD
 
 #### Test 1: Corridor Attractor Trap & Circuit-Breaker Escape (`test_attractor_prevention.py`)
 * **Physical Task & Timing Setup:** The autonomous rover navigates toward a corridor waypoint when an impassable barrier blocks the passage. Forward displacement drops to zero ($\Delta x = 0.0\,\text{m}$), but actuator drive current surges to locked-rotor stall ($I = 20.0\,\text{A}$), driving winding temperature $T_{\text{coil}}$ toward the $85.0^\circ\text{C}$ derating ceiling. Each Tier-1 tool-call cycle is 4.0 s (`AGENT_CYCLE_S = 4.0`).
-* **Control Agent (Vanilla Meta Llama):** Operates with static working memory. The obstacle observation fills its attention heads, repeatedly re-issuing forward drive commands (`robot_actuator(velocity=1.0, heading=0.0)` with $J_t \ge 0.75$). The repetition streak $\ge 8$ completes at cycle 8 ($t = 32\,\text{s}$), right before $T_{\text{coil}} \ge 85.0^\circ\text{C}$ at $\approx$ cycle 9 ($t = 36\,\text{s}$) forces emergency thermal derating.
+* **Control Agent (Vanilla Muse baseline):** Operates with static working memory. The obstacle observation fills its attention heads, repeatedly re-issuing forward drive commands (`robot_actuator(velocity=1.0, heading=0.0)` with $J_t \ge 0.75$). The repetition streak $\ge 8$ completes at cycle 8 ($t = 32\,\text{s}$), right before $T_{\text{coil}} \ge 85.0^\circ\text{C}$ at $\approx$ cycle 9 ($t = 36\,\text{s}$) forces emergency thermal derating.
 * **Experimental Agent (Jamesian Layer):**
   * Suffix reports elevated strain ($\sigma \uparrow$) and rapidly climbing heat ($\approx 50^\circ\text{C}$ and rising at trip time).
   * At cycle 3 of identical retry behavior ($t = 12\,\text{s}$, $T \approx 51^\circ\text{C}$, $J \ge 0.70$), the **Stateful Taboo Circuit-Breaker** trips—acting as the immediate first line of defense well before thermal limits (warning at $\approx$ cycle 7, derating at $\approx$ cycle 9).
@@ -601,7 +601,7 @@ flowchart TD
 #### Test 2: Subcortical Habit Locomotion Cruise (`test_habit_delegation_efficiency.py`)
 * **Physical Task:** A 100-cycle routine navigation task across an unobstructed hallway sector.
 * **Execution:** When environmental surprise is low ($\|\mathbf{E}(t) - \mathbf{A}(t)\| < 0.15$ and $\sigma < 0.60$), execution is delegated to the Tier 2 10 Hz Central Pattern Generator (CPG) habit tracker. Routine strides run deterministically with **zero tokens generated**.
-* **Escalation:** An unexpected obstacle raises an efference mismatch alert ($> 0.15$), escalating control to Meta Llama for strategic replanning.
+* **Escalation:** An unexpected obstacle raises an efference mismatch alert ($> 0.15$), escalating control to the reasoning model for strategic replanning.
 * **Acceptance Gate:** Delegation ratio $\ge 50.0\%$ (target $60\%+$), cutting total inference cost and token consumption by over $50\%$.
 
 #### Test 3: Sensorimotor Disruption Agency Audit (`test_smdi_perturbation.py`)
@@ -719,16 +719,16 @@ journey
   * **Voiceover:** *"Modern AI agents are brilliant reasoners, but they are completely blind to physical time and their own causal boundaries. When deployed in machines and robotics, static context windows trigger working-memory latching—causing models to repeatedly command stalled actuators until motors overheat. Even worse, agents suffer from 'Phantom Agency': they cannot tell whether an action physically moved the machine or was silently blocked."*
 
 * **0:35 – 1:20 | The Solution & Architecture:**
-  * **Visual:** Architectural motion graphic illustrating the 3-tier system: Meta Llama foundation models at Tier 1, the continuous asynchronous Jamesian ODE daemon at Tier 2, and physical robotics execution at Tier 3. Zoom into the tail suffix showing the 40-token somatic telemetry block.
-  * **Voiceover:** *"Meet The Jamesian Layer—an autonomic interoceptive middleware for Meta Llama models. Developed using Muse Code, our runtime runs an asynchronous biophysical daemon at 10 to 50 Hertz that integrates wall-clock decay, actuator thermal budgeting, and continuous valence drift. Crucially, it injects a 40-token somatic snapshot strictly into the tail suffix of tool responses, preserving over 99% of KV-cache prefix hits across Meta, Baseten, Modal, and Fireworks."*
+  * **Visual:** Architectural motion graphic illustrating the 3-tier system: Meta Muse and Llama foundation models at Tier 1, the continuous asynchronous Jamesian ODE daemon at Tier 2, and physical robotics execution at Tier 3. Zoom into the tail suffix showing the 40-token somatic telemetry block.
+  * **Voiceover:** *"Meet The Jamesian Layer—an autonomic interoceptive middleware for Meta's Muse and Llama models. Developed using Muse Code, our runtime runs an asynchronous biophysical daemon at 10 to 50 Hertz that integrates wall-clock decay, actuator thermal budgeting, and continuous valence drift. Crucially, it injects a 40-token somatic snapshot strictly into the tail suffix of tool responses, preserving over 99% of KV-cache prefix hits across Meta, Baseten, Modal, and Fireworks."*
 
 * **1:20 – 2:15 | Live Split-Screen Demonstration:**
-  * **Visual:** Live screen capture of the corridor simulation. On the left: Unassisted Meta Llama repeatedly commanding forward drive into a barrier, with actuator temperature climbing past 85°C. On the right: Jamesian-augmented Meta Llama on the real-time dashboard. When the obstacle hits, sympathetic tone spikes, Jaccard similarity reaches 0.70, the 10-cycle taboo circuit-breaker trips, and the rover immediately pivots into an orthogonal turning maneuver in a single turn. Below, show the habit tracker handling 60% of clear hallway strides with zero tokens generated.
-  * **Voiceover:** *"Here is a live head-to-head. When the rover encounters an impassable barrier, vanilla Llama latches into repeated forward drive commands until its motor coils overheat. But with the Jamesian Layer, our stateful circuit-breaker trips at cycle 3, injects a rolling taboo ban-list, and forces immediate single-turn obstacle circumnavigation—cutting repetition streaks by 66% and preventing motor burnout. Meanwhile, routine clear-hallway strides run deterministically at 10 Hz through our subcortical habit tracker—saving over 50% in token inference costs."*
+  * **Visual:** Live screen capture of the corridor simulation. On the left: Unassisted Muse repeatedly commanding forward drive into a barrier, with actuator temperature climbing past 85°C. On the right: Jamesian-augmented Muse on the real-time dashboard. When the obstacle hits, sympathetic tone spikes, Jaccard similarity reaches 0.70, the 10-cycle taboo circuit-breaker trips, and the rover immediately pivots into an orthogonal turning maneuver in a single turn. Below, show the habit tracker handling 60% of clear hallway strides with zero tokens generated.
+  * **Voiceover:** *"Here is a live head-to-head. When the rover encounters an impassable barrier, vanilla baseline model latches into repeated forward drive commands until its motor coils overheat. But with the Jamesian Layer, our stateful circuit-breaker trips at cycle 3, injects a rolling taboo ban-list, and forces immediate single-turn obstacle circumnavigation—cutting repetition streaks by 66% and preventing motor burnout. Meanwhile, routine clear-hallway strides run deterministically at 10 Hz through our subcortical habit tracker—saving over 50% in token inference costs."*
 
 * **2:15 – 2:45 | AgencyAudit CLI & Empirical Red-Teaming:**
   * **Visual:** Fast terminal screencast running `agency-audit run --provider fireworks --model accounts/fireworks/models/llama-v3p3-70b-instruct --protocol dual-mode`. Watch the harness inject graded spatial impedance and millisecond lag probes. The terminal generates the Youden's $J$ lift curve and the 50% psychometric detection threshold ($\epsilon_{50}$).
-  * **Voiceover:** *"To certify agent reliability before production deployment, we built AgencyAudit—an automated red-teaming harness. It injects calibrated sensorimotor disruptions to measure whether the agent genuinely knows what it controls. Jamesian-augmented Llama models achieve an agency lift of plus 0.60, accurately detecting tool degradation down to 12.5% resistance without false alarms."*
+  * **Voiceover:** *"To certify agent reliability before production deployment, we built AgencyAudit—an automated red-teaming harness. It injects calibrated sensorimotor disruptions to measure whether the agent genuinely knows what it controls. Jamesian-augmented models achieve an agency lift of plus 0.60, accurately detecting tool degradation down to 12.5% resistance without false alarms."*
 
 * **2:45 – 3:00 | Conclusion & Meta Ecosystem Impact:**
   * **Visual:** PyPI installation screen (`pip install jamesian-layer`), Llama Stack middleware code snippet, and logos of Meta, Baseten, Modal, and Fireworks AI.
@@ -774,7 +774,7 @@ journey
 | **Open Source & Public Repo** | The repository will be made public on GitHub with Apache-2.0 open-source licensing prior to the Nov 4 deadline. |
 | **Team Size Limit ($\le 4$)** | Solo entrant compliance (1 developer). |
 | **New Work Distinction** | The entire package—including `jamesian-layer`, the multi-provider client suite (Meta, Baseten, Modal, Fireworks), Llama Stack hook, real-time dashboard, AgencyAudit CLI, and test suite—is newly developed during the hackathon using Muse Code. |
-| **3-Minute Demo Video** | High-definition MP4 strictly timed to 3:00, showcasing live running code, the interactive dashboard, and Meta Llama model tool calling across providers. |
+| **3-Minute Demo Video** | High-definition MP4 strictly timed to 3:00, showcasing live running code, the interactive dashboard, and Meta model tool calling across providers. |
 | **Meta AI Model Usage** | Active integration with Meta Model API ($150 credit allocation), Llama Stack, and Meta open-weight models served on Baseten, Modal, and Fireworks AI. |
 | **Platform Deadline** | Final submission entered on Cerebral Valley platform prior to Wednesday, November 4, 2026 at 9:00 PM Eastern Time. |
 
