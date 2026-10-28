@@ -39,18 +39,27 @@ class LlamaStackInteroceptiveHook:
         self._pending: dict[str, EfferenceCopy] = {}
         self.last_report: dict | None = None
 
-    def pre_tool_call(self, tool_name: str, tool_args: dict) -> dict:
-        """Captures efference copy E(t) and enforces taboo constraints."""
+    def pre_tool_call(
+        self, tool_name: str, tool_args: dict, intent_vector=None
+    ) -> dict:
+        """Captures efference copy E(t) and enforces taboo constraints.
+
+        ``intent_vector`` optionally overrides the args-derived intent when the
+        caller knows the outcome space (e.g. expected displacement/velocity);
+        otherwise intent is derived from numeric tool args as before.
+        """
         from jamesian_layer.breaker.jaccard_detector import tokenize
 
         action_id = f"{tool_name}-{time.monotonic_ns()}"
         text = tool_text_for(tool_name, tool_args)
         if hasattr(self.breaker, "observe"):
             self.breaker.observe(text)
+        if intent_vector is None:
+            intent_vector = intent_vector_for(tool_args)
         self._pending[action_id] = EfferenceCopy(
             action_id=action_id,
             timestamp_ns=time.monotonic_ns(),
-            intent_vector=intent_vector_for(tool_args),
+            intent_vector=np.asarray(intent_vector, dtype=float),
             tool_name=tool_name,
             tool_args=dict(tool_args),
         )
