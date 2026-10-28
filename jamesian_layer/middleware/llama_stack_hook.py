@@ -18,12 +18,14 @@ from jamesian_layer.core.autonomic_daemon import AutonomicDaemon
 from jamesian_layer.kv_cache.suffix_formatter import format_suffix
 
 
-def _numeric_vector(mapping: dict) -> np.ndarray:
-    values = [float(v) for _, v in sorted(mapping.items()) if isinstance(v, (int, float))]
+def intent_vector_for(tool_args: dict) -> np.ndarray:
+    """Deterministic numeric intent vector (sorted keys, numerics only)."""
+    values = [float(v) for _, v in sorted(tool_args.items()) if isinstance(v, (int, float))]
     return np.array(values, dtype=float)
 
 
-def _tool_text(tool_name: str, tool_args: dict) -> str:
+def tool_text_for(tool_name: str, tool_args: dict) -> str:
+    """Canonical tool-call text for taboo and breaker tracking."""
     return " ".join([str(tool_name)] + [str(v) for _, v in sorted(tool_args.items())])
 
 
@@ -35,22 +37,26 @@ class LlamaStackInteroceptiveHook:
         self.taboo = taboo
         self.habit = habit
         self._pending: dict[str, EfferenceCopy] = {}
+        self.last_report: dict | None = None
 
     def pre_tool_call(self, tool_name: str, tool_args: dict) -> dict:
         """Captures efference copy E(t) and enforces taboo constraints."""
         from jamesian_layer.breaker.jaccard_detector import tokenize
 
         action_id = f"{tool_name}-{time.monotonic_ns()}"
+        text = tool_text_for(tool_name, tool_args)
+        if hasattr(self.breaker, "observe"):
+            self.breaker.observe(text)
         self._pending[action_id] = EfferenceCopy(
             action_id=action_id,
             timestamp_ns=time.monotonic_ns(),
-            intent_vector=_numeric_vector(tool_args),
+            intent_vector=intent_vector_for(tool_args),
             tool_name=tool_name,
             tool_args=dict(tool_args),
         )
         banned = set()
         if self.taboo is not None:
-            banned = set(self.taboo.active()) & tokenize(_tool_text(tool_name, tool_args))
+            banned = set(self.taboo.active()) & tokenize(text)
         if banned:
             return {
                 "allowed": False,
@@ -69,10 +75,11 @@ class LlamaStackInteroceptiveHook:
         aff = AfferentFeedback(
             action_id=action_id,
             timestamp_ns=eff.timestamp_ns + int(latency_ms * 1e6),
-            outcome_vector=_numeric_vector(tool_result),
+            outcome_vector=intent_vector_for(tool_result),
             status=str(tool_result.get("status", "ok")),
         )
         report = self.comparator.compare(eff, aff)
+        self.last_report = report
         current = self.daemon.get_state().current
         if isinstance(tool_result.get("current"), (int, float)):
             current = float(tool_result["current"])
