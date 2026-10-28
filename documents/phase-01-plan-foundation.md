@@ -15,18 +15,18 @@ Greenfield build, bottom-up per spec §6: state dataclass first, then pure-funct
 
 ## Steps
 
-1. **Packaging skeleton + config** — add `pyproject.toml` (PEP 621, `jamesian-layer`, `.[dev]` with `pytest`), `requirements.txt` (lower-bound pins per spec §12), `jamesian_layer/__init__.py` + `py.typed`, `tests/__init__.py`, `tests/unit/__init__.py`; add `config.py` `Settings` (thresholds, daemon defaults per spec §8; provider keys default `None`).
+1. **Packaging skeleton + config** — add `pyproject.toml` (PEP 621, `jamesian-layer`, `.[dev]` with `pytest`), `requirements.txt` (lower-bound pins per spec §12), `jamesian_layer/__init__.py` + `py.typed`, `tests/__init__.py`, `tests/unit/__init__.py`; add `config.py` `Settings` (thresholds, daemon defaults per spec §8; provider keys default `None`; uses `SettingsConfigDict`, not the spec's `class Config`, per pydantic v2 deprecation).
 2. **`core/biophysical_state.py`** — `BiophysicalState` dataclass exactly per spec §5.1 (`sigma=0.20`, `valence=0.00`, `gamma=0.10`, `T_coil=25.0`, `current`, `rho_tau`, `mismatch_delta`, `timestamp_ns`) with `to_telemetry_dict()` rounding; clamp helpers for `sigma, gamma ∈ [0,1]`, `valence ∈ [-1,1]`.
 3. **`core/ode_solvers.py`** — pure functions: RK4 stepper + Euler fallback, exponential τ-decay helper, `sigma/V/gamma` derivatives per spec §4.1 (σ₀=0.20/τ=45s, V τ=60s, γ₀=0.10/τ=30s, β_fail=1.50, α_vagal=0.80, κ_succ=0.40, κ_fail=0.60) and coil model per §4.2 (C_th=120 J/K, h=1.8 W/K, T_amb=25°C, R₀=0.32Ω, α_Cu=0.00393/K, warning 75°C, derate 85°C / recovery 72°C at 15% output clamp).
 4. **`core/autonomic_daemon.py`** — background-thread/async daemon at configurable 10–50 Hz (default 20 Hz per spec §8) using `time.monotonic_ns`, `dt` clamp, start/stop/idempotent lifecycle, thread-safe latest-state snapshot + optional ring history; failure/success event hooks (`u_recovery`, `u_brace`, success/fail flags) wired to solver inputs, no provider imports.
 5. **`kv_cache/suffix_formatter.py` + `prefix_verifier.py`** — `format_suffix(state)` appending the §5.2 tail block only (never touching the prefix), `TELEMETRY_PATTERN` regex extraction, token-budget check (target ≤ 40, hard cap ≤ 45; offline word/char estimator with a documented swap-in point for the Llama 3 tokenizer); verifier hashes turns `0..T-1` before/after to prove bit-level invariance.
-6. **Unit tests + runbook** — `tests/unit/test_ode_solvers.py` (RK4 convergence vs. analytic decay, valence clamp, coil steady-state ≤ 0.5%, NaN-free long run) and `tests/unit/test_suffix_formatter.py` (suffix position, regex round-trip, token cap, prefix-hash invariance); minimal `conftest.py`; document `pip install -e ".[dev]"` and `pytest tests/unit/ -v` per spec §12.
+6. **Unit tests + runbook** — `tests/unit/test_ode_solvers.py` (RK4 convergence vs. analytic decay, solver finiteness under sustained events, state-level clamp bounds, coil cruise steady-state ≤ 0.5% plus stall-regime reach, NaN-free long run, Euler comparison, derate hysteresis) and `tests/unit/test_suffix_formatter.py` (suffix position, regex round-trip, token cap, prefix-hash invariance); minimal `conftest.py`; document `pip install -e ".[dev]"` and `pytest tests/unit/ -v` per spec §12.
 
 ## Validation Plan
 
 - `pip install -e ".[dev]"` — expected: clean install, `import jamesian_layer` resolves.
 - `pytest tests/unit/ -v` — expected: all Phase 1 tests pass (this is the §7.2 gate for `test_ode_solvers.py` / `test_suffix_formatter.py`).
-- `pytest tests/unit/test_ode_solvers.py -v -k "convergence or clamp or steady_state"` — expected: RK4 error shrinks ~16× on halved `dt`, valence stays in bounds, coil steady-state error ≤ 0.5%.
+- `pytest tests/unit/test_ode_solvers.py -v -k "convergence or clamp or steady_state"` — expected: RK4 error shrinks ~16× on halved `dt`, solver stays finite under sustained events, clamp pins `V ∈ [-1, 1]`, coil steady-state error ≤ 0.5%.
 - Manual: format a tool result and diff prefix bytes before/after — expected: identical prefix, telemetry block only at tail, regex extracts all six fields.
 
 Highest-risk validation: the ≤ 45-token budget claim without a vendored Llama 3 tokenizer — run the estimator plus a character-length assertion, and flag exact-tokenizer verification as the one deferred check.
