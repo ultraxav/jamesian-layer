@@ -18,7 +18,7 @@ SETTINGS = Settings(
 )
 
 EXPECTED = {
-    "meta": ("meta-test", "meta-llama/Llama-3.3-70B-Instruct"),
+    "meta": ("meta-test", "muse-spark-1.3"),
     "baseten": ("baseten-test", "meta-models/muse-spark-open-1026"),
     "fireworks": ("fireworks-test", Settings().default_model),
 }
@@ -147,7 +147,15 @@ def test_provider_error_mapping():
 
 
 def test_missing_key_raises():
-    client = MultiProviderClient("meta", Settings())
+    # Explicit Nones so ambient .env credentials cannot mask the failure.
+    empty = Settings(
+        meta_api_key=None,
+        baseten_api_key=None,
+        modal_token_id=None,
+        modal_token_secret=None,
+        fireworks_api_key=None,
+    )
+    client = MultiProviderClient("meta", empty)
     with pytest.raises(ValueError):
         _run(client.chat_completion(MESSAGES))
 
