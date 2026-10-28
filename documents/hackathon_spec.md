@@ -352,7 +352,7 @@ class EfferenceComparator:
 ### 5.4 Stateful Anti-Recidivism Circuit-Breaker (`jamesian_layer.breaker`)
 * **Jaccard Overlap Metric:**
   $$J_t = \frac{|W_t \cap W_{t-1}|}{|W_t \cup W_{t-1}|}$$
-* **Tripping Threshold:** $J_t \ge 0.70$ over $k = 3$ consecutive cycles.
+* **Tripping Threshold:** $J_t \ge 0.70$ over $k = 3$ consecutive cycles. The trip counter counts consecutive matching turns (run length $\ge k$), not qualifying $J$-values: three identical turns trip on the third, whose two defined $J$-values are both $1.0$.
 * **Refractory Ban-List Injection:**
   `[CIRCUIT_BREAKER_ACTIVE: TABOO_WORDS = ['stride_forward', 'drive', 'forward', 'thrust']]`
 
@@ -629,7 +629,7 @@ flowchart TD
 | :--- | :--- | :--- | :--- |
 | **Unit** | `test_ode_solvers.py` | RK4 error $O(dt^4)$; $V \in [-1, 1]$; $T_{\text{coil}}$ steady-state error $\le 0.5\%$ | Divergent ODE, NaN values, valence overflow |
 | **Unit** | `test_suffix_formatter.py` | Telemetry block length $\le 45$ tokens; prefix hash match $100\%$ | Token budget exceeded, prefix modification |
-| **Unit** | `test_taboo_circuit_breaker.py` | Breaker trips at $k=3$ with $J \ge 0.70$; taboo tokens decay after 10 cycles | Breaker fails to trip, eternal taboo lock |
+| **Unit** | `test_taboo_circuit_breaker.py` | Breaker trips on the 3rd identical turn (run length $\ge 3$, $J \ge 0.70$); taboo tokens decay after 10 cycles | Breaker fails to trip, eternal taboo lock |
 | **Unit** | `test_habit_tracker.py` | Low-surprise routine handles $\ge 10$ steps without LLM call; escalates on error | False escalation during quiescent cruise |
 | **Integration** | `test_multi_provider.py` | Valid completion and tool call parsing on Meta Model API, Baseten, Modal, Fireworks | Provider handshake error, unparsed tool calls |
 | **Integration** | `test_kv_cache_preservation.py`| Prefix cache hit rate $\ge 99.0\%$; TTFT overhead $\le 5\%$ | Cache invalidation, full prompt recompute |
