@@ -16,7 +16,11 @@ dependencies = [
     "httpx>=0.27",
     "fastapi>=0.110",
     "modal>=0.60",
+    "typer>=0.9",
 ]
+
+[project.scripts]
+agency-audit = "jamesian_layer.cli.main:app"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
