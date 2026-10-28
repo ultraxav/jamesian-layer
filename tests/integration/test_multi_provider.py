@@ -161,8 +161,11 @@ def test_missing_key_raises():
 
 
 def test_modal_routing_with_stubbed_invoke():
+    seen = {}
+
     def fake_invoke(payload):
         assert payload["messages"] == MESSAGES
+        seen.update(payload)
         return {
             "content": "modal-ok",
             "tool_calls": [],
@@ -170,10 +173,13 @@ def test_modal_routing_with_stubbed_invoke():
             "finish_reason": "stop",
         }
 
-    client = MultiProviderClient("modal", SETTINGS, invoke=fake_invoke)
+    client = MultiProviderClient(
+        "modal", SETTINGS, invoke=fake_invoke, model="meta-models/muse-spark-open-1026"
+    )
     out = _run(client.chat_completion(MESSAGES))
     assert out["content"] == "modal-ok"
     assert out["model"] == "modal-worker"
+    assert seen["model"] == "meta-models/muse-spark-open-1026"
 
 
 def test_modal_missing_tokens_raise():

@@ -23,10 +23,12 @@ class ModalClient(BaseProviderClient):
         token_id: str | None = None,
         token_secret: str | None = None,
         invoke: Any | None = None,
+        model: str | None = None,
     ):
         self.token_id = token_id
         self.token_secret = token_secret
         self._invoke = invoke or self._remote_invoke
+        self.model = model
 
     @classmethod
     def from_settings(cls, settings: Settings, **kwargs) -> "ModalClient":
@@ -51,7 +53,9 @@ class ModalClient(BaseProviderClient):
         self, messages: list[dict], tools: list[dict] | None = None
     ) -> dict:
         self._require_tokens()
-        result = self._invoke({"messages": messages, "tools": tools or []})
+        result = self._invoke(
+            {"messages": messages, "tools": tools or [], "model": self.model}
+        )
         return {
             "content": result.get("content"),
             "tool_calls": result.get("tool_calls", []),

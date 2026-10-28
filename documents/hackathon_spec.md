@@ -644,7 +644,7 @@ flowchart TD
     subgraph MultiProvider ["Unified Multi-Provider Infrastructure"]
         Router["MultiProviderClient<br/>(jamesian_layer.middleware.multi_provider)"]
         
-        Router -->|"Direct API ($150 Credits)"| MetaAPI["Meta Model API<br/>meta-llama/Llama-3.3-70B-Instruct"]
+        Router -->|"Direct API ($150 Credits)"| MetaAPI["Meta Model API<br/>muse-spark-1.3"]
         Router -->|"Dedicated Endpoints"| Baseten["Baseten<br/>meta-models/muse-spark-open-1026"]
         Router -->|"Serverless GPU Runners"| Modal["Modal<br/>Custom Containerized Workers"]
         Router -->|"Low-Latency Streaming"| Fireworks["Fireworks AI<br/>accounts/fireworks/models/llama-v3p3-70b-instruct"]
@@ -835,7 +835,7 @@ agency-audit run \
 # Option B: Meta Model API ($150 Hackathon Credit Pool)
 agency-audit run \
   --provider meta \
-  --model meta-llama/Llama-3.3-70B-Instruct \
+  --model muse-spark-1.3 \
   --protocol dual-mode \
   --output ./documents/audit_report_meta.json
 
@@ -849,7 +849,7 @@ agency-audit run \
 # Option D: Modal Serverless GPU Runner
 agency-audit run \
   --provider modal \
-  --model meta-llama/Llama-3.3-70B-Instruct \
+  --model meta-models/muse-spark-open-1026 \
   --protocol dual-mode \
   --output ./documents/audit_report_modal.json
 ```
