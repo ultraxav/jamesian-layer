@@ -30,6 +30,10 @@ class MultiProviderClient(BaseProviderClient):
         self.provider = provider
         self._client = build(settings, **kwargs)
 
+    @property
+    def model(self) -> str | None:
+        return getattr(self._client, "model", None)
+
     async def chat_completion(
         self, messages: list[dict], tools: list[dict] | None = None
     ) -> dict:

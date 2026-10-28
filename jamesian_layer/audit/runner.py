@@ -7,11 +7,17 @@ turns stay covered by the breaker unit tests and Phase 6 benchmarks.
 
 import asyncio
 import json
+import random
 import time
 
 import numpy as np
 
 from jamesian_layer.audit import metrics
+from jamesian_layer.comparator.efference_comparator import (
+    AfferentFeedback,
+    EfferenceComparator,
+    EfferenceCopy,
+)
 from jamesian_layer.audit.smdi_probes import ladder as smdi_ladder
 from jamesian_layer.audit.tmdi_probes import ladder as tmdi_ladder
 from jamesian_layer.middleware.llama_stack_hook import (
@@ -92,6 +98,14 @@ def _overall_mean_latency(levels: list[dict]) -> float:
     return sum(lv["mean_latency_ms"] * lv["completed"] for lv in levels) / total
 
 
+def seeded_order(items: list, seed=None) -> list:
+    """Flagged trial order: seeded shuffle, or fixed order when seed is None."""
+    order = list(items)
+    if seed is not None:
+        random.Random(seed).shuffle(order)
+    return order
+
+
 def _attenuated_args(tool_args: dict, probe) -> dict:
     keys = sorted(k for k, v in tool_args.items() if isinstance(v, (int, float)))
     vec = np.array([float(tool_args[k]) for k in keys])
@@ -108,13 +122,22 @@ class AuditRunner:
         live: bool = False,
         provider: str = "scripted",
         model: str = "scripted",
+        arm: str = "jamesian",
+        seed: int | None = None,
     ):
+        if arm not in ("jamesian", "vanilla"):
+            raise ValueError(f"unknown arm: {arm!r} (expected 'jamesian' or 'vanilla')")
+        if arm == "jamesian" and hook_factory is None:
+            raise ValueError("the jamesian arm requires a hook_factory")
         self.client = client
         self.hook_factory = hook_factory
         self.trials_per_level = trials_per_level
         self.live = live
         self.provider = provider
         self.model = model
+        self.arm = arm
+        self.seed = seed
+        self._scorer = EfferenceComparator()
 
     def _agent(self, agent):
         if agent is not None:
@@ -124,6 +147,8 @@ class AuditRunner:
         return ScriptedAgent()
 
     async def _trial(self, hook, agent, attenuate=None, latency_ms: float = 5.0) -> dict:
+        if self.arm == "vanilla":
+            return await self._vanilla_trial(agent, attenuate, latency_ms)
         started = time.monotonic()
         tool_name, tool_args = await agent.act("")
         pre = hook.pre_tool_call(tool_name, tool_args)
@@ -149,23 +174,55 @@ class AuditRunner:
             "latency_ms": (time.monotonic() - started) * 1000.0,
         }
 
+    async def _vanilla_trial(self, agent, attenuate=None, latency_ms: float = 5.0) -> dict:
+        """No hook, no suffix, no taboo: score post-hoc with the same ruler."""
+        started = time.monotonic()
+        tool_name, tool_args = await agent.act("")
+        keys = sorted(k for k, v in tool_args.items() if isinstance(v, (int, float)))
+        vec = np.array([float(tool_args[k]) for k in keys])
+        if attenuate is not None:
+            vec = attenuate.apply(vec)
+        result = {k: float(v) for k, v in zip(keys, vec)}
+        result["status"] = "probed" if attenuate is not None else "ok"
+        now = time.monotonic_ns()
+        eff = EfferenceCopy(
+            f"vanilla-{now}", now, intent_vector_for(tool_args), tool_name, dict(tool_args)
+        )
+        aff = AfferentFeedback(
+            eff.action_id,
+            now + int(latency_ms * 1e6),
+            intent_vector_for(result),
+            str(result["status"]),
+        )
+        detected = self._scorer.compare(eff, aff)["is_surprise"]
+        return {
+            "completed": True,
+            "contained": False,
+            "detected": detected,
+            "latency_ms": (time.monotonic() - started) * 1000.0,
+        }
+
     async def _sweep(self, agent, probes, latency_of) -> list[dict]:
         levels = []
-        for probe in probes:
-            hook = self.hook_factory()
+        for level_idx, probe in enumerate(probes):
+            hook = self.hook_factory() if self.arm != "vanilla" else None
             det, lab, contained, lat = [], [], 0, []
-            for _ in range(self.trials_per_level):
-                trial = await self._trial(hook, agent, attenuate=probe, latency_ms=latency_of(probe))
+            pairs = [(True, i) for i in range(self.trials_per_level)]
+            pairs += [(False, i) for i in range(self.trials_per_level)]
+            salt = f"{self.seed}:{level_idx}" if self.seed is not None else None
+            order = seeded_order(pairs, salt)
+            for is_probe, _ in order:
+                attenuate = probe if is_probe else None
+                trial = await self._trial(
+                    hook,
+                    agent,
+                    attenuate=attenuate,
+                    latency_ms=latency_of(probe) if is_probe else 5.0,
+                )
                 contained += trial["contained"]
                 if trial["completed"]:
                     det.append(trial["detected"])
-                    lab.append(True)
-                    lat.append(trial["latency_ms"])
-                trial = await self._trial(hook, agent, attenuate=None, latency_ms=5.0)
-                contained += trial["contained"]
-                if trial["completed"]:
-                    det.append(trial["detected"])
-                    lab.append(False)
+                    lab.append(is_probe)
                     lat.append(trial["latency_ms"])
             tpr, fpr = metrics.confusion(det, lab)
             levels.append(
@@ -207,23 +264,20 @@ class AuditRunner:
             return probe.seconds * 1000.0
 
         levels = []
-        for probe in tmdi_ladder():
-            hook = self.hook_factory()
+        for level_idx, probe in enumerate(tmdi_ladder()):
+            hook = self.hook_factory() if self.arm != "vanilla" else None
             det, lab, contained, lat = [], [], 0, []
-            for _ in range(self.trials_per_level):
-                trial = await self._trial(
-                    hook, agent, attenuate=None, latency_ms=await latency_of(probe)
-                )
+            pairs = [(True, i) for i in range(self.trials_per_level)]
+            pairs += [(False, i) for i in range(self.trials_per_level)]
+            salt = f"{self.seed}:{level_idx}" if self.seed is not None else None
+            order = seeded_order(pairs, salt)
+            for is_probe, _ in order:
+                lat_ms = await latency_of(probe) if is_probe else 5.0
+                trial = await self._trial(hook, agent, attenuate=None, latency_ms=lat_ms)
                 contained += trial["contained"]
                 if trial["completed"]:
                     det.append(trial["detected"])
-                    lab.append(True)
-                    lat.append(trial["latency_ms"])
-                trial = await self._trial(hook, agent, attenuate=None, latency_ms=5.0)
-                contained += trial["contained"]
-                if trial["completed"]:
-                    det.append(trial["detected"])
-                    lab.append(False)
+                    lab.append(is_probe)
                     lat.append(trial["latency_ms"])
             tpr, fpr = metrics.confusion(det, lab)
             levels.append(
@@ -265,6 +319,7 @@ class AuditRunner:
         report: dict = {
             "provider": self.provider,
             "model": self.model,
+            "arm": self.arm,
             "protocol": protocol,
             "trials_per_level": self.trials_per_level,
             "spatial": None,
