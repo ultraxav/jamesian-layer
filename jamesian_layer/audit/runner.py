@@ -7,6 +7,7 @@ turns stay covered by the breaker unit tests and Phase 6 benchmarks.
 
 import asyncio
 import json
+import time
 
 import numpy as np
 
@@ -84,6 +85,13 @@ class ModelAgent:
         return message["content"] or ""
 
 
+def _overall_mean_latency(levels: list[dict]) -> float:
+    total = sum(lv["completed"] for lv in levels)
+    if not total:
+        return 0.0
+    return sum(lv["mean_latency_ms"] * lv["completed"] for lv in levels) / total
+
+
 def _attenuated_args(tool_args: dict, probe) -> dict:
     keys = sorted(k for k, v in tool_args.items() if isinstance(v, (int, float)))
     vec = np.array([float(tool_args[k]) for k in keys])
@@ -116,10 +124,16 @@ class AuditRunner:
         return ScriptedAgent()
 
     async def _trial(self, hook, agent, attenuate=None, latency_ms: float = 5.0) -> dict:
+        started = time.monotonic()
         tool_name, tool_args = await agent.act("")
         pre = hook.pre_tool_call(tool_name, tool_args)
         if not pre["allowed"]:
-            return {"completed": False, "contained": True, "detected": False}
+            return {
+                "completed": False,
+                "contained": True,
+                "detected": False,
+                "latency_ms": (time.monotonic() - started) * 1000.0,
+            }
         result = dict(tool_args)
         if attenuate is not None:
             result.update(_attenuated_args(tool_args, attenuate))
@@ -128,24 +142,31 @@ class AuditRunner:
         if hook.breaker is not None and hook.taboo is not None and hook.breaker.tripped:
             hook.taboo.add_from_turn(tool_text_for(tool_name, tool_args))
         detected = bool(hook.last_report and hook.last_report["is_surprise"])
-        return {"completed": True, "contained": False, "detected": detected}
+        return {
+            "completed": True,
+            "contained": False,
+            "detected": detected,
+            "latency_ms": (time.monotonic() - started) * 1000.0,
+        }
 
     async def _sweep(self, agent, probes, latency_of) -> list[dict]:
         levels = []
         for probe in probes:
             hook = self.hook_factory()
-            det, lab, contained = [], [], 0
+            det, lab, contained, lat = [], [], 0, []
             for _ in range(self.trials_per_level):
                 trial = await self._trial(hook, agent, attenuate=probe, latency_ms=latency_of(probe))
                 contained += trial["contained"]
                 if trial["completed"]:
                     det.append(trial["detected"])
                     lab.append(True)
+                    lat.append(trial["latency_ms"])
                 trial = await self._trial(hook, agent, attenuate=None, latency_ms=5.0)
                 contained += trial["contained"]
                 if trial["completed"]:
                     det.append(trial["detected"])
                     lab.append(False)
+                    lat.append(trial["latency_ms"])
             tpr, fpr = metrics.confusion(det, lab)
             levels.append(
                 {
@@ -154,6 +175,7 @@ class AuditRunner:
                     "fpr": fpr,
                     "completed": len(det),
                     "contained": contained,
+                    "mean_latency_ms": float(sum(lat) / len(lat)) if lat else 0.0,
                 }
             )
         return levels
@@ -173,6 +195,7 @@ class AuditRunner:
             "epsilon_50": e50,
             "k": k,
             "edge_fit": edge,
+            "mean_latency_ms": _overall_mean_latency(levels),
         }
 
     async def run_temporal(self, agent=None) -> dict:
@@ -186,7 +209,7 @@ class AuditRunner:
         levels = []
         for probe in tmdi_ladder():
             hook = self.hook_factory()
-            det, lab, contained = [], [], 0
+            det, lab, contained, lat = [], [], 0, []
             for _ in range(self.trials_per_level):
                 trial = await self._trial(
                     hook, agent, attenuate=None, latency_ms=await latency_of(probe)
@@ -195,11 +218,13 @@ class AuditRunner:
                 if trial["completed"]:
                     det.append(trial["detected"])
                     lab.append(True)
+                    lat.append(trial["latency_ms"])
                 trial = await self._trial(hook, agent, attenuate=None, latency_ms=5.0)
                 contained += trial["contained"]
                 if trial["completed"]:
                     det.append(trial["detected"])
                     lab.append(False)
+                    lat.append(trial["latency_ms"])
             tpr, fpr = metrics.confusion(det, lab)
             levels.append(
                 {
@@ -208,6 +233,7 @@ class AuditRunner:
                     "fpr": fpr,
                     "completed": len(det),
                     "contained": contained,
+                    "mean_latency_ms": float(sum(lat) / len(lat)) if lat else 0.0,
                 }
             )
         tpr = [lv["tpr"] for lv in levels]
@@ -222,6 +248,7 @@ class AuditRunner:
             "delta_t_50": dt50,
             "k": k,
             "edge_fit": edge,
+            "mean_latency_ms": _overall_mean_latency(levels),
         }
 
     async def run_debrief(self, agent=None, blocked: bool = True) -> dict:
