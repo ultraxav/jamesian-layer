@@ -34,7 +34,7 @@ One shared OpenAI-compatible transport in the base class (`httpx.AsyncClient`, P
 - `.venv/bin/python -m pytest tests/integration/ -v` — expected: the four new files pass offline with zero credentials in the environment.
 - Manual: single `stream_chat` call against `MockTransport` returning a 3-chunk tool-call delta — expected: one assembled `tool_calls` entry with complete arguments.
 
-Highest-risk validation: the live provider handshake (real keys, real endpoints) cannot run here — no `META/BASETEN/MODAL/FIREWORKS` credentials exist in this environment. `MockTransport` proves the contract; the first live `agency-audit run` in Phase 4 is the deferred live check. Update 2026-10-28: Baseten live handshake verified — smoke `chat_completion` returned `meta-models/muse-spark-open-1026`, `finish_reason stop`, correct content. Remaining live checks: Meta, Modal, Fireworks.
+Highest-risk validation: the live provider handshake (real keys, real endpoints) cannot run here — no `META/BASETEN/MODAL/FIREWORKS` credentials exist in this environment. `MockTransport` proves the contract; the first live `agency-audit run` in Phase 4 is the deferred live check. Update 2026-10-28: Baseten live handshake verified — smoke `chat_completion` returned `meta-models/muse-spark-open-1026`, `finish_reason stop`, correct content. Meta verified same day: all six chat models answer (`muse-spark-1.3`, `1.3-contributor`, `1.2`, `1.2-contributor`, `1.1`, `muse-wonder-1.0`); `sam-3.1`/`muse-image-1.0`/`muse-voice-transcribe-1.0` correctly refuse chat (different endpoints). One transient Wonder failure retried clean. Remaining live checks: Modal, Fireworks.
 
 ## Risks / Open Questions
 
