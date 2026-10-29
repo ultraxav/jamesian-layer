@@ -50,7 +50,8 @@ class AutonomicDaemon:
 
     def step_once(self, dt: float) -> BiophysicalState:
         """Advance the ODEs by dt seconds; returns a snapshot (thread-safe)."""
-        dt = min(max(dt, 0.0), self.max_dt_s)
+        raw_dt = max(dt, 0.0)
+        dt = min(raw_dt, self.max_dt_s)
         with self._lock:
             inputs = dict(self._inputs)
             vec = rk4_step(
@@ -74,6 +75,9 @@ class AutonomicDaemon:
             self._state.clamp()
             self._state.current = inputs["current"]
             self._state.mismatch_delta = inputs["mismatch"]
+            self._state.rho_tau = (
+                raw_dt / self.params.tau_sigma if self.params.tau_sigma > 0 else 0.0
+            )
             self._state.timestamp_ns = time.monotonic_ns()
             snapshot = replace(self._state)
             self._history.append(snapshot)

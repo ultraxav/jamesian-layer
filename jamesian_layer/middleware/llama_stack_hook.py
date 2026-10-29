@@ -92,9 +92,45 @@ class LlamaStackInteroceptiveHook:
         current = self.daemon.get_state().current
         if isinstance(tool_result.get("current"), (int, float)):
             current = float(tool_result["current"])
-        self.daemon.set_inputs(mismatch=report["spatial_delta"], current=current)
+        elif tool_name in ("rover_cool_down", "cool_down"):
+            current = 0.0
+        u_recovery = 1.0 if tool_name in ("rover_cool_down", "cool_down") else 0.0
+        u_brace = (
+            float(eff.tool_args.get("level", 1.0))
+            if tool_name in ("rover_brace", "brace")
+            else 0.0
+        )
+        is_surprise = bool(report["is_surprise"])
+        self.daemon.set_inputs(
+            mismatch=report["spatial_delta"],
+            current=current,
+            u_recovery=u_recovery,
+            u_brace=min(1.0, max(0.0, u_brace)),
+            fail=1.0 if is_surprise else 0.0,
+            success=0.0 if is_surprise else 1.0,
+        )
         self.daemon.step_once(max(latency_ms / 1000.0, 1e-3))
-        return format_suffix(self.daemon.get_state())
+        status_raw = str(tool_result.get("status", "ok")).upper()
+        stalled_actuator = (
+            tool_name == "robot_actuator"
+            and is_surprise
+            and float(tool_result.get("velocity", 1.0)) == 0.0
+        )
+        if status_raw in ("BLOCKED", "STALLED") or stalled_actuator:
+            suffix = format_suffix(
+                self.daemon.get_state(),
+                status="BLOCKED",
+                displacement=float(tool_result.get("displacement", 0.0)),
+                velocity=float(tool_result.get("velocity", 0.0)),
+            )
+        else:
+            suffix = format_suffix(self.daemon.get_state())
+        if self.breaker is not None and self.taboo is not None and self.breaker.tripped:
+            self.taboo.add_from_turn(tool_text_for(tool_name, eff.tool_args))
+            directive = self.taboo.directive()
+            if directive:
+                suffix = f"{suffix}\n{directive}"
+        return suffix
 
     def intercept_cycle(self, state) -> dict | None:
         """Returns cached CPG routine if habit conditions are met (0 tokens)."""

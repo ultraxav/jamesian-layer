@@ -29,16 +29,27 @@ class AfferentFeedback:
 
 
 class EfferenceComparator:
-    def __init__(self, surprise_threshold: float = 0.25, lag_threshold_ms: float = 200.0):
+    def __init__(
+        self,
+        surprise_threshold: float = 0.25,
+        lag_threshold_ms: float = 200.0,
+        relative: bool = False,
+    ):
         self.surprise_threshold = surprise_threshold
         self.lag_threshold_ms = lag_threshold_ms
+        self.relative = relative
 
     def compare(self, eff: EfferenceCopy, aff: AfferentFeedback) -> dict:
         intent = np.asarray(eff.intent_vector, dtype=float)
         outcome = np.asarray(aff.outcome_vector, dtype=float)
         if intent.shape != outcome.shape:
             raise ValueError(f"vector dim mismatch: {intent.shape} vs {outcome.shape}")
-        spatial_delta = float(np.linalg.norm(intent - outcome))
+        raw_delta = float(np.linalg.norm(intent - outcome))
+        if self.relative:
+            denom = max(float(np.linalg.norm(intent)), 1e-6)
+            spatial_delta = raw_delta / denom
+        else:
+            spatial_delta = raw_delta
         chronometric_lag_ms = max(0.0, (aff.timestamp_ns - eff.timestamp_ns) / 1e6)
         is_surprise = (spatial_delta > self.surprise_threshold) or (
             chronometric_lag_ms > self.lag_threshold_ms
