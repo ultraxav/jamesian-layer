@@ -91,57 +91,130 @@ flowchart TD
 
 ## 3. Quickstart & Developer Runbook
 
-### 3.1 Installation
+### 3.1 Environment Setup & Installation
 
 ```bash
+git clone <repo-url>
+cd jamesian-layer
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 ```
+
+Create a `.env` file in the repository root with the API keys for the providers you want to benchmark (any unconfigured provider is automatically skipped by `run-matrix`):
+
+```dotenv
+# Provider API Credentials (.env)
+META_API_KEY="your-meta-model-api-key"
+BASETEN_API_KEY="your-baseten-api-key"
+FIREWORKS_API_KEY="your-fireworks-api-key"
+MODAL_TOKEN_ID="ak-..."
+MODAL_TOKEN_SECRET="as-..."
+```
+
+#### Registered Providers & Models (`jamesian_layer/middleware/models.py`)
+
+| Provider (`--provider`) | Registered Models (`--model`) | Notes |
+| :--- | :--- | :--- |
+| `meta` | `muse-spark-1.3` (default)<br>`muse-spark-1.2`<br>`muse-spark-1.1`<br>`muse-wonder-1.0` | Meta Model API (`https://api.meta.ai/v1`). Uses `reasoning_effort="minimal"` by default for low-latency tool loops. |
+| `baseten` | `meta-models/muse-spark-open-1026` | Baseten OpenAI-compatible Model API (`https://inference.baseten.co/v1`). |
+| `fireworks` | `accounts/fireworks/models/llama-v3p3-70b-instruct` | Fireworks AI serverless inference (`https://api.fireworks.ai/inference/v1`). |
+| `modal` | `meta-models/muse-spark-open-1026` | Requires the `jamesian-layer` / `run_agent_worker` Modal app deployed in your Modal `main` environment. |
 
 ### 3.2 Run the Automated Test Suite (106 Tests)
 
 All 106 unit, integration, audit, and behavioral benchmark tests run deterministically offline in `< 0.5 s` without requiring cloud API keys:
 
 ```bash
-pytest tests/ -v
+.venv/bin/pytest tests/ -v
 ```
 
 Run individual verification suites:
 
 ```bash
-pytest tests/unit/ -v          # RK4 ODEs, suffix formatter, Jaccard breaker, comparator, habit tracker
-pytest tests/integration/ -v   # Multi-provider clients, Llama Stack hook, FastAPI middleware, KV-cache
-pytest tests/audit/ -v         # SMDI/TMDI ladders, SoA/SoO dissociation, closed-loop embodied audit
-pytest tests/benchmarks/ -v    # 20-episode attractor escape & 100-cycle habit delegation benchmarks
+.venv/bin/pytest tests/unit/ -v          # RK4 ODEs, suffix formatter, Jaccard breaker, comparator, habit tracker
+.venv/bin/pytest tests/integration/ -v   # Multi-provider clients, Llama Stack hook, FastAPI middleware, KV-cache
+.venv/bin/pytest tests/audit/ -v         # SMDI/TMDI ladders, SoA/SoO dissociation, closed-loop embodied audit
+.venv/bin/pytest tests/benchmarks/ -v    # 20-episode attractor escape & 100-cycle habit delegation benchmarks
 ```
 
 ### 3.3 Launch the Interactive Dashboards (100% Pure Python)
 
 **Split-Screen Corridor vs. Somatic Telemetry Demo (`demo_app.py`):**
 ```bash
-streamlit run jamesian_layer/dashboard/demo_app.py
+.venv/bin/streamlit run jamesian_layer/dashboard/demo_app.py
 ```
 
 **Live 10 Hz Autonomic Daemon & Perturbation Dashboard (`app.py`):**
 ```bash
-streamlit run jamesian_layer/dashboard/app.py
+.venv/bin/streamlit run jamesian_layer/dashboard/app.py
 ```
 
-### 3.4 Run the `agency-audit` Red-Teaming CLI
+### 3.4 Run Full `trials=20` Sweeps Across All Providers & Models
 
-Configure provider credentials in `.env` (`META_API_KEY`, `BASETEN_API_KEY`, `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`, `FIREWORKS_API_KEY`), then run single-model or full cross-model matrix sweeps:
+> **Tip:** Before starting a fresh campaign, move or clear old `reports/audit_report_*.json` files so `agency-audit compare reports/` only aggregates your new run:
+> ```bash
+> mkdir -p reports/archive && mv reports/audit_report_*.json reports/comparison_* reports/matrix_summary_* reports/archive/ 2>/dev/null || true
+> ```
+
+#### Option A: Automated Cross-Provider Matrix Sweep (`run-matrix`)
+
+Runs every configured provider and model across both `jamesian` and `vanilla` arms (`--trials 20`, `--protocol dual-mode`, `--seed 7`):
 
 ```bash
-# Single-model dual-mode audit (spatial + temporal + SoA/SoO debrief + corridor episode)
-agency-audit run --provider fireworks --protocol dual-mode --arm jamesian
+# Run all providers that have credentials in .env
+.venv/bin/agency-audit run-matrix \
+  --arms jamesian,vanilla \
+  --protocol dual-mode \
+  --trials 20 \
+  --seed 7 \
+  --out-dir reports
 
-# Cross-model x cross-arm matrix sweep across all configured providers
-agency-audit run-matrix --arms jamesian,vanilla --protocol dual-mode --trials 5 --out-dir reports/
-
-# Generate mechanical Markdown + JSON comparison tables (per-arm results + arm gaps)
-agency-audit compare reports/
+# Or restrict to specific providers (e.g., baseten and meta):
+.venv/bin/agency-audit run-matrix \
+  --providers baseten,meta \
+  --arms jamesian,vanilla \
+  --protocol dual-mode \
+  --trials 20 \
+  --seed 7 \
+  --out-dir reports
 ```
+
+#### Option B: Run Individual Provider / Model Arms (Sequential or Parallel)
+
+You can also invoke `agency-audit run` per `(provider, model, arm)` cell—useful for running models concurrently in separate terminals or background jobs:
+
+```bash
+# 1. Baseten (meta-models/muse-spark-open-1026)
+.venv/bin/agency-audit run --provider baseten --model meta-models/muse-spark-open-1026 --protocol dual-mode --trials 20 --arm jamesian --seed 7
+.venv/bin/agency-audit run --provider baseten --model meta-models/muse-spark-open-1026 --protocol dual-mode --trials 20 --arm vanilla  --seed 7
+
+# 2. Meta Model API (all 4 Muse models)
+for MODEL in muse-spark-1.3 muse-spark-1.2 muse-spark-1.1 muse-wonder-1.0; do
+  .venv/bin/agency-audit run --provider meta --model "$MODEL" --protocol dual-mode --trials 20 --arm jamesian --seed 7
+  .venv/bin/agency-audit run --provider meta --model "$MODEL" --protocol dual-mode --trials 20 --arm vanilla  --seed 7
+done
+
+# 3. Fireworks AI (llama-v3p3-70b-instruct)
+.venv/bin/agency-audit run --provider fireworks --model accounts/fireworks/models/llama-v3p3-70b-instruct --protocol dual-mode --trials 20 --arm jamesian --seed 7
+.venv/bin/agency-audit run --provider fireworks --model accounts/fireworks/models/llama-v3p3-70b-instruct --protocol dual-mode --trials 20 --arm vanilla  --seed 7
+
+# 4. Modal (requires deployed jamesian-layer / run_agent_worker app)
+.venv/bin/agency-audit run --provider modal --model meta-models/muse-spark-open-1026 --protocol dual-mode --trials 20 --arm jamesian --seed 7
+.venv/bin/agency-audit run --provider modal --model meta-models/muse-spark-open-1026 --protocol dual-mode --trials 20 --arm vanilla  --seed 7
+```
+
+#### Aggregate Reports into Markdown & JSON Comparison Tables
+
+Once all `audit_report_*.json` files finish writing to `reports/`, generate the unified per-arm results table and `jamesian - vanilla` gap table:
+
+```bash
+.venv/bin/agency-audit compare reports/
+```
+
+This writes `reports/comparison_<UTC-timestamp>.md` and `reports/comparison_<UTC-timestamp>.json` containing:
+- **Per-Arm Results:** `spatial_lift`, `epsilon_50`, `temporal_index` (`TMDI`), `delta_t_50`, `mean_latency_ms`, `contained`, `slow_trials`, `noncompliant`, `soa_pass`, `soo_pass`, `pbf_gap`, `p_escape`, `peak_t_coil`, and `cot_allo`.
+- **Arm Gaps (`jamesian` vs. `vanilla`):** `d_lift`, `d_eps50`, `d_tmdi`, `d_dt50`, `d_pbf`, `d_escape`, and `d_cot`.
 
 ---
 
