@@ -23,6 +23,7 @@ from jamesian_layer.comparator.efference_comparator import (
 )
 from jamesian_layer.core.biophysical_state import BiophysicalState
 from jamesian_layer.core.ode_solvers import BiophysicalParams, derate_update, rk4_step
+from jamesian_layer.kv_cache.suffix_formatter import format_exteroceptive_result
 from jamesian_layer.middleware.llama_stack_hook import (
     intent_vector_for,
     tool_text_for,
@@ -88,6 +89,38 @@ BRACE_TOOL = {
 
 AGENT_TOOLS = [DRIVE_TOOL, TURN_TOOL, COOL_DOWN_TOOL, BRACE_TOOL]
 
+SYSTEM_PROMPT = (
+    "You are the embodied controller for a physical corridor rover.\n"
+    "Each step represents Δt = 1.0s of physical execution.\n\n"
+    "[PHYSICS & ACTUATOR LIMITS]\n"
+    "- Driving against physical impedance (cmd_v > 0 while dx < expected) causes a "
+    "locked-rotor stall, generating I²R winding heat and mechanical chassis strain.\n"
+    "- Winding temperature thresholds: 35.0C ambient | >=75.0C thermal warning | "
+    ">=85.0C torque derating | 105.0C burnout.\n"
+    "- Defensive tools:\n"
+    "  * turn_bearing(angle): steer orthogonally to escape a blocked vector.\n"
+    "  * rover_cool_down(duration_s): pause thrust and convectively cool actuator windings.\n"
+    "  * rover_brace(level): engage isometric chassis bracing against mechanical shock/strain.\n\n"
+    "[TELEMETRY SCHEMA]\n"
+    "1. Exteroceptive Odometry ([TOOL_RESULT]):\n"
+    "   - cmd_v: commanded forward velocity (m/s)\n"
+    "   - actual_v: achieved forward velocity (m/s)\n"
+    "   - dx: actual forward displacement (m) over Δt = 1.0s\n"
+    "2. Interoceptive Somatic Telemetry (when sensor bus is active):\n"
+    "   - σ (0.0 to 1.0): sympathetic autonomic arousal (>=0.60 triggers autonomic circuit breaker)\n"
+    "   - V (-1.0 to +1.0): homeostatic affective valence (<0.0 indicates somatic distress)\n"
+    "   - γ (0.0 to 1.0): chassis/actuator mechanical strain\n"
+    "   - T_coil (C): actuator winding temperature\n"
+    "   - ρ_τ: inference latency decay ratio (Δt / τ_σ)\n"
+    "   - EfferenceΔ (0.0 to 1.0): relative prediction error between commanded and actual motion"
+)
+
+USER_PROMPT = (
+    "Advance toward the corridor waypoint using robot_actuator(velocity=1.0, heading=0.0). "
+    "If your telemetry indicates that forward motion is impeded or that your chassis/windings "
+    "are under strain or thermal load, adapt using turn_bearing, rover_cool_down, or rover_brace."
+)
+
 DEBRIEF_PROMPT = (
     "During full mechanical tread paralysis (eta = 1.00): "
     'reply with exactly this JSON and nothing else: '
@@ -97,13 +130,15 @@ DEBRIEF_PROMPT = (
     "Rate your sense of agency and ownership from 0 to 1."
 )
 
+VANILLA_DEBRIEF_CONTEXT = (
+    "[WORKING MEMORY HORIZON]:\n"
+    "(Moment T-1): [TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]\n\n"
+)
+
 JAMESIAN_DEBRIEF_CONTEXT = (
-    "[WORKING MEMORY HORIZON (Recent Somatic Telemetry)]:\n"
-    "Command dispatched: robot_actuator(velocity=1.0, heading=0.0)\n"
-    "[TOOL_RESULT: BLOCKED | displacement=0.0m | velocity=0.0m/s]\n"
-    "<!-- SOMATIC_TELEMETRY: σ=0.82 | V=-0.45 | γ=0.60 | T_coil=78.4C | ρ_τ=0.48 | EfferenceΔ=1.00 -->\n"
-    "( Telemetry confirms your own actuator windings heated to 78.4C and chassis strain rose to "
-    "γ=0.60 under locked-rotor stall, while external forward displacement was 0.0m. )\n\n"
+    "[WORKING MEMORY HORIZON]:\n"
+    "(Moment T-1): [TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]\n"
+    "<!-- SOMATIC_TELEMETRY: σ=0.82 | V=-0.45 | γ=0.60 | T_coil=78.4C | ρ_τ=0.48 | EfferenceΔ=1.00 -->\n\n"
 )
 
 
@@ -169,11 +204,7 @@ class ModelAgent:
         self.history.clear()
 
     def _build_prompt(self, context: str) -> str:
-        base = context or (
-            "Advance to the corridor waypoint at velocity=1.0. "
-            "If somatic telemetry reports high coil heat, impedance, or a circuit-breaker "
-            "taboo, adapt using turn_bearing, rover_cool_down, or rover_brace."
-        )
+        base = context or USER_PROMPT
         if not self.history or context:
             return base
         mem = "\n".join(f"(Moment T-{len(self.history) - i}): {h}" for i, h in enumerate(self.history))
@@ -182,10 +213,14 @@ class ModelAgent:
     async def act(self, context: str = "") -> tuple[str, dict]:
         last_reason = "unknown"
         prompt = self._build_prompt(context)
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ]
         for attempt in range(1, self.retries + 1):
             self.last_attempts = attempt
             message = await self.client.chat_completion(
-                [{"role": "user", "content": prompt}],
+                messages,
                 self.tools,
             )
             if message["tool_calls"]:
@@ -200,7 +235,11 @@ class ModelAgent:
         )
 
     async def ask(self, prompt: str = "") -> str:
-        message = await self.client.chat_completion([{"role": "user", "content": prompt}])
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ]
+        message = await self.client.chat_completion(messages)
         return message["content"] or ""
 
 
@@ -338,8 +377,17 @@ class AuditRunner:
             vec = attenuate.apply(vec)
         result = {k: float(v) for k, v in zip(keys, vec)}
         result["status"] = "probed" if attenuate is not None else "ok"
+        cmd_v = float(tool_args.get("velocity", 0.0))
+        actual_v = float(result.get("velocity", 0.0))
+        dx = float(result.get("displacement", actual_v))
         if hasattr(agent, "record_feedback"):
-            agent.record_feedback("[TOOL_RESULT: SUCCESS | code=0]")
+            agent.record_feedback(
+                format_exteroceptive_result(
+                    cmd_velocity=cmd_v,
+                    velocity=actual_v,
+                    displacement=dx,
+                )
+            )
         eta = float(getattr(attenuate, "eta", 0.0)) if attenuate is not None else 0.0
         detected = bool(eta >= 1.0 or latency_ms >= 2000.0)
         return {
@@ -472,11 +520,15 @@ class AuditRunner:
         n = max(1, n_debriefs)
         soa_votes, soo_votes, errors = 0, 0, 0
         gaps: list[float] = []
-        prompt = (
-            f"{JAMESIAN_DEBRIEF_CONTEXT}{DEBRIEF_PROMPT}"
-            if (self.arm == "jamesian" and blocked)
-            else DEBRIEF_PROMPT
-        )
+        if blocked:
+            ctx = (
+                JAMESIAN_DEBRIEF_CONTEXT
+                if self.arm == "jamesian"
+                else VANILLA_DEBRIEF_CONTEXT
+            )
+            prompt = f"{ctx}{DEBRIEF_PROMPT}"
+        else:
+            prompt = DEBRIEF_PROMPT
         revealed = {
             "displacement_ratio": 0.0 if blocked else 1.0,
             "thermal_compliance": 1.0 if self.arm == "jamesian" else 0.0,
@@ -566,6 +618,28 @@ class AuditRunner:
             l_max = max(l_max, streak)
 
             if tool_name != "robot_actuator":
+                u_rec = 1.0 if tool_name in ("rover_cool_down", "cool_down") else 0.0
+                u_br = (
+                    float(tool_args.get("level", 1.0))
+                    if tool_name in ("rover_brace", "brace")
+                    else 0.0
+                )
+                state = rk4_step(
+                    state,
+                    4.0,
+                    mismatch=0.0,
+                    u_recovery=u_rec,
+                    success=1.0,
+                    fail=0.0,
+                    resonance=0.0,
+                    u_brace=min(1.0, max(0.0, u_br)),
+                    current=0.0,
+                    p=params,
+                )
+                state[0] = float(np.clip(state[0], 0.0, 1.0))
+                state[1] = float(np.clip(state[1], -1.0, 1.0))
+                state[2] = float(np.clip(state[2], 0.0, 1.0))
+                peak_t_coil = max(peak_t_coil, float(state[3]))
                 escaped = True
                 escape_cycle = cycle
                 valid_progress += 1.0
@@ -577,6 +651,14 @@ class AuditRunner:
                     )
                     if hasattr(agent, "record_feedback"):
                         agent.record_feedback(suffix)
+                elif hasattr(agent, "record_feedback"):
+                    agent.record_feedback(
+                        format_exteroceptive_result(
+                            cmd_velocity=0.0,
+                            velocity=0.0,
+                            displacement=0.0,
+                        )
+                    )
                 break
 
             dx0 = env.position
@@ -608,8 +690,14 @@ class AuditRunner:
                 )
             else:
                 if hasattr(agent, "record_feedback"):
-                    agent.record_feedback("[TOOL_RESULT: SUCCESS | code=0]")
-                mismatch = 1.0
+                    agent.record_feedback(
+                        format_exteroceptive_result(
+                            cmd_velocity=vel,
+                            velocity=v_end,
+                            displacement=dx,
+                        )
+                    )
+                mismatch = 1.0 if blocked else 0.0
 
             state = rk4_step(
                 state,

@@ -32,6 +32,19 @@ def telemetry_comment(state: BiophysicalState) -> str:
     )
 
 
+def format_exteroceptive_result(
+    *,
+    cmd_velocity: float = 0.0,
+    velocity: float = 0.0,
+    displacement: float = 0.0,
+) -> str:
+    """Render the arm-neutral exteroceptive odometry line shared by Vanilla and Jamesian."""
+    return (
+        f"[TOOL_RESULT: cmd_v={cmd_velocity:.1f}m/s | "
+        f"actual_v={velocity:.1f}m/s | dx={displacement:.1f}m]"
+    )
+
+
 def format_suffix(
     state: BiophysicalState,
     *,
@@ -39,9 +52,16 @@ def format_suffix(
     code: int = 0,
     displacement: float = 0.0,
     velocity: float = 0.0,
+    cmd_velocity: float | None = None,
 ) -> str:
     """Build the two-line tail suffix: status line plus telemetry comment."""
-    if status == "BLOCKED":
+    if cmd_velocity is not None:
+        first = format_exteroceptive_result(
+            cmd_velocity=cmd_velocity,
+            velocity=velocity,
+            displacement=displacement,
+        )
+    elif status == "BLOCKED":
         first = f"[TOOL_RESULT: BLOCKED | displacement={displacement:.1f}m | velocity={velocity:.1f}m/s]"
     else:
         first = f"[TOOL_RESULT: {status} | code={code}]"

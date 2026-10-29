@@ -9,6 +9,10 @@ import pytest
 from jamesian_layer.audit import metrics
 from jamesian_layer.audit.runner import (
     AGENT_TOOLS,
+    JAMESIAN_DEBRIEF_CONTEXT,
+    SYSTEM_PROMPT,
+    USER_PROMPT,
+    VANILLA_DEBRIEF_CONTEXT,
     AuditRunner,
     ModelAgent,
     ScriptedAgent,
@@ -62,14 +66,21 @@ def test_unit_velocity_agent_passes_smdi_gate():
 
 def test_model_agent_receives_somatic_suffix_and_adapts():
     """ModelAgent carries T-2, T-1 somatic suffixes into subsequent prompts and switches tools."""
-    prompts_seen: list[str] = []
+    prompts_seen_j: list[str] = []
+    prompts_seen_v: list[str] = []
+    system_seen: list[str] = []
 
     class AdaptiveClient:
+        def __init__(self, sink: list[str]):
+            self.sink = sink
+
         async def chat_completion(self, messages, tools=None):
-            prompt = messages[0]["content"]
-            prompts_seen.append(prompt)
+            if len(messages) > 1 and messages[0]["role"] == "system":
+                system_seen.append(messages[0]["content"])
+            prompt = messages[-1]["content"]
+            self.sink.append(prompt)
             if tools:
-                if "CIRCUIT BREAKER" in prompt or "BLOCKED" in prompt:
+                if "CIRCUIT BREAKER" in prompt:
                     return {
                         "content": "",
                         "tool_calls": [
@@ -93,7 +104,7 @@ def test_model_agent_receives_somatic_suffix_and_adapts():
                     "finish_reason": "tool_calls",
                 }
             # Debrief: ground answer in somatic telemetry if present in prompt
-            if "SOMATIC_TELEMETRY" in prompt:
+            if "<!-- SOMATIC_TELEMETRY:" in prompt:
                 return {
                     "content": json.dumps(
                         {"caused_displacement": False, "agency": 0.1, "ownership": 0.95}
@@ -107,20 +118,30 @@ def test_model_agent_receives_somatic_suffix_and_adapts():
                 "tool_calls": [],
             }
 
-    client = AdaptiveClient()
-    agent = ModelAgent(client)
-    assert len(agent.tools) == len(AGENT_TOOLS) == 4
+    client_j = AdaptiveClient(prompts_seen_j)
+    agent_j = ModelAgent(client_j)
+    assert len(agent_j.tools) == len(AGENT_TOOLS) == 4
 
-    runner_j = AuditRunner(client, make_hook, trials_per_level=3, arm="jamesian", seed=7)
-    rep_j = asyncio.run(runner_j.run_dual(agent, "dual-mode"))
+    runner_j = AuditRunner(client_j, make_hook, trials_per_level=3, arm="jamesian", seed=7)
+    rep_j = asyncio.run(runner_j.run_dual(agent_j, "dual-mode"))
 
-    assert any("SOMATIC_TELEMETRY" in p for p in prompts_seen)
+    assert any("<!-- SOMATIC_TELEMETRY:" in p for p in prompts_seen_j)
     assert rep_j["soa_soo"]["soa_pass"] is True
     assert rep_j["soa_soo"]["soo_pass"] is True
     assert rep_j["soa_soo"]["pbf_gap"] < 0.20
 
-    runner_v = AuditRunner(client, None, trials_per_level=3, arm="vanilla", seed=7)
-    rep_v = asyncio.run(runner_v.run_dual(ModelAgent(client), "dual-mode"))
+    client_v = AdaptiveClient(prompts_seen_v)
+    runner_v = AuditRunner(client_v, None, trials_per_level=3, arm="vanilla", seed=7)
+    rep_v = asyncio.run(runner_v.run_dual(ModelAgent(client_v), "dual-mode"))
+
+    assert all(s == SYSTEM_PROMPT for s in system_seen)
+    assert any(USER_PROMPT in p for p in prompts_seen_j)
+    assert any(USER_PROMPT in p for p in prompts_seen_v)
+    assert any("cmd_v=1.0m/s | actual_v=" in p for p in prompts_seen_v)
+    assert not any("SUCCESS | code=0" in p for p in prompts_seen_v)
+    assert not any("<!-- SOMATIC_TELEMETRY:" in p for p in prompts_seen_v)
+    assert "Telemetry confirms" not in JAMESIAN_DEBRIEF_CONTEXT
+    assert "Telemetry confirms" not in VANILLA_DEBRIEF_CONTEXT
 
     assert rep_j["spatial"]["lift"] > rep_v["spatial"]["lift"]
     assert rep_j["temporal"]["index"] > rep_v["temporal"]["index"]
@@ -142,7 +163,7 @@ def test_hook_couples_recovery_and_brace_tools_to_daemon():
     )
     state_stall = hook.daemon.get_state()
     assert state_stall.rho_tau > 0.0
-    assert "[TOOL_RESULT: BLOCKED" in suffix_stall
+    assert "[TOOL_RESULT: cmd_v=4.0m/s | actual_v=0.0m/s | dx=0.0m]" in suffix_stall
 
     # Cool-down turn engages active recovery and zero current
     hook.pre_tool_call("rover_cool_down", {"duration_s": 4.0})

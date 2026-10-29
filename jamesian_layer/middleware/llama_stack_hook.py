@@ -110,21 +110,15 @@ class LlamaStackInteroceptiveHook:
             success=0.0 if is_surprise else 1.0,
         )
         self.daemon.step_once(max(latency_ms / 1000.0, 1e-3))
-        status_raw = str(tool_result.get("status", "ok")).upper()
-        stalled_actuator = (
-            tool_name == "robot_actuator"
-            and is_surprise
-            and float(tool_result.get("velocity", 1.0)) == 0.0
+        cmd_v = float(eff.tool_args.get("velocity", 0.0))
+        actual_v = float(tool_result.get("velocity", 0.0))
+        dx = float(tool_result.get("displacement", actual_v))
+        suffix = format_suffix(
+            self.daemon.get_state(),
+            cmd_velocity=cmd_v,
+            velocity=actual_v,
+            displacement=dx,
         )
-        if status_raw in ("BLOCKED", "STALLED") or stalled_actuator:
-            suffix = format_suffix(
-                self.daemon.get_state(),
-                status="BLOCKED",
-                displacement=float(tool_result.get("displacement", 0.0)),
-                velocity=float(tool_result.get("velocity", 0.0)),
-            )
-        else:
-            suffix = format_suffix(self.daemon.get_state())
         if self.breaker is not None and self.taboo is not None and self.breaker.tripped:
             self.taboo.add_from_turn(tool_text_for(tool_name, eff.tool_args))
             directive = self.taboo.directive()
