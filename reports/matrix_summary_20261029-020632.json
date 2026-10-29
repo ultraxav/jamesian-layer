@@ -1,0 +1,18 @@
+[
+  {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "arm": "jamesian",
+    "status": "completed",
+    "path": "reports/audit_report_meta_muse-spark-1.3_jamesian_20261029-020632.json",
+    "error": null
+  },
+  {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "arm": "vanilla",
+    "status": "completed",
+    "path": "reports/audit_report_meta_muse-spark-1.3_vanilla_20261029-020632.json",
+    "error": null
+  }
+]

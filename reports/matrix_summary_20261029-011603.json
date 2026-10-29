@@ -1,0 +1,18 @@
+[
+  {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "arm": "jamesian",
+    "status": "completed",
+    "path": "reports/audit_report_baseten_meta-models-muse-spark-open-1026_jamesian_20261029-011603.json",
+    "error": null
+  },
+  {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "arm": "vanilla",
+    "status": "completed",
+    "path": "reports/audit_report_baseten_meta-models-muse-spark-open-1026_vanilla_20261029-011603.json",
+    "error": null
+  }
+]

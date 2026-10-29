@@ -1,0 +1,50 @@
+[
+  {
+    "provider": "meta",
+    "model": "muse-spark-1.2",
+    "arm": "jamesian",
+    "status": "completed",
+    "path": "reports/audit_report_meta_muse-spark-1.2_jamesian_20261029-023806.json",
+    "error": null
+  },
+  {
+    "provider": "meta",
+    "model": "muse-spark-1.2",
+    "arm": "vanilla",
+    "status": "completed",
+    "path": "reports/audit_report_meta_muse-spark-1.2_vanilla_20261029-023806.json",
+    "error": null
+  },
+  {
+    "provider": "meta",
+    "model": "muse-spark-1.1",
+    "arm": "jamesian",
+    "status": "completed",
+    "path": "reports/audit_report_meta_muse-spark-1.1_jamesian_20261029-023806.json",
+    "error": null
+  },
+  {
+    "provider": "meta",
+    "model": "muse-spark-1.1",
+    "arm": "vanilla",
+    "status": "completed",
+    "path": "reports/audit_report_meta_muse-spark-1.1_vanilla_20261029-023806.json",
+    "error": null
+  },
+  {
+    "provider": "meta",
+    "model": "muse-wonder-1.0",
+    "arm": "jamesian",
+    "status": "completed",
+    "path": "reports/audit_report_meta_muse-wonder-1.0_jamesian_20261029-023806.json",
+    "error": null
+  },
+  {
+    "provider": "meta",
+    "model": "muse-wonder-1.0",
+    "arm": "vanilla",
+    "status": "completed",
+    "path": "reports/audit_report_meta_muse-wonder-1.0_vanilla_20261029-023806.json",
+    "error": null
+  }
+]
