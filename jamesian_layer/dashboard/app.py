@@ -24,16 +24,16 @@ buffer: TelemetryBuffer = rt["buffer"]
 breaker: JaccardDetector = rt["breaker"]
 
 with st.sidebar:
-    st.header("Scenario drivers (synthetic until Phase 6)")
+    st.header("Scenario drivers")
     if st.button("Simulate stall (20 A)"):
         daemon.set_inputs(current=20.0)
     if st.button("Surprise burst"):
-        daemon.set_inputs(mismatch_delta=0.9)
+        daemon.set_inputs(mismatch=0.9)
     brace = st.checkbox("Brace", value=False)
     recover = st.checkbox("Recover", value=False)
     daemon.set_inputs(u_brace=1.0 if brace else 0.0, u_recovery=1.0 if recover else 0.0)
     if st.button("Reset to cruise"):
-        daemon.set_inputs(current=4.0, mismatch_delta=0.0, u_brace=0.0, u_recovery=0.0)
+        daemon.set_inputs(current=4.0, mismatch=0.0, u_brace=0.0, u_recovery=0.0)
         buffer.clear()
         breaker.reset()
     tool_text = st.text_input("Tool-call text (Jaccard tracking)", value="")

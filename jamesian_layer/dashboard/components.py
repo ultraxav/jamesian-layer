@@ -86,17 +86,23 @@ def jaccard_panel(score: float, tripped: bool) -> go.Figure:
     )
 
 
-def latency_panel(reports_dir: str = "./documents") -> dict:
+def latency_panel(reports_dir: str = "./reports") -> dict:
     """Per-provider latencies from audit reports, or an explicit empty state."""
     latencies: dict[str, float] = {}
-    for path in sorted(glob.glob(os.path.join(reports_dir, "audit_report_*.json"))):
+    paths = sorted(glob.glob(os.path.join(reports_dir, "audit_report_*.json")))
+    if not paths and reports_dir == "./reports":
+        paths = sorted(glob.glob(os.path.join("./documents", "audit_report_*.json")))
+    for path in paths:
         try:
             with open(path, encoding="utf-8") as fh:
                 report = json.load(fh)
         except (OSError, ValueError):
             continue
         provider = report.get("provider", os.path.basename(path))
-        latencies[str(provider)] = float(report.get("mean_latency_ms", 0.0))
+        top_lat = report.get("mean_latency_ms")
+        spatial_lat = (report.get("spatial") or {}).get("mean_latency_ms")
+        val = top_lat if isinstance(top_lat, (int, float)) else (spatial_lat or 0.0)
+        latencies[str(provider)] = float(val)
     if not latencies:
         return {"status": "empty", "message": "no audit runs yet", "latencies": {}}
     return {"status": "ok", "latencies": latencies}
