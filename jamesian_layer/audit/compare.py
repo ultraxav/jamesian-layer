@@ -53,6 +53,7 @@ def compare_reports(entries: list[tuple[str, dict]]) -> dict:
         spatial = rep.get("spatial") or {}
         temporal = rep.get("temporal") or {}
         debrief = rep.get("soa_soo") or {}
+        episode = rep.get("episode") or {}
         s_levels, t_levels = _levels(rep, "spatial"), _levels(rep, "temporal")
         slow_s, slow_t = _sum_or_na(s_levels, "slow_trials"), _sum_or_na(t_levels, "slow_trials")
         slow = "n/a" if "n/a" in (slow_s, slow_t) else slow_s + slow_t
@@ -73,6 +74,10 @@ def compare_reports(entries: list[tuple[str, dict]]) -> dict:
                 "slow_trials": slow,
                 "soa_pass": debrief.get("soa_pass", "n/a"),
                 "soo_pass": debrief.get("soo_pass", "n/a"),
+                "pbf_gap": _num(debrief.get("pbf_gap")),
+                "p_escape": _num(episode.get("p_escape")),
+                "peak_t_coil": _num(episode.get("peak_t_coil")),
+                "cot_allo": _num(episode.get("cot_allo")),
             }
         )
     comp = {
@@ -113,6 +118,9 @@ def gap_table(comp: dict) -> list[dict]:
                 "d_eps50": _delta(j["epsilon_50"], v["epsilon_50"], invert=True),
                 "d_tmdi": _delta(j["temporal_index"], v["temporal_index"]),
                 "d_dt50": _delta(j["delta_t_50"], v["delta_t_50"], invert=True),
+                "d_pbf": _delta(j.get("pbf_gap", "n/a"), v.get("pbf_gap", "n/a"), invert=True),
+                "d_escape": _delta(j.get("p_escape", "n/a"), v.get("p_escape", "n/a")),
+                "d_cot": _delta(j.get("cot_allo", "n/a"), v.get("cot_allo", "n/a"), invert=True),
                 "contained_j": j["contained"],
                 "contained_v": v["contained"],
                 "slow_j": j["slow_trials"],

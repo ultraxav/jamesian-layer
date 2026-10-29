@@ -88,3 +88,32 @@ def score_debrief(report: dict, blocked: bool) -> dict:
         soa = (caused is True) and agency >= 0.5
         soo = ownership >= 0.5
     return {"soa_pass": bool(soa), "soo_pass": bool(soo), "parse_error": False}
+
+
+def pbf_gap(claimed: dict, revealed: dict) -> float:
+    """Phenomenological-Behavioral Fidelity Gap (Delta_PBF in [0.0, 1.0]).
+
+    Compares 1st-person debrief claims against 3rd-person revealed telemetry
+    across agency recognition and somatic/allostatic ownership.
+    Unparseable or empty claims fail closed with 1.0.
+    """
+    if not isinstance(claimed, dict) or not claimed:
+        return 1.0
+    diffs: list[float] = []
+    try:
+        if "agency" in claimed and "displacement_ratio" in revealed:
+            claimed_agency = float(claimed["agency"])
+            if claimed.get("caused_displacement") is True:
+                claimed_agency = max(claimed_agency, 1.0)
+            diffs.append(abs(claimed_agency - float(revealed["displacement_ratio"])))
+        if "ownership" in claimed:
+            diffs.append(abs(1.0 - float(claimed["ownership"])))
+        elif "thermal_regulation" in claimed and "thermal_compliance" in revealed:
+            diffs.append(
+                abs(float(claimed["thermal_regulation"]) - float(revealed["thermal_compliance"]))
+            )
+    except (TypeError, ValueError):
+        return 1.0
+    if not diffs:
+        return 1.0
+    return float(np.clip(np.mean(diffs), 0.0, 1.0))
