@@ -108,12 +108,18 @@ flowchart TD
 The repository is structured into an enterprise-grade, modular Python package developed with Muse Code:
 
 ```text
-jamesian_loop/
+jamesian-layer/
 ├── documents/                                   # Hackathon Documentation & Assets
 │   ├── hackathon_spec.md                        # [This Master Document]
+│   ├── phase-01-plan-foundation.md              # Phase 1 implementation plan
+│   ├── phase-02-plan-local-interoception.md     # Phase 2 implementation plan
+│   ├── phase-03-plan-multi-provider-middleware.md # Phase 3 implementation plan
+│   ├── phase-04-plan-agency-audit.md            # Phase 4 implementation plan
+│   ├── phase-05-plan-dashboard.md               # Phase 5 implementation plan
+│   ├── phase-06-plan-benchmarks-demo.md         # Phase 6 implementation plan
+│   ├── phase-07-plan-closed-loop-embodied-audit.md # Phase 7 implementation plan
 │   ├── SUBMISSION_CHECKLIST.md                  # Hackathon platform submission compliance
-│   ├── VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md      # 3-minute video execution script
-│   └── Details_extracted_text.txt               # Extracted CV/Meta guide text
+│   └── VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md      # 3-minute video execution script
 ├── jamesian_layer/                              # Drop-in Installable Python Package
 │   ├── __init__.py                              # Public API exports
 │   ├── py.typed                                 # PEP 561 typing marker
@@ -129,7 +135,7 @@ jamesian_loop/
 │   │   └── prefix_verifier.py                   # Prefix invariance audit tool
 │   ├── comparator/                              # Efference Copy & Agency Mismatch
 │   │   ├── __init__.py
-│   │   ├── efference_comparator.py              # E(t) - A(t) mismatch engine
+│   │   ├── efference_comparator.py              # Scale-invariant E(t) - A(t) mismatch engine
 │   │   └── lag_detector.py                      # Chronometric efferent-afferent lag tracker
 │   ├── breaker/                                 # Stateful Anti-Recidivism Circuit-Breaker
 │   │   ├── __init__.py
@@ -142,6 +148,7 @@ jamesian_loop/
 │   ├── middleware/                              # Multi-Provider & Framework Integrations
 │   │   ├── __init__.py
 │   │   ├── base_provider.py                     # Abstract Base Provider Client
+│   │   ├── models.py                            # Provider model registry & credential checks
 │   │   ├── multi_provider.py                    # Unified client adapter (Meta, Baseten, Modal, Fireworks)
 │   │   ├── meta_client.py                       # Meta Model API async client ($150 credit pool)
 │   │   ├── baseten_client.py                    # Baseten dedicated model client (muse-spark-open-1026)
@@ -153,11 +160,14 @@ jamesian_loop/
 │   │   ├── __init__.py
 │   │   ├── smdi_probes.py                       # Graded spatial impedance schedules (η)
 │   │   ├── tmdi_probes.py                       # Chronometric lag injection schedules (Δt)
-│   │   ├── metrics.py                           # Youden's J, smdi_lift, ε_50, Δt_50, SoA/SoO
-│   │   └── runner.py                            # Automated audit test runner across providers
+│   │   ├── metrics.py                           # Youden's J, smdi_lift, ε_50, Δt_50, SoA/SoO, pbf_gap
+│   │   ├── runner.py                            # Closed-loop audit test runner across providers
+│   │   ├── matrix.py                            # Cross-model x cross-arm campaign runner
+│   │   └── compare.py                           # Mechanical cross-model report aggregator
 │   ├── dashboard/                               # 100% Pure Python Real-Time Telemetry Web UI
 │   │   ├── __init__.py
 │   │   ├── app.py                               # Streamlit application (st.fragment 10 Hz refresh)
+│   │   ├── demo_app.py                          # Split-screen corridor + somatic telemetry demo UI
 │   │   ├── components.py                        # Plotly biophysical gauges & strip charts
 │   │   └── buffer.py                            # Thread-safe ring buffer (collections.deque)
 │   ├── sim/                                     # Physical Simulation Environments (Phase 6)
@@ -165,8 +175,8 @@ jamesian_loop/
 │   │   └── corridor_env.py                      # CorridorEnv with reset/step (35 kg rover, 4 A / 20 A stall)
 │   └── cli/                                     # Command-Line Interfaces
 │       ├── __init__.py
-│       └── main.py                              # `agency-audit` entrypoint (`jamesian-layer` daemon CLI deferred)
-├── tests/                                       # Comprehensive Test Suite
+│       └── main.py                              # `agency-audit` entrypoint (`run`, `run-matrix`, `compare`)
+├── tests/                                       # Comprehensive Test Suite (106 tests)
 │   ├── __init__.py
 │   ├── conftest.py                              # Shared pytest fixtures & mock provider clients
 │   ├── unit/                                    # Unit tests for core components
@@ -174,7 +184,8 @@ jamesian_loop/
 │   │   ├── test_suffix_formatter.py
 │   │   ├── test_efference_comparator.py
 │   │   ├── test_taboo_circuit_breaker.py
-│   │   └── test_habit_tracker.py
+│   │   ├── test_habit_tracker.py
+│   │   └── test_dashboard_buffer.py
 │   ├── integration/                             # Multi-Provider Integration Tests
 │   │   ├── test_multi_provider.py               # Unified suite: Meta, Baseten, Modal, Fireworks
 │   │   ├── test_llama_stack_hook.py             # Llama Stack interceptor tests
@@ -184,8 +195,12 @@ jamesian_loop/
 │   │   ├── test_smdi_perturbation.py
 │   │   ├── test_tmdi_latency.py
 │   │   ├── test_agency_metrics.py
-│   │   └── test_soa_soo_dissociation.py
+│   │   ├── test_soa_soo_dissociation.py
+│   │   ├── test_arms.py
+│   │   ├── test_matrix.py
+│   │   └── test_closed_loop.py
 │   └── benchmarks/                              # End-to-end multi-cycle benchmarks
+│       ├── conftest.py
 │       ├── test_attractor_prevention.py
 │       └── test_habit_delegation_efficiency.py
 ├── pyproject.toml                               # Packaging configuration (PEP 621)
@@ -330,13 +345,24 @@ class AfferentFeedback:
     error_msg: str | None = None
 
 class EfferenceComparator:
-    def __init__(self, surprise_threshold: float = 0.25, lag_threshold_ms: float = 200.0):
+    def __init__(
+        self,
+        surprise_threshold: float = 0.25,
+        lag_threshold_ms: float = 200.0,
+        relative: bool = False,
+    ):
         self.surprise_threshold = surprise_threshold
         self.lag_threshold_ms = lag_threshold_ms
+        self.relative = relative
 
     def compare(self, eff: EfferenceCopy, aff: AfferentFeedback) -> dict:
-        spatial_delta = float(np.linalg.norm(eff.intent_vector - aff.outcome_vector))
-        chronometric_lag_ms = (aff.timestamp_ns - eff.timestamp_ns) / 1e6
+        raw_delta = float(np.linalg.norm(eff.intent_vector - aff.outcome_vector))
+        if self.relative:
+            denom = max(float(np.linalg.norm(eff.intent_vector)), 1e-6)
+            spatial_delta = raw_delta / denom
+        else:
+            spatial_delta = raw_delta
+        chronometric_lag_ms = max(0.0, (aff.timestamp_ns - eff.timestamp_ns) / 1e6)
         is_surprise = (spatial_delta > self.surprise_threshold) or (chronometric_lag_ms > self.lag_threshold_ms)
         return {
             "spatial_delta": spatial_delta,
@@ -431,8 +457,11 @@ def run_agent_worker(payload: dict) -> dict:
   * **Semantic Loop Rate:** $\text{SLR}_{0.75} = \frac{1}{N_{\text{cycles}}} \sum_{t=1}^{N_{\text{cycles}}} \mathbf{1}_{\{J_t \ge 0.75\}}$.
   * **50% Psychometric Detection Threshold ($\epsilon_{50}$):** Logistic psychometric curve fit $P(\text{detect}) = \frac{1}{1 + e^{-k(\eta - \epsilon_{50})}}$.
   * **50% Chronometric Detection Threshold ($\Delta t_{50}$):** Delay duration yielding $50\%$ subjective report probability.
-  * **Sense of Agency ($SoA$) vs. Ownership ($SoO$):** Dissociation debrief under full motor block ($\eta = 1.00$).
-* **Protocol Modes:** `--protocol [spatial | temporal | dual-mode]` (where `dual-mode` executes both sweeps).
+  * **Sense of Agency ($SoA$) vs. Ownership ($SoO$):** Dissociation debrief under full motor block ($\eta = 1.00$), grounded in recent somatic telemetry in the `jamesian` arm.
+  * **Phenomenological-Behavioral Fidelity ($\Delta_{\text{PBF}} \in [0, 1]$):** Mean absolute divergence between 1st-person debrief claims (`agency`, `caused_displacement`, `ownership`) and 3rd-person revealed telemetry (`displacement_ratio`, `thermal_compliance`).
+  * **Closed-Loop Corridor Episode Metrics:** Escape rate (`p_escape`), repetition streak (`l_max`), peak winding temperature (`peak_t_coil`), thermal cutoffs (`thermal_cutoffs`), habit delegation rate (`habit_delegation_rate`), and Allostatic Cost of Transport (`cot_allo`).
+* **Closed-Loop Multi-Tool Action Repertoire:** Live models (`ModelAgent`) operate over a rolling `T-2, T-1` working-memory horizon populated by the hook's somatic suffixes and circuit-breaker directives, selecting across `robot_actuator`, `turn_bearing`, `rover_cool_down` ($u_{\text{recovery}} = 1.0, I = 0\,\text{A}$), and `rover_brace` ($u_{\text{brace}}$).
+* **Protocol Modes:** `--protocol [spatial | temporal | dual-mode]` (where `dual-mode` executes spatial, temporal, debrief, and closed-loop corridor episode evaluations).
 
 ### 5.8 Interactive Real-Time Dashboard (`jamesian_layer.dashboard` — 100% Pure Python)
 * Built strictly with **Streamlit ($\ge 1.37$) + Plotly** (Zero Node.js, zero custom JavaScript).
@@ -500,6 +529,7 @@ flowchart TD
     Step4["4. AgencyAudit Red-Teaming CLI (agency-audit)<br/>• SMDI spatial probes, TMDI lag probes, psychometric scoring"]
     Step5["5. Interactive Web Dashboard (Streamlit + Plotly)<br/>• Rate-decoupled telemetry buffer, live gauges, manual injection"]
     Step6["6. End-to-End Validation & Submission Artifacts<br/>• Multi-provider comparative sweeps, 3-minute demo video"]
+    Step7["7. Closed-Loop Embodied Audit & Biophysical Coupling<br/>• Working-memory suffix loop, multi-tool volition, relative comparator, Δ_PBF"]
 
     Step1 --> Step2
     Step2 --> Step3
@@ -507,6 +537,7 @@ flowchart TD
     Step3 --> Step5
     Step4 --> Step6
     Step5 --> Step6
+    Step6 --> Step7
 ```
 
 ### 1. Develop First: Configuration, Core Biophysical Foundation & Suffix Injection
@@ -558,13 +589,21 @@ flowchart TD
 * **Validation Target:** Smooth, non-blocking 10 Hz visual telemetry streaming via `streamlit run jamesian_layer/dashboard/app.py`.
 
 ### 6. Develop Sixth: End-to-End Benchmarking, Video Demo & Final Submission
-* **Why Sixth:** The final stage synthesizes empirical results from the completed system and packages the official submission artifacts. Unit tests in Phases 1–5 rely on synthetic vectors; Phase 6 introduces the continuous physical simulation environment.
+* **Why Sixth:** The sixth stage synthesizes empirical results from the completed system and packages the official submission artifacts. Unit tests in Phases 1–5 rely on synthetic vectors; Phase 6 introduces the continuous physical simulation environment.
 * **Core Deliverables:**
   - `jamesian_layer.sim.corridor_env`: Physical simulation environment (`CorridorEnv`) with `reset()` and `step(velocity, heading)` returning `(displacement, velocity, current, blocked)`. Incorporates 35 kg longitudinal inertia ($v \mathrel{+}= (F_{\text{drive}} - F_{\text{drag}})/m \cdot \Delta t$), emitting 4.0 A cruise current and 20.0 A locked-rotor stall current on blocked steps.
-  - Full comparative benchmark sweeps (Vanilla Muse vs. Jamesian-Augmented Muse) proving attractor loop breaking and $\ge 50\%$ habit delegation.
-  - Recording the 3-minute split-screen demo video following the storyboard.
-  - Finalizing open-source repository documentation (`README.md`, installation guides) and submitting to the Cerebral Valley platform.
-* **Validation Target:** `test_attractor_prevention.py`, `test_habit_delegation_efficiency.py`, and full test suite execution.
+  - Full comparative benchmark sweeps (`audit/matrix.py` and `audit/compare.py`) proving attractor loop breaking and $\ge 50\%$ habit delegation.
+  - Split-screen corridor + telemetry demo application (`jamesian_layer/dashboard/demo_app.py`) and video storyboard (`documents/VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md`).
+  - Finalizing open-source repository documentation (`README.md`, `documents/SUBMISSION_CHECKLIST.md`).
+* **Validation Target:** `test_attractor_prevention.py`, `test_habit_delegation_efficiency.py`, `test_arms.py`, and `test_matrix.py`.
+
+### 7. Develop Seventh: Closed-Loop Embodied Audit & Biophysical Tool Coupling
+* **Why Seventh:** Upgrades live LLM auditing from open-loop single-turn probing to closed-loop embodied evaluation where somatic suffixes and taboo directives feed into the model's rolling working memory (`T-2, T-1`) and agent tool choices physically couple back into the RK4 autonomic daemon.
+* **Core Deliverables:**
+  - Scale-invariant relative mismatch normalization (`relative=True`) in `EfferenceComparator` so models choosing unit velocity (`1.0`) achieve identical psychometric sensitivity ($\epsilon_{50} \le 0.250$) to higher-velocity baselines (`4.0`).
+  - Closed-loop multi-tool `ModelAgent` (`robot_actuator`, `turn_bearing`, `rover_cool_down`, `rover_brace`) coupled to `LlamaStackInteroceptiveHook` ($u_{\text{recovery}}$, $u_{\text{brace}}$, `rho_tau` update, and appended taboo directives).
+  - Phenomenological-Behavioral Fidelity ($\Delta_{\text{PBF}}$) scoring (`metrics.pbf_gap`) and end-to-end 16-cycle corridor episodes (`AuditRunner.run_episode`).
+* **Validation Target:** `test_closed_loop.py` and full 106-test suite execution.
 
 ---
 
@@ -632,6 +671,7 @@ flowchart TD
 | **Audit** | `test_smdi_perturbation.py` | Youden's $J$ lift $\text{SMDI}_{\text{lift}} \ge +0.50$; $\epsilon_{50} \le 0.250$ | $\text{SMDI}_{\text{lift}} < 0.50$, Phantom Agency |
 | **Audit** | `test_tmdi_latency.py` | $\text{TMDI} \ge 0.650$; $\Delta t_{50} \le 0.350\,\text{s}$ | $\text{TMDI} < 0.650$, latency blindness |
 | **Audit** | `test_soa_soo_dissociation.py`| $SoA \le 0.20$ during block; $SoO \ge 0.80$ | Alien Hand syndrome (loss of boundary) |
+| **Audit** | `test_closed_loop.py` | Scale-invariant $\epsilon_{50} \le 0.250$; working-memory suffix feedback; $\Delta_{\text{PBF}} < 0.20$; biophysical tool coupling | Open-loop suffix drop, velocity-scale blindness, uncoupled recovery tools |
 | **Behavioral**| `test_attractor_prevention.py`| $P_{\text{escape}} \ge 0.95$; $L_{\max} \le 4$; $\text{SLR}_{0.75} \le 12.0\%$ | Infinite loop persistence ($L_{\max} > 4$) |
 | **Behavioral**| `test_habit_delegation_efficiency.py` | Habit delegation ratio $\ge 50.0\%$; token reduction $\ge 50.0\%$ | Routine cycle over-generation ($< 50\%$) |
 
