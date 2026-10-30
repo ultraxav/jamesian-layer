@@ -4,8 +4,15 @@ Thin replay surface over tests/benchmarks conftest traces (same scripted
 Jamesian/vanilla episodes the gates certify). No independent physics here.
 """
 
+import sys
+from pathlib import Path
+
 import plotly.graph_objects as go
 import streamlit as st
+
+_REPO_ROOT = str(Path(__file__).resolve().parents[2])
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 
 from jamesian_layer.dashboard import components
 from tests.benchmarks.conftest import (
