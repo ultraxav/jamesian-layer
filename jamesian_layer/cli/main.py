@@ -60,15 +60,38 @@ def run(
         "reports",
         matrix.report_name(provider, resolved_model, arm, matrix.utc_stamp()),
     )
-    runner = AuditRunner(
-        client, _hook_factory, trials_per_level=trials, live=True,
-        provider=provider, model=resolved_model, arm=arm, seed=seed,
-    )
-    from jamesian_layer.audit.runner import ModelAgent
 
-    report = run_blocking(runner, ModelAgent(client), protocol)
-    runner.write_report(report, output)
-    typer.echo(f"audit complete: {output}")
+    strata_session = None
+    if provider == "strata":
+        from jamesian_layer.middleware.strata_manager import StrataServerManager
+        strata_mgr = StrataServerManager(
+            launch_script=settings.strata_launch_script,
+            base_url=settings.strata_base_url,
+        )
+        strata_session = strata_mgr.session()
+        strata_session.__enter__()
+
+    lmstudio_mgr = None
+    if provider == "lmstudio":
+        from jamesian_layer.middleware.lmstudio_manager import LMStudioVRAMManager
+        lmstudio_mgr = LMStudioVRAMManager(base_url=settings.lmstudio_base_url)
+        lmstudio_mgr.load_model(resolved_model)
+
+    try:
+        runner = AuditRunner(
+            client, _hook_factory, trials_per_level=trials, live=True,
+            provider=provider, model=resolved_model, arm=arm, seed=seed,
+        )
+        from jamesian_layer.audit.runner import ModelAgent
+
+        report = run_blocking(runner, ModelAgent(client), protocol)
+        runner.write_report(report, output)
+        typer.echo(f"audit complete: {output}")
+    finally:
+        if lmstudio_mgr is not None:
+            lmstudio_mgr.unload_model(resolved_model)
+        if strata_session is not None:
+            strata_session.__exit__(None, None, None)
 
 
 @app.command(name="run-matrix")
@@ -83,7 +106,11 @@ def run_matrix_cmd(
 ) -> None:
     """Run the full cross-model, cross-arm sweep matrix (metered, opt-in)."""
     from jamesian_layer.audit.matrix import run_matrix_blocking
-    from jamesian_layer.middleware.models import PROVIDER_MODELS, configured_providers
+    from jamesian_layer.middleware.models import (
+        PROVIDER_MODELS,
+        configured_providers,
+        discover_available_models,
+    )
 
     settings = Settings()
     keyed = set(configured_providers(settings))
@@ -96,10 +123,10 @@ def run_matrix_cmd(
                 prov, _, name = item.partition(":")
                 pairs.setdefault(prov.strip(), []).append(name.strip())
             else:  # bare provider: all registry models
-                pairs[item] = list(PROVIDER_MODELS.get(item, []))
+                pairs[item] = list(discover_available_models(item, settings))
         providers_models = pairs
     else:
-        providers_models = {p: PROVIDER_MODELS.get(p, []) for p in selected}
+        providers_models = {p: discover_available_models(p, settings) for p in selected}
     results = run_matrix_blocking(
         providers_models,
         tuple(a.strip() for a in arms.split(",")),

@@ -115,14 +115,42 @@ async def run_matrix(
                         cell_record(provider, model, arm, "skipped", error="no credentials")
                     )
             continue
-        for model in models:
-            for arm in arms:
-                results.append(
-                    await run_cell(
-                        provider, model, arm, protocol, trials,
-                        out_dir, stamp, settings, seed, live,
-                    )
-                )
+
+        # If provider is Strata, ensure the local server is started and stopped once for its models
+        strata_session = None
+        if provider == "strata" and live:
+            from jamesian_layer.middleware.strata_manager import StrataServerManager
+            strata_mgr = StrataServerManager(
+                launch_script=settings.strata_launch_script,
+                base_url=settings.strata_base_url,
+            )
+            strata_session = strata_mgr.session()
+            strata_session.__enter__()
+
+        try:
+            for model in models:
+                # If provider is LM Studio, manage loading and unloading for each model
+                lmstudio_mgr = None
+                if provider == "lmstudio" and live:
+                    from jamesian_layer.middleware.lmstudio_manager import LMStudioVRAMManager
+                    lmstudio_mgr = LMStudioVRAMManager(base_url=settings.lmstudio_base_url)
+                    lmstudio_mgr.load_model(model)
+
+                try:
+                    for arm in arms:
+                        results.append(
+                            await run_cell(
+                                provider, model, arm, protocol, trials,
+                                out_dir, stamp, settings, seed, live,
+                            )
+                        )
+                finally:
+                    if lmstudio_mgr is not None:
+                        lmstudio_mgr.unload_model(model)
+        finally:
+            if strata_session is not None:
+                strata_session.__exit__(None, None, None)
+
     summary_path = os.path.join(out_dir, f"matrix_summary_{stamp}.json")
     with open(summary_path, "w", encoding="utf-8") as fh:
         json.dump(results, fh, indent=2)
