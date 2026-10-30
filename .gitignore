@@ -17,3 +17,6 @@ jamesian_layer.egg-info/
 
 # OS noise
 .DS_Store
+
+# Personal notes (untracked)
+personal_notes.md
