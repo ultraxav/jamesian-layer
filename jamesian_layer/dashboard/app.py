@@ -51,11 +51,11 @@ def render():
 
     cols = st.columns(4)
     for col, fig in zip(cols, components.gauges(latest)):
-        col.plotly_chart(fig, use_container_width=True)
-    st.plotly_chart(components.strip_charts(history), use_container_width=True)
+        col.plotly_chart(fig, width="stretch")
+    st.plotly_chart(components.strip_charts(history), width="stretch")
     left, right = st.columns(2)
     left.plotly_chart(
-        components.jaccard_panel(score, breaker.tripped), use_container_width=True
+        components.jaccard_panel(score, breaker.tripped), width="stretch"
     )
     latency = components.latency_panel()
     if latency["status"] == "empty":

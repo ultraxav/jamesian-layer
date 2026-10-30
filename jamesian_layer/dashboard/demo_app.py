@@ -84,7 +84,7 @@ def replay():
         st.session_state.idx += 1
     frame = trace[st.session_state.idx]
     st.subheader(f"{st.session_state.arm} — cycle {frame['cycle']}")
-    st.plotly_chart(corridor_figure(frame["position"], 25.0), use_container_width=True)
+    st.plotly_chart(corridor_figure(frame["position"], 25.0), width="stretch")
     latest = {
         "sigma": frame["sigma"],
         "valence": 0.0,
@@ -95,7 +95,7 @@ def replay():
     }
     cols = st.columns(4)
     for col, fig in zip(cols, components.gauges(latest)):
-        col.plotly_chart(fig, use_container_width=True)
+        col.plotly_chart(fig, width="stretch")
     st.code(f"{frame['tool']} | blocked={frame['blocked']} tripped={frame['tripped']}")
     if frame["suffix"]:
         st.code(frame["suffix"])
