@@ -65,3 +65,27 @@ def test_latency_panel_empty_without_reports(tmp_path):
     out = components.latency_panel(str(tmp_path))
     assert out["status"] == "empty"
     assert out["latencies"] == {}
+
+
+def test_corridor_2d_figure_and_demo_traces():
+    from jamesian_layer.dashboard.demo_app import load_demo_traces
+
+    traces = load_demo_traces()
+    assert "muse_spark_open_baseten" in traces
+    assert "muse_spark_1_3_meta" in traces
+    for sc in traces.values():
+        j_frames = sc["jamesian"]["frames"]
+        v_frames = sc["vanilla"]["frames"]
+        assert len(j_frames) == 16
+        assert len(v_frames) == 16
+        assert sc["jamesian"]["summary"]["p_escape"] == 1.0
+        assert sc["jamesian"]["summary"]["final_x"] == 100.0
+        assert sc["jamesian"]["summary"]["peak_t_coil"] < 75.0
+        assert sc["vanilla"]["summary"]["p_escape"] == 0.0
+        assert sc["vanilla"]["summary"]["final_x"] == 25.0
+        assert sc["vanilla"]["summary"]["peak_t_coil"] >= 85.0
+        fig_j = components.corridor_2d_figure(j_frames[4], j_frames[:5], arm="jamesian")
+        fig_v = components.corridor_2d_figure(v_frames[11], v_frames[:12], arm="vanilla")
+        assert isinstance(fig_j, go.Figure)
+        assert isinstance(fig_v, go.Figure)
+
