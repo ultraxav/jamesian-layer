@@ -310,7 +310,7 @@
         <span class="legend-item"><span class="legend-line" style="background: var(--accent-red);"></span> T_coil (°C, Right Axis)</span>
       </div>
     </div>
-    <canvas id="scopeCanvas" class="oscilloscope-canvas" width="900" height="200"></canvas>
+    <canvas id="scopeCanvas" class="oscilloscope-canvas"></canvas>
   </div>
 
   <!-- BOTTOM PANELS: JACCARD BREAKER & LATENCY BENCHMARKS -->
@@ -478,8 +478,24 @@
     const ctx = canvas.getContext('2d');
 
     function drawOscilloscope() {
-      const w = canvas.width;
-      const h = canvas.height;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const displayW = Math.round(rect.width) || 900;
+      const displayH = Math.round(rect.height) || 200;
+
+      const targetW = Math.round(displayW * dpr);
+      const targetH = Math.round(displayH * dpr);
+
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
+      const w = displayW;
+      const h = displayH;
       ctx.clearRect(0, 0, w, h);
 
       // Grid lines
@@ -492,32 +508,34 @@
         ctx.stroke();
       }
 
-      if (history.length < 2) return;
+      if (history.length >= 2) {
+        const pad = 10;
+        const plotH = h - pad * 2;
+        const stepX = w / (maxHistory - 1);
 
-      const pad = 10;
-      const plotH = h - pad * 2;
-      const stepX = w / (maxHistory - 1);
-
-      function plotTrace(getter, color, minV, maxV) {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        for (let i = 0; i < history.length; i++) {
-          const val = getter(history[i]);
-          const norm = (val - minV) / (maxV - minV);
-          const x = i * stepX;
-          const y = h - pad - norm * plotH;
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+        function plotTrace(getter, color, minV, maxV) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          for (let i = 0; i < history.length; i++) {
+            const val = getter(history[i]);
+            const norm = (val - minV) / (maxV - minV);
+            const x = i * stepX;
+            const y = h - pad - norm * plotH;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
         }
-        ctx.stroke();
+
+        // Traces
+        plotTrace(s => s[0], '#38bdf8', 0.0, 1.0);  // sigma
+        plotTrace(s => s[1], '#10b981', -1.0, 1.0); // valence
+        plotTrace(s => s[2], '#c084fc', 0.0, 1.0);  // gamma
+        plotTrace(s => s[3], '#ef4444', 25.0, 105.0); // T_coil
       }
 
-      // Traces
-      plotTrace(s => s[0], '#38bdf8', 0.0, 1.0);  // sigma
-      plotTrace(s => s[1], '#10b981', -1.0, 1.0); // valence
-      plotTrace(s => s[2], '#c084fc', 0.0, 1.0);  // gamma
-      plotTrace(s => s[3], '#ef4444', 25.0, 105.0); // T_coil
+      ctx.restore();
     }
 
     // Main continuous animation loop

@@ -213,7 +213,7 @@
     }
     canvas.corridor-canvas {
       width: 100%;
-      height: 140px;
+      height: 155px;
       display: block;
     }
     .gauges-grid {
@@ -355,7 +355,7 @@
         </div>
       </div>
       <div class="corridor-canvas-wrap">
-        <canvas id="jCanvas" class="corridor-canvas" width="600" height="140"></canvas>
+        <canvas id="jCanvas" class="corridor-canvas"></canvas>
       </div>
       <div class="gauges-grid">
         <div class="gauge-cell">
@@ -411,7 +411,7 @@
         </div>
       </div>
       <div class="corridor-canvas-wrap">
-        <canvas id="vCanvas" class="corridor-canvas" width="600" height="140"></canvas>
+        <canvas id="vCanvas" class="corridor-canvas"></canvas>
       </div>
       <div class="gauges-grid">
         <div class="gauge-cell">
@@ -5085,19 +5085,36 @@
       `;
     }
 
-    // 2D Corridor Canvas Renderer
+    // 2D Corridor Canvas Renderer (DPR-aware and resolution-independent)
     function drawCorridor(canvasId, frame, trail, arm) {
       const canvas = document.getElementById(canvasId);
       if (!canvas) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const displayW = Math.round(rect.width) || 600;
+      const displayH = Math.round(rect.height) || 155;
+
+      const targetW = Math.round(displayW * dpr);
+      const targetH = Math.round(displayH * dpr);
+
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
+
       const ctx = canvas.getContext('2d');
-      const w = canvas.width;
-      const h = canvas.height;
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
+      const w = displayW;
+      const h = displayH;
 
       ctx.clearRect(0, 0, w, h);
 
       // Coordinate mapping: x in [0, 100], y in [-1.15, 1.15]
-      const padX = 24;
-      const padY = 16;
+      const padX = 28;
+      const padY = 18;
       const usableW = w - padX * 2;
       const usableH = h - padY * 2;
 
@@ -5129,8 +5146,10 @@
       ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
       ctx.fillRect(toScreenX(96), toScreenY(1.0), toScreenX(100) - toScreenX(96), toScreenY(-1.0) - toScreenY(1.0));
       ctx.fillStyle = '#6ee7b7';
-      ctx.font = '10px monospace';
-      ctx.fillText('🏁 100m', toScreenX(93), toScreenY(-0.7));
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText('🏁 100m', toScreenX(99.5), toScreenY(-0.65));
+      ctx.textAlign = 'left';
 
       // Obstacle barrier wall at 25m (blocks center y: -0.98 to +0.35)
       const bX = toScreenX(25.0);
@@ -5143,16 +5162,18 @@
       ctx.strokeRect(bX - 4, bTop, 8, bBottom - bTop);
 
       ctx.fillStyle = '#fca5a5';
-      ctx.font = '9px sans-serif';
-      ctx.fillText('🧱 WALL (25m)', bX - 28, toScreenY(-0.7));
+      ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('🧱 WALL (25m)', bX - 8, toScreenY(-0.6));
+      ctx.textAlign = 'left';
 
       ctx.fillStyle = '#6ee7b7';
-      ctx.font = '9px sans-serif';
-      ctx.fillText('↗ BYPASS (y = +0.65m)', toScreenX(52), toScreenY(0.85));
+      ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText('↗ BYPASS (y = +0.65m)', toScreenX(32), toScreenY(0.85));
 
       // Trajectory trail
       if (trail && trail.length > 0) {
-        ctx.strokeStyle = arm === 'jamesian' ? 'rgba(56, 189, 248, 0.6)' : 'rgba(248, 113, 113, 0.6)';
+        ctx.strokeStyle = arm === 'jamesian' ? 'rgba(56, 189, 248, 0.65)' : 'rgba(248, 113, 113, 0.65)';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(toScreenX(trail[0].x), toScreenY(trail[0].y));
@@ -5209,11 +5230,13 @@
 
       // Text badge
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 9px sans-serif';
-      const labelY = frame.y > 0.3 ? rY + 18 : rY - 12;
+      ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const labelY = frame.y > 0.3 ? rY + 18 : rY - 14;
       ctx.textAlign = 'center';
       ctx.fillText(labelText, rX, labelY);
       ctx.textAlign = 'left';
+
+      ctx.restore();
     }
 
     function updateNarrative(jFrame, vFrame, vSummary) {
@@ -5406,6 +5429,11 @@
       if (!str) return '';
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
+
+    // Resize listener for responsive, crisp re-renders
+    window.addEventListener('resize', () => {
+      renderStep(currentStepIndex);
+    });
 
     // Initial render
     updateUI();
