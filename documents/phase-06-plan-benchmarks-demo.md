@@ -45,3 +45,18 @@ Highest-risk validation: the control arm must genuinely reach derating (otherwis
 - **`demo_app.py` not in spec tree:** deliberate addition (step 5); the alternative — recording against the raw dashboard — would not show the corridor side of the split screen the storyboard requires.
 
 Open questions: None — all Phase 6 facts resolve to spec §5.9, §6 step 6, §7.1–7.2, §9, §12, and the committed Phase 1–5 code.
+
+---
+
+## Addendum: Real LLM Empirical Traces & High-DPI Polish
+
+1. **Empirical LLM Traces (`demo_traces.json`)**:
+   Instead of synthetic scripted agents, `demo_app.py` replays 100% authentic 16-cycle closed-loop traces recorded directly from live LLM inference:
+   * **Meta Muse Spark Open 1026** (Baseten - Table 4.2 Rank #1)
+   * **Meta Muse Spark 1.3** (Meta Model API)
+   * **Gemma 4 31B** & **12B** (LM Studio)
+   Traces adhere strictly to the *ceteris paribus* protocol: identical 25 m obstacle barrier, locked-rotor current surge (20 A), and biophysical integration.
+2. **Client-Side HTML5/Canvas/SVG Replay (`viewer.html`)**:
+   Replaced server-side Streamlit WebSocket polling with a client-side viewer embedded via `st.iframe`.
+3. **Dynamic Device Pixel Ratio (DPR) Scaling**:
+   Implemented automatic DPR auto-scaling (`canvas.width = rect.width * dpr`, `ctx.scale(dpr, dpr)`) ensuring razor-sharp vector typography, 1:1 circular rovers, and zero aspect-ratio distortion across all monitor resolutions.

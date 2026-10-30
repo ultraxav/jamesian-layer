@@ -37,7 +37,7 @@ Extend the multi-provider middleware and `AgencyAudit` harness to support local/
 
 ### 1.4 CLI & Matrix Integration + Verification Tests
 * **[`jamesian_layer/cli/main.py`](../jamesian_layer/cli/main.py) & [`audit/matrix.py`](../jamesian_layer/audit/matrix.py)**: Wired `LMStudioVRAMManager` and `StrataServerManager` into both `agency-audit run` and `agency-audit run-matrix`.
-* **[`tests/integration/test_local_providers.py`](../tests/integration/test_local_providers.py)**: Added 4 integration tests covering client initialization, embedding-filtered model discovery, and Strata status probing, expanding the automated test suite to **110/110 passing tests**.
+* **[`tests/integration/test_local_providers.py`](../tests/integration/test_local_providers.py)**: Added 4 integration tests covering client initialization, embedding-filtered model discovery, and Strata status probing, expanding the automated test suite to **111/111 passing tests**.
 
 ---
 

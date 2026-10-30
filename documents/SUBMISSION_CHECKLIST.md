@@ -11,7 +11,7 @@
 
 Run all verification gates before recording and submitting:
 
-- [x] **Full Test Suite (110/110 tests passing):**
+- [x] **Full Test Suite (111/111 tests passing):**
   ```bash
   .venv/bin/python -m pytest tests/ -v
   ```
@@ -26,8 +26,8 @@ Run all verification gates before recording and submitting:
 ## 2. Deliverable Artifacts
 
 - [x] **Installable Package:** `pyproject.toml` and `requirements.txt` (`pip install -e ".[dev]"`).
-- [x] **Interactive Real-Time Telemetry Dashboard:** `jamesian_layer/dashboard/app.py` (`streamlit run jamesian_layer/dashboard/app.py`).
-- [x] **Synchronized Side-by-Side Corridor Demo UI:** `jamesian_layer/dashboard/demo_app.py` (`streamlit run jamesian_layer/dashboard/demo_app.py`) with pre-recorded *ceteris paribus* traces across Meta and open-weight models (`muse-spark-open-1026`, `muse-spark-1.3`, `gemma-4-31b`, `gemma-4-12b`).
+- [x] **Interactive Real-Time Telemetry Dashboard:** `jamesian_layer/dashboard/app.py` (`streamlit run jamesian_layer/dashboard/app.py`) with continuous client-side biophysical RK4 integration, dynamic DPR canvas scaling, live perturbation controls, 3-strike Jaccard anti-recidivism breaker, and cached multi-provider latency analytics.
+- [x] **Synchronized Side-by-Side Corridor Demo UI:** `jamesian_layer/dashboard/demo_app.py` (`streamlit run jamesian_layer/dashboard/demo_app.py`) with ultra-smooth client-side HTML5/Canvas/SVG replay (`viewer.html`), dynamic DPR auto-scaling, and pre-recorded *ceteris paribus* traces prioritized with Meta models (`muse-spark-open-1026`, `muse-spark-1.3`, `gemma-4-31b`, `gemma-4-12b`).
 - [x] **AgencyAudit CLI (`agency-audit`):** `run`, `run-matrix`, and `compare` commands in `jamesian_layer/cli/main.py` with automated LM Studio VRAM unloading and Strata server session management.
 - [x] **Documentation & Phase Plans:** `README.md`, `documents/hackathon_spec.md`, `documents/phase-01-plan-foundation.md` through `documents/phase-08-local-providers-and-campaign-results.md`, and `documents/VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md`.
 

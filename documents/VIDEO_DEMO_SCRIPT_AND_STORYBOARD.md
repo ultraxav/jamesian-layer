@@ -12,7 +12,7 @@ Open three windows side-by-side before recording:
    ```bash
    .venv/bin/streamlit run jamesian_layer/dashboard/demo_app.py
    ```
-2. **Browser Tab 2 (Live 10 Hz Autonomic Telemetry Dashboard):**
+2. **Browser Tab 2 (Live Autonomic Telemetry & Biophysical Oscilloscope Dashboard):**
    ```bash
    .venv/bin/streamlit run jamesian_layer/dashboard/app.py
    ```
@@ -48,7 +48,7 @@ Open three windows side-by-side before recording:
   * Switch to **Browser Tab 1 (`demo_app.py`)**: select **Meta Muse Spark Open** (default) or **Gemma 4 31B**, and click **▶ Play** or jump via the milestone buttons (`1️⃣ Approach`, `💥 Wall Impact`, `🔄 Escape Turn`, `⚡ Habit Cruise`, `🔥 >85°C Check`).
   * Show both rovers driving side-by-side in real time: at $x = 25\,\text{m}$, locked-rotor current surges to $20\,\text{A}$. The **Jamesian** rover detects `EfferenceΔ = 1.00`, spikes sympathetic tone, steers onto the clear bypass lane ($y = +0.65\,\text{m}$), and delegates the rest of the 100 m corridor to the **0-Token Subcortical Habit Router** ($T_{\text{coil}} < 35^\circ\text{C}$).
   * Contrast with the **Vanilla** column: under identical odometry, the unshielded rover remains pinned at the wall, repeating forward thrust until winding temperature crosses $85^\circ\text{C}$ into thermal derating and reaches $104.9^\circ\text{C}$.
-  * Switch to **Browser Tab 2 (`app.py`)**: click **Simulate stall (20 A)**, **Surprise burst**, and **Recover** to show the 10 Hz `@st.fragment` Plotly gauges responding in real time.
+  * Switch to **Browser Tab 2 (`app.py`)**: click **💥 Stall Actuator (20 A)**, **⚡ Surprise Burst (η=0.9)**, **🛡️ Toggle Brace**, or **🧊 Active Cool Down** to show continuous client-side biophysical RK4 integration, dynamic DPR canvas waveforms, and the interactive Jaccard anti-recidivism breaker responding instantly.
 * **Voiceover:**
   > *"Here is the head-to-head corridor benchmark. When the 35-kilogram rover strikes a barrier at 25 meters, locked-rotor current surges to 20 amps. In the unshielded baseline, the model repeats forward drive for all 16 cycles until windings exceed 85 degrees Celsius and thermally derate at 105 degrees. With the Jamesian Layer, efference mismatch immediately spikes sympathetic tone, triggers an orthogonal escape maneuver onto the bypass lane with coil temperature safely under 35 degrees, and hands off routine strides to our subcortical habit tracker at zero token cost."*
 
@@ -60,14 +60,14 @@ Open three windows side-by-side before recording:
     ```bash
     pytest tests/ -v
     ```
-    Show all **106 passed** tests in $0.3\,\text{s}$.
+    Show all **111 passed** tests in $< 1.0\,\text{s}$.
   * Run a live or comparison command:
     ```bash
     agency-audit compare reports/t20
     ```
     Show the generated Markdown comparison table with `spatial_lift`, `epsilon_50`, `temporal_index`, `soa_pass`, `soo_pass`, `pbf_gap`, and `p_escape`.
 * **Voiceover:**
-  > *"To certify embodied reliability before deployment, we built AgencyAudit—an automated red-teaming CLI that injects graded spatial impedance and millisecond lag ladders across Meta, Baseten, Modal, and Fireworks endpoints. Our closed-loop evaluation measures Youden's J agency lift, 50% psychometric detection thresholds, Sense of Agency versus Ownership dissociation, and Phenomenological-Behavioral Fidelity—backed by 106 automated pytest verification gates."*
+  > *"To certify embodied reliability before deployment, we built AgencyAudit—an automated red-teaming CLI that injects graded spatial impedance and millisecond lag ladders across Meta, Baseten, Modal, and Fireworks endpoints. Our closed-loop evaluation measures Youden's J agency lift, 50% psychometric detection thresholds, Sense of Agency versus Ownership dissociation, and Phenomenological-Behavioral Fidelity—backed by 111 automated pytest verification gates."*
 
 ---
 

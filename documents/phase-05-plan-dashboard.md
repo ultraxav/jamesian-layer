@@ -40,3 +40,25 @@ Highest-risk validation: Streamlit's fragment rerun interacting with the backgro
 - **Latency panel without live runs:** shows "no runs yet" until audit reports exist; the panel never invents numbers.
 
 Open questions: None — all Phase 5 facts resolve to spec §5.8, §6 step 5, §12, and the committed Phase 1–4 code.
+
+---
+
+## Addendum: Client-Side Embedded Architecture Evolution & High-DPI Polish
+
+### 1. Motivation
+The original Phase 5 implementation utilized server-driven Streamlit fragments (`@st.fragment(run_every="100ms")`) to pull data from a Python ring buffer and update Plotly charts over a WebSocket connection. During live stress testing, two critical friction points emerged:
+1. **WebSocket Lag & DOM Destruction**: Polling at 10 Hz over Streamlit's WebSocket caused perceptible stutter, DOM rebuild churn, and browser micro-freezes.
+2. **High-DPI / Aspect-Ratio Distortion**: Static canvas dimensions (600×140) scaled with CSS `width: 100%` distorted circles into horizontal ellipses and produced pixelation/blurriness on high-DPI (Retina / 1.5× / 2.0× scaling) screens.
+
+### 2. Architectural Solution
+Both dashboards were refactored into high-performance, client-side embedded architectures hosted via `st.iframe`:
+* **Live Telemetry & Biophysical Oscilloscope (`app.py` & `live_monitor.html`)**:
+  - Embedded client-side Runge-Kutta 4th Order (RK4) ODE solver executing continuous physical integration.
+  - Zero-latency HTML5 canvas biophysical oscilloscope rolling traces ($\sigma, V, \gamma, T_{\text{coil}}$).
+  - Dynamic Device Pixel Ratio (DPR) resolution scaling: auto-adjusts `canvas.width = rect.width * dpr` with `ctx.scale(dpr, dpr)` for razor-sharp rendering at all monitor DPIs.
+  - Interactive live perturbation injections (`Stall Actuator 20 A`, `Surprise Burst η=0.9`, `Toggle Brace`, `Active Cool Down`, `Reset to Cruise`).
+  - Interactive 3-strike Jaccard anti-recidivism breaker and Taboo buffer test arena.
+  - Cached multi-provider latency analytics (`@st.cache_data`) aggregating real campaign runtimes across Meta, Baseten, and LM Studio.
+* **Synchronized 2D Corridor Replay (`demo_app.py` & `viewer.html`)**:
+  - Synchronized head-to-head replay of pre-recorded Table 4.2 *ceteris paribus* traces across Meta and open-weight models (`muse-spark-open-1026` Rank #1 on Baseten, `muse-spark-1.3` on Meta API, followed by Gemma models).
+  - Dynamic DPR-scaled 2D corridor canvas with 1:1 true-circle rover rendering, crisp vector labels, interactive scrub bar, milestone jumps, and side-by-side metric scorecards.

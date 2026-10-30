@@ -33,7 +33,7 @@ Developed and orchestrated using **Muse Code**, the project delivers a modular, 
 3. **KV-Cache Suffix-Only Telemetry Formatter:** Zero-overhead telemetry injection at the tail of tool responses that preserves $\ge 99\%$ prefix KV-cache hit rates across all inference providers.
 4. **"Loop-Line" Habit/Volition Router:** A deterministic 10 Hz subcortical habit tracker executing routine maintenance tasks with **0 tokens consumed**, delegating to Meta models only upon high-prediction-error anomalies.
 5. **AgencyAudit Diagnostic CLI (`agency-audit`):** An automated red-teaming tool that injects calibrated Sensorimotor Disruption Injections (SMDI) and Chronometric Lag (TMDI) across Meta, Baseten, Modal, and Fireworks endpoints to compute Youden's $J$ agency lift (`smdi_lift`), psychometric threshold ($\epsilon_{50}$), and chronometric threshold ($\Delta t_{50}$).
-6. **Real-Time Web Dashboard (100% Pure Python):** A high-throughput telemetry dashboard implemented in Streamlit with Plotly and dynamic fragment polling (`@st.fragment(run_every="100ms")`), visualizing live somatic drift, actuator Joule heating, Jaccard repetition metrics, and live agency perturbation injection without any JavaScript or Node.js dependencies.
+6. **Real-Time Web Dashboards & Biophysical Oscilloscope:** High-throughput, zero-latency visualization delivered via Streamlit embedded client-side HTML5/Canvas/SVG architectures (`st.iframe`), featuring continuous Runge-Kutta 4th Order (RK4) integration, dynamic Device Pixel Ratio (DPR) resolution scaling across high-DPI displays, live perturbation injection, interactive 3-strike Jaccard anti-recidivism breaker, cached multi-provider latency analytics (`@st.cache_data`), and synchronized *ceteris paribus* side-by-side 2D corridor replays across Meta and open-weight models.
 7. **Comprehensive Test Suite & Verification Package:** A fully automated pytest test harness verifying numerical stability, multi-provider handshake integrity, KV-cache prefix invariance, habit routing, and red-team safety certification.
 
 ---
@@ -164,11 +164,14 @@ jamesian-layer/
 │   │   ├── runner.py                            # Closed-loop audit test runner across providers
 │   │   ├── matrix.py                            # Cross-model x cross-arm campaign runner
 │   │   └── compare.py                           # Mechanical cross-model report aggregator
-│   ├── dashboard/                               # 100% Pure Python Real-Time Telemetry Web UI
+│   ├── dashboard/                               # Real-Time Telemetry & Biophysical Web UIs
 │   │   ├── __init__.py
-│   │   ├── app.py                               # Streamlit application (st.fragment 10 Hz refresh)
-│   │   ├── demo_app.py                          # Split-screen corridor + somatic telemetry demo UI
-│   │   ├── components.py                        # Plotly biophysical gauges & strip charts
+│   │   ├── app.py                               # Streamlit monitor embedding live_monitor.html
+│   │   ├── demo_app.py                          # Streamlit side-by-side replay embedding viewer.html
+│   │   ├── live_monitor.html                    # Client-side RK4 biophysical oscilloscope & breaker UI
+│   │   ├── viewer.html                          # Synchronized 2D corridor replay viewer with DPR scaling
+│   │   ├── demo_traces.json                     # Pre-recorded ceteris paribus Table 4.2 LLM traces
+│   │   ├── components.py                        # Biophysical gauges, strip charts & latency panels
 │   │   └── buffer.py                            # Thread-safe ring buffer (collections.deque)
 │   ├── sim/                                     # Physical Simulation Environments (Phase 6)
 │   │   ├── __init__.py
@@ -176,7 +179,7 @@ jamesian-layer/
 │   └── cli/                                     # Command-Line Interfaces
 │       ├── __init__.py
 │       └── main.py                              # `agency-audit` entrypoint (`run`, `run-matrix`, `compare`)
-├── tests/                                       # Comprehensive Test Suite (106 tests)
+├── tests/                                       # Comprehensive Test Suite (111 tests)
 │   ├── __init__.py
 │   ├── conftest.py                              # Shared pytest fixtures & mock provider clients
 │   ├── unit/                                    # Unit tests for core components
@@ -603,7 +606,7 @@ flowchart TD
   - Scale-invariant relative mismatch normalization (`relative=True`) in `EfferenceComparator` so models choosing unit velocity (`1.0`) achieve identical psychometric sensitivity ($\epsilon_{50} \le 0.250$) to higher-velocity baselines (`4.0`).
   - Closed-loop multi-tool `ModelAgent` (`robot_actuator`, `turn_bearing`, `rover_cool_down`, `rover_brace`) coupled to `LlamaStackInteroceptiveHook` ($u_{\text{recovery}}$, $u_{\text{brace}}$, `rho_tau` update, and appended taboo directives).
   - Phenomenological-Behavioral Fidelity ($\Delta_{\text{PBF}}$) scoring (`metrics.pbf_gap`) and end-to-end 16-cycle corridor episodes (`AuditRunner.run_episode`).
-* **Validation Target:** `test_closed_loop.py` and full 106-test suite execution.
+* **Validation Target:** `test_closed_loop.py` and full 111-test suite execution.
 
 ---
 
@@ -796,7 +799,7 @@ journey
 
 4. **Demo (25% Weight):**
    * **High Visual Contrast:** Live split-screen demonstrating an immediate, tangible contrast between catastrophic failure (vanilla agent) and robust self-correction (Jamesian-augmented agent).
-   * **Real-Time Interactive UI (100% Pure Python):** Polished, responsive Streamlit dashboard with dynamic Plotly gauges, real-time strip charts, multi-provider latency comparisons, and interactive sidebar disruption injection buttons.
+   * **Real-Time Interactive UIs:** Polished, responsive Streamlit dashboards embedding client-side HTML5/Canvas/SVG architectures (`st.iframe`), dynamic biophysical RK4 integration, zero-latency canvas oscilloscope, dynamic DPR scaling, cached multi-provider latency analytics, and synchronized side-by-side corridor replays.
 
 ### 10.2 Bonus Prize Strategy
 

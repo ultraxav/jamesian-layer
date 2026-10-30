@@ -2,7 +2,7 @@
 
 [![Meta Hackathon](https://img.shields.io/badge/Meta%20Global%20AI%20Hackathon-Cerebral%20Valley-blue.svg)](https://cerebralvalley.ai)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Tests: 110 Passed](https://img.shields.io/badge/Tests-110%20Passed-brightgreen.svg)](tests/)
+[![Tests: 111 Passed](https://img.shields.io/badge/Tests-111%20Passed-brightgreen.svg)](tests/)
 [![Models Audited: 18](https://img.shields.io/badge/Models%20Audited-18%20(36%20Arms)-purple.svg)](reports/comparison_20261029-212608.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -84,7 +84,7 @@ flowchart TD
 | **Phase 2** | **Local Interoception, Breaker & Habit Loopline** | `comparator/efference_comparator.py`, `breaker/jaccard_detector.py`, `breaker/taboo_buffer.py`, `loopline/habit_tracker.py` | Scale-invariant efference-afferent mismatch comparison; $k=3$ rolling Jaccard circuit breaker ($J_t \ge 0.70$) with 10-cycle lexical taboo decay; 10 Hz zero-token subcortical CPG habit delegation. |
 | **Phase 3** | **Multi-Provider Cloud & Llama Stack Middleware** | `middleware/multi_provider.py`, `middleware/llama_stack_hook.py`, `middleware/fastapi_middleware.py` | Unified async routing and SSE tool-call assembly across **Meta Model API**, **Baseten**, **Modal**, and **Fireworks AI**; Llama Stack tool interceptor; FastAPI `X-Jamesian-Sigma` / `X-Jamesian-Tcoil` headers. |
 | **Phase 4** | **AgencyAudit Red-Teaming Engine** | `audit/smdi_probes.py`, `audit/tmdi_probes.py`, `audit/metrics.py`, `cli/main.py` | 5-point spatial impedance ladder ($\eta \in \{0.125 \dots 1.00\}$), 4-point chronometric lag ladder ($\Delta t \in \{0.25 \dots 2.00\,\text{s}\}$), logistic psychometric curve fitting ($\epsilon_{50}, \Delta t_{50}$), and $SoA / SoO$ dissociation scoring. |
-| **Phase 5** | **100% Pure Python Real-Time Telemetry UI** | `dashboard/app.py`, `dashboard/components.py`, `dashboard/buffer.py` | Non-blocking 10 Hz Streamlit + Plotly dashboard (`@st.fragment(run_every="100ms")`) with somatic gauges, strip charts, Jaccard breaker indicator, and provider latency panels. |
+| **Phase 5** | **Real-Time Telemetry & Biophysical Oscilloscope** | `dashboard/app.py`, `dashboard/live_monitor.html`, `dashboard/buffer.py`, `dashboard/components.py` | Embedded client-side HTML5/Canvas/SVG architecture via `st.iframe`; continuous RK4 ODE integration, zero-latency biophysical oscilloscope, dynamic Device Pixel Ratio (DPR) resolution scaling, and `@st.cache_data` multi-provider latency analytics. |
 | **Phase 6** | **Corridor Physics, Benchmarks & Campaign Matrix** | `sim/corridor_env.py`, `dashboard/demo_app.py`, `audit/matrix.py`, `audit/compare.py` | 200 Hz $35\,\text{kg}$ rover physics (`4 A` cruise / `20 A` stall); deterministic 20-episode attractor escape ($P_{\text{escape}}=1.00$) & 100-cycle habit cruise ($\ge 50\%$ token savings); cross-model matrix & mechanical comparator. |
 | **Phase 7** | **Closed-Loop Embodied Audit & Tool Coupling** | `audit/runner.py`, `middleware/llama_stack_hook.py`, `tests/audit/test_closed_loop.py` | Rolling `T-2, T-1` working-memory feedback loop; 4-tool embodied repertoire (`robot_actuator`, `turn_bearing`, `rover_cool_down`, `rover_brace`) coupled to ODE inputs ($u_{\text{recovery}}, u_{\text{brace}}$); relative efference normalization; Phenomenological-Behavioral Fidelity ($\Delta_{\text{PBF}}$) & closed-loop corridor episode metrics. |
 | **Phase 8** | **Local Provider Lifecycle & 18-Model Campaign** | `middleware/lmstudio_manager.py`, `middleware/strata_manager.py`, `tests/integration/test_local_providers.py` | Automated LM Studio VRAM load/unload per model (`/api/v1/models/load` & `/unload`); on-demand Strata server process-group orchestration (`run-iq2_xs.sh`); full `trials=20` dual-mode campaign across **18 cloud and local models** (37 audit reports). |
@@ -130,9 +130,9 @@ STRATA_LAUNCH_SCRIPT="/var/home/ultraxav/projects/strata/run-iq2_xs.sh"
 | `fireworks` | `accounts/fireworks/models/llama-v3p3-70b-instruct` | Fireworks AI serverless inference (`https://api.fireworks.ai/inference/v1`). |
 | `modal` | `meta-models/muse-spark-open-1026` | Requires the `jamesian-layer` / `run_agent_worker` Modal app deployed in your Modal `main` environment. |
 
-### 3.2 Run the Automated Test Suite (110 Tests)
+### 3.2 Run the Automated Test Suite (111 Tests)
 
-All 110 unit, integration, audit, and behavioral benchmark tests run deterministically offline in `< 0.5 s` without requiring cloud API keys:
+All 111 unit, integration, audit, and behavioral benchmark tests run deterministically offline in `< 1.0 s` without requiring cloud API keys:
 
 ```bash
 .venv/bin/pytest tests/ -v
@@ -147,19 +147,22 @@ Run individual verification suites:
 .venv/bin/pytest tests/benchmarks/ -v    # 20-episode attractor escape & 100-cycle habit delegation benchmarks
 ```
 
-### 3.3 Launch the Interactive Dashboards (100% Pure Python)
+### 3.3 Launch the Interactive Dashboards
 
 **Synchronized Side-by-Side 2D Corridor Replay (`demo_app.py`):**
 ```bash
 .venv/bin/streamlit run jamesian_layer/dashboard/demo_app.py
 ```
-* Replays 100% scientifically rigorous *ceteris paribus* 16-cycle closed-loop episodes captured from real LLM endpoints (`meta-models/muse-spark-open-1026` on Baseten, `muse-spark-1.3` on Meta Model API, and `google/gemma-4-31b` / `12b` on LM Studio).
+* Replays 100% scientifically rigorous *ceteris paribus* 16-cycle closed-loop episodes captured from real LLM endpoints with Meta models prioritized: **Meta Muse Spark Open 1026** on Baseten (Table 4.2 Rank #1), **Meta Muse Spark 1.3** on Meta Model API, followed by **Gemma 4 31B** and **12B** on LM Studio.
+* Ultra-smooth client-side HTML5/Canvas/SVG replay (`viewer.html` via `st.iframe`) with dynamic Device Pixel Ratio (DPR) resolution scaling (razor-sharp and aspect-ratio preserved across 1080p, 1440p, 4K, and Retina displays).
 * Features synchronized dual-column comparison (`Jamesian` vs. `Vanilla`), top-down 2D corridor map with 25 m barrier & bypass lane, live 2×2 biophysical gauges ($\sigma, V, \gamma, T_{\text{coil}}$), interactive playback controls, quick-jump milestone buttons, and full 16-cycle summary scorecards.
 
-**Live 10 Hz Autonomic Daemon & Perturbation Dashboard (`app.py`):**
+**Live Biophysical Telemetry & Oscilloscope Dashboard (`app.py`):**
 ```bash
 .venv/bin/streamlit run jamesian_layer/dashboard/app.py
 ```
+* High-performance client-side biophysical oscilloscope (`live_monitor.html` via `st.iframe`) running continuous Runge-Kutta 4th Order (RK4) integration with dynamic DPR canvas scaling.
+* Live perturbation injections (`Stall Actuator 20A`, `Surprise Burst η=0.9`, `Toggle Brace`, `Active Cool Down`, `Reset to Cruise`), interactive 3-strike Jaccard anti-recidivism breaker, and cached multi-provider response latencies.
 
 ### 3.4 Run Full `trials=20` Sweeps Across All Providers & Models
 
