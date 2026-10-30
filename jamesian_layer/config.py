@@ -11,6 +11,13 @@ class Settings(BaseSettings):
     modal_token_secret: str | None = None
     fireworks_api_key: str | None = None
 
+    # Local Provider Endpoints
+    lmstudio_base_url: str = "http://localhost:1234/v1"
+    lmstudio_api_key: str = "lm-studio"
+    strata_base_url: str = "http://127.0.0.1:8080/v1"
+    strata_api_key: str = "strata"
+    strata_launch_script: str = "/var/home/ultraxav/projects/strata/run-iq2_xs.sh"
+
     # Middleware Defaults
     default_provider: str = "fireworks"
     default_model: str = "accounts/fireworks/models/llama-v3p3-70b-instruct"

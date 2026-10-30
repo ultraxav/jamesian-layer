@@ -4,10 +4,12 @@ from jamesian_layer.config import Settings
 from jamesian_layer.middleware.base_provider import BaseProviderClient
 from jamesian_layer.middleware.baseten_client import BasetenClient
 from jamesian_layer.middleware.fireworks_client import FireworksClient
+from jamesian_layer.middleware.lmstudio_client import LMStudioClient
 from jamesian_layer.middleware.meta_client import MetaModelClient
 from jamesian_layer.middleware.modal_client import ModalClient
+from jamesian_layer.middleware.strata_client import StrataClient
 
-PROVIDERS = ("meta", "baseten", "modal", "fireworks")
+PROVIDERS = ("meta", "baseten", "modal", "fireworks", "lmstudio", "strata")
 
 
 def list_providers() -> tuple[str, ...]:
@@ -22,6 +24,8 @@ class MultiProviderClient(BaseProviderClient):
             "baseten": BasetenClient.from_settings,
             "modal": ModalClient.from_settings,
             "fireworks": FireworksClient.from_settings,
+            "lmstudio": LMStudioClient.from_settings,
+            "strata": StrataClient.from_settings,
         }
         try:
             build = builders[provider]
@@ -33,6 +37,10 @@ class MultiProviderClient(BaseProviderClient):
     @property
     def model(self) -> str | None:
         return getattr(self._client, "model", None)
+
+    @property
+    def raw_client(self):
+        return self._client
 
     async def chat_completion(
         self, messages: list[dict], tools: list[dict] | None = None
