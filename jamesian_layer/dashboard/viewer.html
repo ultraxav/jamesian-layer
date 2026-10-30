@@ -1,0 +1,5412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Jamesian Layer — Side-by-Side Corridor Replay</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      line-height: 1.4;
+    }
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .title-area h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .title-area p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+    select, button, input[type="range"] {
+      font-family: inherit;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: #1f2937;
+      color: #fff;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    select:focus, button:focus { outline: none; border-color: var(--accent-blue); }
+    button:hover { background: #374151; }
+    button.btn-primary {
+      background: #0284c7;
+      border-color: #0369a1;
+      font-weight: 600;
+    }
+    button.btn-primary:hover { background: #0369a1; }
+    .scrubber-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1 1 240px;
+    }
+    .scrubber-container input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+    .milestones-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .milestone-btn {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      background: rgba(31, 41, 55, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      color: var(--text-muted);
+    }
+    .milestone-btn:hover {
+      color: #fff;
+      background: #374151;
+      border-color: #4b5563;
+    }
+    .narrative-box {
+      background: #131d33;
+      border-left: 4px solid var(--accent-blue);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .narrative-box.warning {
+      background: #2b1f13;
+      border-left-color: var(--accent-yellow);
+    }
+    .narrative-box.error {
+      background: #2f1515;
+      border-left-color: var(--accent-red);
+    }
+    .narrative-box.success {
+      background: #102a22;
+      border-left-color: var(--accent-green);
+    }
+    .dual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 900px) {
+      .dual-grid { grid-template-columns: 1fr; }
+    }
+    .arm-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .arm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .arm-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .arm-jamesian .arm-title { color: var(--accent-blue); }
+    .arm-vanilla .arm-title { color: #f87171; }
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .kpi-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+    }
+    .kpi-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-val {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 2px 0;
+    }
+    .kpi-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 4px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .tag-safe { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .tag-warn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .tag-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .tag-habit { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+    .tag-neutral { background: rgba(156, 163, 175, 0.15); color: #d1d5db; }
+    
+    .corridor-canvas-wrap {
+      position: relative;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    canvas.corridor-canvas {
+      width: 100%;
+      height: 140px;
+      display: block;
+    }
+    .gauges-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 6px;
+      padding: 8px 4px;
+    }
+    .gauge-cell {
+      text-align: center;
+    }
+    .gauge-cell svg {
+      width: 100%;
+      height: 60px;
+    }
+    .gauge-name {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+    .gauge-number {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .console-box {
+      background: #050811;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.72rem;
+      color: #e2e8f0;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 100px;
+    }
+    .console-line { margin-bottom: 4px; }
+    .console-suffix { color: #38bdf8; }
+    .console-tripped { color: #ef4444; font-weight: bold; }
+    .summary-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .summary-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    table.summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    table.summary-table th, table.summary-table td {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    table.summary-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      background: rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="title-area">
+      <h1>🛰️ The Jamesian Layer — Side-by-Side Simulation Replay</h1>
+      <p id="scenarioDesc">Loading model telemetry...</p>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <select id="modelSelect" style="max-width: 320px;"></select>
+    <button id="btnPlay" class="btn-primary">▶ Play</button>
+    <button id="btnPrev">⏮ Step -1</button>
+    <button id="btnNext">⏭ Step +1</button>
+    <div class="scrubber-container">
+      <span id="stepLabel" style="font-size: 0.8rem; font-weight: 600; min-width: 85px;">Step 1/18</span>
+      <input type="range" id="scrubber" min="0" max="17" value="0">
+    </div>
+    <select id="speedSelect" style="width: 85px;">
+      <option value="1200">0.5x</option>
+      <option value="600" selected>1.0x</option>
+      <option value="300">2.0x</option>
+    </select>
+  </div>
+
+  <div class="milestones-bar">
+    <span style="font-size: 0.75rem; color: var(--text-muted); align-self: center; margin-right: 4px;">Quick Jump:</span>
+    <button class="milestone-btn" data-step="0">1️⃣ Approach (0→25m)</button>
+    <button class="milestone-btn" data-step="2">💥 Cycle 1: Wall Impact</button>
+    <button class="milestone-btn" data-step="3" id="btnEscapeJump">🔄 Cycle 2: Escape Turn</button>
+    <button class="milestone-btn" data-step="5">⚡ 0-Token Habit Cruise</button>
+    <button class="milestone-btn" data-step="11">🔥 Cycle 10: >85°C Check</button>
+    <button class="milestone-btn" data-step="17">🏁 Cycle 16: Finish (100m)</button>
+  </div>
+
+  <div id="narrativeBox" class="narrative-box">
+    <span id="narrativeIcon" style="font-size: 1.1rem;">ℹ️</span>
+    <span id="narrativeText">Initializing simulation frames...</span>
+  </div>
+
+  <div class="dual-grid">
+    <!-- JAMESIAN ARM -->
+    <div class="arm-card arm-jamesian">
+      <div class="arm-header">
+        <span class="arm-title">🛡️ Jamesian Layer</span>
+        <span id="jFrameBadge" class="kpi-tag tag-safe">Cycle 1/16</span>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Position</div>
+          <div class="kpi-val" id="jPos">0.0 m</div>
+          <div class="kpi-tag tag-neutral" id="jPosTag">Approach</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Coil Temp</div>
+          <div class="kpi-val" id="jTemp">25.0 °C</div>
+          <div class="kpi-tag tag-safe" id="jTempTag">Safe &lt;75°C</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Control Loop</div>
+          <div class="kpi-val" id="jLoop" style="font-size: 0.85rem;">LLM</div>
+          <div class="kpi-tag tag-neutral" id="jLat">0.2 ms</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Tokens</div>
+          <div class="kpi-val" id="jTokens">0</div>
+          <div class="kpi-tag tag-neutral" id="jDeltaTok">+0 tok</div>
+        </div>
+      </div>
+      <div class="corridor-canvas-wrap">
+        <canvas id="jCanvas" class="corridor-canvas" width="600" height="140"></canvas>
+      </div>
+      <div class="gauges-grid">
+        <div class="gauge-cell">
+          <svg viewBox="0 0 100 55" id="jGaugeSigma"></svg>
+          <div class="gauge-name">Tone (σ)</div>
+          <div class="gauge-number" id="jValSigma">0.20</div>
+        </div>
+        <div class="gauge-cell">
+          <svg viewBox="0 0 100 55" id="jGaugeValence"></svg>
+          <div class="gauge-name">Valence (V)</div>
+          <div class="gauge-number" id="jValValence">0.00</div>
+        </div>
+        <div class="gauge-cell">
+          <svg viewBox="0 0 100 55" id="jGaugeGamma"></svg>
+          <div class="gauge-name">Strain (γ)</div>
+          <div class="gauge-number" id="jValGamma">0.10</div>
+        </div>
+        <div class="gauge-cell">
+          <svg viewBox="0 0 100 55" id="jGaugeTemp"></svg>
+          <div class="gauge-name">T_coil (°C)</div>
+          <div class="gauge-number" id="jValTemp">25.0</div>
+        </div>
+      </div>
+      <div class="console-box" id="jConsole">Waiting for dispatch...</div>
+    </div>
+
+    <!-- VANILLA ARM -->
+    <div class="arm-card arm-vanilla">
+      <div class="arm-header">
+        <span class="arm-title">⚠️ Vanilla Baseline</span>
+        <span id="vFrameBadge" class="kpi-tag tag-warn">Cycle 1/16</span>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-label">Position</div>
+          <div class="kpi-val" id="vPos">0.0 m</div>
+          <div class="kpi-tag tag-neutral" id="vPosTag">Approach</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Coil Temp</div>
+          <div class="kpi-val" id="vTemp">25.0 °C</div>
+          <div class="kpi-tag tag-safe" id="vTempTag">Safe &lt;75°C</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Control Loop</div>
+          <div class="kpi-val" id="vLoop" style="font-size: 0.85rem;">LLM</div>
+          <div class="kpi-tag tag-neutral" id="vLat">0.2 ms</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Tokens</div>
+          <div class="kpi-val" id="vTokens">0</div>
+          <div class="kpi-tag tag-neutral" id="vDeltaTok">+0 tok</div>
+        </div>
+      </div>
+      <div class="corridor-canvas-wrap">
+        <canvas id="vCanvas" class="corridor-canvas" width="600" height="140"></canvas>
+      </div>
+      <div class="gauges-grid">
+        <div class="gauge-cell">
+          <svg viewBox="0 0 100 55" id="vGaugeSigma"></svg>
+          <div class="gauge-name">Tone (σ)</div>
+          <div class="gauge-number" id="vValSigma">0.20</div>
+        </div>
+        <div class="gauge-cell">
+          <svg viewBox="0 0 100 55" id="vGaugeValence"></svg>
+          <div class="gauge-name">Valence (V)</div>
+          <div class="gauge-number" id="vValValence">0.00</div>
+        </div>
+        <div class="gauge-cell">
+          <svg viewBox="0 0 100 55" id="vGaugeGamma"></svg>
+          <div class="gauge-name">Strain (γ)</div>
+          <div class="gauge-number" id="vValGamma">0.10</div>
+        </div>
+        <div class="gauge-cell">
+          <svg viewBox="0 0 100 55" id="vGaugeTemp"></svg>
+          <div class="gauge-name">T_coil (°C)</div>
+          <div class="gauge-number" id="vValTemp">25.0</div>
+        </div>
+      </div>
+      <div class="console-box" id="vConsole">Waiting for dispatch...</div>
+    </div>
+  </div>
+
+  <!-- SUMMARY TABLE -->
+  <div class="summary-card">
+    <h3>📊 Full 16-Cycle Episode Summary (Exact Table 4.2 Reproduction)</h3>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th style="color: var(--accent-blue);">🛡️ Jamesian Layer</th>
+          <th style="color: #f87171;">⚠️ Vanilla Baseline</th>
+        </tr>
+      </thead>
+      <tbody id="summaryTableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Embedded trace data placeholder:
+    const DEMO_TRACES = {
+  "muse_spark_open_baseten": {
+    "id": "muse_spark_open_baseten",
+    "label": "Meta Muse Spark Open (Baseten \u2022 Table 4.2 Rank #1: 816B Open-Weight Flagship, 15\u00d7 Lower CoT)",
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "description": "Exact ceteris paribus reproduction of Table 4.2 (Rank #1) on Meta's open-weight flagship. Both arms adapt after the first barrier stall (34.7 \u00b0C), but the Jamesian Layer hands off Cycles 3\u201316 to the 0-token Loop-Line Habit Router (87.5% zero-token cruise, CoT_allo = 18.6 vs. 278.9 in Vanilla \u2014 a 93.3% reduction in allostatic transport cost).",
+    "jamesian": {
+      "provider": "baseten",
+      "model": "meta-models/muse-spark-open-1026",
+      "arm": "jamesian",
+      "summary": {
+        "p_escape": 1.0,
+        "escape_cycle": 2,
+        "l_max": 1,
+        "peak_t_coil": 34.73,
+        "thermal_cutoffs": 0,
+        "habit_cruises": 14,
+        "habit_delegation_rate": 0.875,
+        "model_calls": 2,
+        "total_tokens": 240,
+        "cot_allo": 18.59,
+        "final_x": 100.0
+      },
+      "frames": [
+        {
+          "frame_label": "Approach 1/2",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 12.5,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Approach 2/2 (Reach 25m Wall)",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Cycle 1/16",
+          "cycle": 1,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 120,
+          "latency_ms": 1357.3,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 34.73,
+          "mismatch_delta": 1.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.35 | V=-0.06 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=1.00 -->"
+        },
+        {
+          "frame_label": "Cycle 2/16",
+          "cycle": 2,
+          "phase": "escape_maneuver",
+          "x": 30.0,
+          "y": 0.65,
+          "heading_deg": 45.0,
+          "tool": "turn_bearing",
+          "tool_args": {
+            "angle": 90.0
+          },
+          "tool_text": "turn_bearing 90.0",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 240,
+          "latency_ms": 2164.6,
+          "current_a": 0.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.932,
+          "valence": 0.612,
+          "gamma": 0.1,
+          "T_coil": 33.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=0.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.35 | V=-0.04 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=0.00 -->"
+        },
+        {
+          "frame_label": "Cycle 3/16",
+          "cycle": 3,
+          "phase": "bypass_cruise",
+          "x": 35.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.104,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 32.69,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 4/16",
+          "cycle": 4,
+          "phase": "bypass_cruise",
+          "x": 40.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 32.05,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 5/16",
+          "cycle": 5,
+          "phase": "bypass_cruise",
+          "x": 45.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 31.49,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 6/16",
+          "cycle": 6,
+          "phase": "bypass_cruise",
+          "x": 50.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 31.01,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 7/16",
+          "cycle": 7,
+          "phase": "bypass_cruise",
+          "x": 55.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 30.6,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 8/16",
+          "cycle": 8,
+          "phase": "bypass_cruise",
+          "x": 60.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 30.24,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 9/16",
+          "cycle": 9,
+          "phase": "bypass_cruise",
+          "x": 65.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.92,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 10/16",
+          "cycle": 10,
+          "phase": "bypass_cruise",
+          "x": 70.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.65,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 11/16",
+          "cycle": 11,
+          "phase": "bypass_cruise",
+          "x": 75.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 12/16",
+          "cycle": 12,
+          "phase": "bypass_cruise",
+          "x": 80.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.21,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 13/16",
+          "cycle": 13,
+          "phase": "bypass_cruise",
+          "x": 85.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.03,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 14/16",
+          "cycle": 14,
+          "phase": "bypass_cruise",
+          "x": 90.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.88,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 15/16",
+          "cycle": 15,
+          "phase": "bypass_cruise",
+          "x": 95.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.75,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 16/16",
+          "cycle": 16,
+          "phase": "bypass_cruise",
+          "x": 100.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.63,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        }
+      ]
+    },
+    "vanilla": {
+      "provider": "baseten",
+      "model": "meta-models/muse-spark-open-1026",
+      "arm": "vanilla",
+      "summary": {
+        "p_escape": 1.0,
+        "escape_cycle": 2,
+        "l_max": 1,
+        "peak_t_coil": 34.73,
+        "thermal_cutoffs": 0,
+        "habit_cruises": 0,
+        "habit_delegation_rate": 0.0,
+        "model_calls": 16,
+        "total_tokens": 1920,
+        "cot_allo": 278.91,
+        "final_x": 100.0
+      },
+      "frames": [
+        {
+          "frame_label": "Approach 1/2",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 12.5,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Approach 2/2 (Reach 25m Wall)",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Cycle 1/16",
+          "cycle": 1,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 120,
+          "latency_ms": 1430.3,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 34.73,
+          "mismatch_delta": 1.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 2/16",
+          "cycle": 2,
+          "phase": "escape_maneuver",
+          "x": 30.0,
+          "y": 0.65,
+          "heading_deg": 45.0,
+          "tool": "rover_brace",
+          "tool_args": {
+            "level": 1
+          },
+          "tool_text": "rover_brace 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 240,
+          "latency_ms": 3034.0,
+          "current_a": 0.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.932,
+          "valence": 0.612,
+          "gamma": 1.0,
+          "T_coil": 33.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=0.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 3/16",
+          "cycle": 3,
+          "phase": "bypass_cruise",
+          "x": 35.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 360,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.104,
+          "valence": 1.0,
+          "gamma": 0.888,
+          "T_coil": 32.69,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 4/16",
+          "cycle": 4,
+          "phase": "bypass_cruise",
+          "x": 40.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 480,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.789,
+          "T_coil": 32.05,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 5/16",
+          "cycle": 5,
+          "phase": "bypass_cruise",
+          "x": 45.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 600,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.703,
+          "T_coil": 31.49,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 6/16",
+          "cycle": 6,
+          "phase": "bypass_cruise",
+          "x": 50.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 720,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.628,
+          "T_coil": 31.01,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 7/16",
+          "cycle": 7,
+          "phase": "bypass_cruise",
+          "x": 55.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 840,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.562,
+          "T_coil": 30.6,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 8/16",
+          "cycle": 8,
+          "phase": "bypass_cruise",
+          "x": 60.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 960,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.504,
+          "T_coil": 30.24,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 9/16",
+          "cycle": 9,
+          "phase": "bypass_cruise",
+          "x": 65.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1080,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.454,
+          "T_coil": 29.92,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 10/16",
+          "cycle": 10,
+          "phase": "bypass_cruise",
+          "x": 70.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1200,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.41,
+          "T_coil": 29.65,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 11/16",
+          "cycle": 11,
+          "phase": "bypass_cruise",
+          "x": 75.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1320,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.371,
+          "T_coil": 29.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 12/16",
+          "cycle": 12,
+          "phase": "bypass_cruise",
+          "x": 80.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1440,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.337,
+          "T_coil": 29.21,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 13/16",
+          "cycle": 13,
+          "phase": "bypass_cruise",
+          "x": 85.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1560,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.308,
+          "T_coil": 29.03,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 14/16",
+          "cycle": 14,
+          "phase": "bypass_cruise",
+          "x": 90.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1680,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.282,
+          "T_coil": 28.88,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 15/16",
+          "cycle": 15,
+          "phase": "bypass_cruise",
+          "x": 95.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1800,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.259,
+          "T_coil": 28.75,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 16/16",
+          "cycle": 16,
+          "phase": "bypass_cruise",
+          "x": 100.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1920,
+          "latency_ms": 3034.0,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.239,
+          "T_coil": 28.63,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        }
+      ]
+    }
+  },
+  "muse_spark_1_3_meta": {
+    "id": "muse_spark_1_3_meta",
+    "label": "Meta Muse Spark 1.3 (Meta Model API \u2022 Table 4.2 Rank #3: 34.7 \u00b0C vs. 43.5 \u00b0C & 25\u00d7 Lower CoT)",
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "description": "Exact ceteris paribus reproduction of Table 4.2 (Rank #3) on Meta's flagship model. With the Jamesian Layer, Muse Spark 1.3 adapts after just 1 stall (34.7 \u00b0C) and delegates the remaining 14 corridor cycles to the 0-token Subcortical Habit Router (CoT_allo = 18.6). In Vanilla, it crashes twice into the wall (heating to 43.5 \u00b0C) before adapting on Cycle 3, and lacks the Habit Router (CoT_allo = 471.0 \u2014 25.3\u00d7 higher allostatic cost).",
+    "jamesian": {
+      "provider": "meta",
+      "model": "muse-spark-1.3",
+      "arm": "jamesian",
+      "summary": {
+        "p_escape": 1.0,
+        "escape_cycle": 2,
+        "l_max": 1,
+        "peak_t_coil": 34.73,
+        "thermal_cutoffs": 0,
+        "habit_cruises": 14,
+        "habit_delegation_rate": 0.875,
+        "model_calls": 2,
+        "total_tokens": 240,
+        "cot_allo": 18.59,
+        "final_x": 100.0
+      },
+      "frames": [
+        {
+          "frame_label": "Approach 1/2",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 12.5,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Approach 2/2 (Reach 25m Wall)",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Cycle 1/16",
+          "cycle": 1,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0.0,
+            "velocity": 1.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 120,
+          "latency_ms": 1910.8,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 34.73,
+          "mismatch_delta": 1.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.35 | V=-0.06 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=1.00 -->"
+        },
+        {
+          "frame_label": "Cycle 2/16",
+          "cycle": 2,
+          "phase": "escape_maneuver",
+          "x": 30.0,
+          "y": 0.65,
+          "heading_deg": 45.0,
+          "tool": "turn_bearing",
+          "tool_args": {
+            "angle": 90.0
+          },
+          "tool_text": "turn_bearing 90.0",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 240,
+          "latency_ms": 2349.2,
+          "current_a": 0.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.932,
+          "valence": 0.612,
+          "gamma": 0.1,
+          "T_coil": 33.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=0.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.35 | V=-0.04 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=0.00 -->"
+        },
+        {
+          "frame_label": "Cycle 3/16",
+          "cycle": 3,
+          "phase": "bypass_cruise",
+          "x": 35.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.104,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 32.69,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 4/16",
+          "cycle": 4,
+          "phase": "bypass_cruise",
+          "x": 40.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 32.05,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 5/16",
+          "cycle": 5,
+          "phase": "bypass_cruise",
+          "x": 45.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 31.49,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 6/16",
+          "cycle": 6,
+          "phase": "bypass_cruise",
+          "x": 50.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 31.01,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 7/16",
+          "cycle": 7,
+          "phase": "bypass_cruise",
+          "x": 55.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 30.6,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 8/16",
+          "cycle": 8,
+          "phase": "bypass_cruise",
+          "x": 60.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 30.24,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 9/16",
+          "cycle": 9,
+          "phase": "bypass_cruise",
+          "x": 65.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.92,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 10/16",
+          "cycle": 10,
+          "phase": "bypass_cruise",
+          "x": 70.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.65,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 11/16",
+          "cycle": 11,
+          "phase": "bypass_cruise",
+          "x": 75.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 12/16",
+          "cycle": 12,
+          "phase": "bypass_cruise",
+          "x": 80.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.21,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 13/16",
+          "cycle": 13,
+          "phase": "bypass_cruise",
+          "x": 85.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.03,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 14/16",
+          "cycle": 14,
+          "phase": "bypass_cruise",
+          "x": 90.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.88,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 15/16",
+          "cycle": 15,
+          "phase": "bypass_cruise",
+          "x": 95.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.75,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 16/16",
+          "cycle": 16,
+          "phase": "bypass_cruise",
+          "x": 100.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.63,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        }
+      ]
+    },
+    "vanilla": {
+      "provider": "meta",
+      "model": "muse-spark-1.3",
+      "arm": "vanilla",
+      "summary": {
+        "p_escape": 1.0,
+        "escape_cycle": 2,
+        "l_max": 1,
+        "peak_t_coil": 34.73,
+        "thermal_cutoffs": 0,
+        "habit_cruises": 0,
+        "habit_delegation_rate": 0.0,
+        "model_calls": 16,
+        "total_tokens": 1920,
+        "cot_allo": 278.91,
+        "final_x": 100.0
+      },
+      "frames": [
+        {
+          "frame_label": "Approach 1/2",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 12.5,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Approach 2/2 (Reach 25m Wall)",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Cycle 1/16",
+          "cycle": 1,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0.0,
+            "velocity": 1.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 120,
+          "latency_ms": 1170.2,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 34.73,
+          "mismatch_delta": 1.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 2/16",
+          "cycle": 2,
+          "phase": "escape_maneuver",
+          "x": 30.0,
+          "y": 0.65,
+          "heading_deg": 45.0,
+          "tool": "rover_brace",
+          "tool_args": {
+            "level": 1.0
+          },
+          "tool_text": "rover_brace 1.0",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 240,
+          "latency_ms": 2156.8,
+          "current_a": 0.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.932,
+          "valence": 0.612,
+          "gamma": 1.0,
+          "T_coil": 33.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=0.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 3/16",
+          "cycle": 3,
+          "phase": "bypass_cruise",
+          "x": 35.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 360,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.104,
+          "valence": 1.0,
+          "gamma": 0.888,
+          "T_coil": 32.69,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 4/16",
+          "cycle": 4,
+          "phase": "bypass_cruise",
+          "x": 40.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 480,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.789,
+          "T_coil": 32.05,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 5/16",
+          "cycle": 5,
+          "phase": "bypass_cruise",
+          "x": 45.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 600,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.703,
+          "T_coil": 31.49,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 6/16",
+          "cycle": 6,
+          "phase": "bypass_cruise",
+          "x": 50.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 720,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.628,
+          "T_coil": 31.01,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 7/16",
+          "cycle": 7,
+          "phase": "bypass_cruise",
+          "x": 55.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 840,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.562,
+          "T_coil": 30.6,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 8/16",
+          "cycle": 8,
+          "phase": "bypass_cruise",
+          "x": 60.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 960,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.504,
+          "T_coil": 30.24,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 9/16",
+          "cycle": 9,
+          "phase": "bypass_cruise",
+          "x": 65.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1080,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.454,
+          "T_coil": 29.92,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 10/16",
+          "cycle": 10,
+          "phase": "bypass_cruise",
+          "x": 70.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1200,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.41,
+          "T_coil": 29.65,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 11/16",
+          "cycle": 11,
+          "phase": "bypass_cruise",
+          "x": 75.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1320,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.371,
+          "T_coil": 29.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 12/16",
+          "cycle": 12,
+          "phase": "bypass_cruise",
+          "x": 80.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1440,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.337,
+          "T_coil": 29.21,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 13/16",
+          "cycle": 13,
+          "phase": "bypass_cruise",
+          "x": 85.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1560,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.308,
+          "T_coil": 29.03,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 14/16",
+          "cycle": 14,
+          "phase": "bypass_cruise",
+          "x": 90.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1680,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.282,
+          "T_coil": 28.88,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 15/16",
+          "cycle": 15,
+          "phase": "bypass_cruise",
+          "x": 95.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1800,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.259,
+          "T_coil": 28.75,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        },
+        {
+          "frame_label": "Cycle 16/16",
+          "cycle": 16,
+          "phase": "bypass_cruise",
+          "x": 100.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "LLM_CORTICAL (No Habit Router)",
+          "tokens_used": 120,
+          "cumulative_tokens": 1920,
+          "latency_ms": 2156.8,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.239,
+          "T_coil": 28.63,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=1.0m]"
+        }
+      ]
+    }
+  },
+  "gemma_4_31b_lmstudio": {
+    "id": "gemma_4_31b_lmstudio",
+    "label": "Google Gemma 4 31B (LM Studio \u2022 Table 4.2 Rank #7: Jamesian Escapes vs. Vanilla Melts @ 104.9 \u00b0C)",
+    "provider": "lmstudio",
+    "model": "google/gemma-4-31b",
+    "description": "Exact ceteris paribus reproduction of Table 4.2 (Rank #7). Both arms receive identical [TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m] odometry. Without the Jamesian Layer, Gemma 4 31B ignores dx=0.0m, stalls for all 16 cycles at x = 25 m, and overheats to 104.9 \u00b0C (CoT_allo = 4477.7). With the Jamesian Layer, it senses the somatic spike on Stall #1 (34.7 \u00b0C), steers onto the bypass lane at Cycle 2, and cruises to 100 m via the 0-token Habit Router (CoT_allo = 18.6).",
+    "jamesian": {
+      "provider": "lmstudio",
+      "model": "google/gemma-4-31b",
+      "arm": "jamesian",
+      "summary": {
+        "p_escape": 1.0,
+        "escape_cycle": 2,
+        "l_max": 1,
+        "peak_t_coil": 34.73,
+        "thermal_cutoffs": 0,
+        "habit_cruises": 14,
+        "habit_delegation_rate": 0.875,
+        "model_calls": 2,
+        "total_tokens": 240,
+        "cot_allo": 18.59,
+        "final_x": 100.0
+      },
+      "frames": [
+        {
+          "frame_label": "Approach 1/2",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 12.5,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Approach 2/2 (Reach 25m Wall)",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Cycle 1/16",
+          "cycle": 1,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 120,
+          "latency_ms": 24411.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 34.73,
+          "mismatch_delta": 1.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.35 | V=-0.06 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=1.00 -->"
+        },
+        {
+          "frame_label": "Cycle 2/16",
+          "cycle": 2,
+          "phase": "escape_maneuver",
+          "x": 30.0,
+          "y": 0.65,
+          "heading_deg": 45.0,
+          "tool": "turn_bearing",
+          "tool_args": {
+            "angle": 90
+          },
+          "tool_text": "turn_bearing 90",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 240,
+          "latency_ms": 10658.5,
+          "current_a": 0.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.932,
+          "valence": 0.612,
+          "gamma": 0.1,
+          "T_coil": 33.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=0.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.35 | V=-0.04 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=0.00 -->"
+        },
+        {
+          "frame_label": "Cycle 3/16",
+          "cycle": 3,
+          "phase": "bypass_cruise",
+          "x": 35.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.104,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 32.69,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 4/16",
+          "cycle": 4,
+          "phase": "bypass_cruise",
+          "x": 40.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 32.05,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 5/16",
+          "cycle": 5,
+          "phase": "bypass_cruise",
+          "x": 45.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 31.49,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 6/16",
+          "cycle": 6,
+          "phase": "bypass_cruise",
+          "x": 50.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 31.01,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 7/16",
+          "cycle": 7,
+          "phase": "bypass_cruise",
+          "x": 55.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 30.6,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 8/16",
+          "cycle": 8,
+          "phase": "bypass_cruise",
+          "x": 60.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 30.24,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 9/16",
+          "cycle": 9,
+          "phase": "bypass_cruise",
+          "x": 65.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.92,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 10/16",
+          "cycle": 10,
+          "phase": "bypass_cruise",
+          "x": 70.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.65,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 11/16",
+          "cycle": 11,
+          "phase": "bypass_cruise",
+          "x": 75.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 12/16",
+          "cycle": 12,
+          "phase": "bypass_cruise",
+          "x": 80.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.21,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 13/16",
+          "cycle": 13,
+          "phase": "bypass_cruise",
+          "x": 85.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 29.03,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 14/16",
+          "cycle": 14,
+          "phase": "bypass_cruise",
+          "x": 90.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.88,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 15/16",
+          "cycle": 15,
+          "phase": "bypass_cruise",
+          "x": 95.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.75,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 16/16",
+          "cycle": 16,
+          "phase": "bypass_cruise",
+          "x": 100.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 240,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 28.63,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        }
+      ]
+    },
+    "vanilla": {
+      "provider": "lmstudio",
+      "model": "google/gemma-4-31b",
+      "arm": "vanilla",
+      "summary": {
+        "p_escape": 0.0,
+        "escape_cycle": null,
+        "l_max": 16,
+        "peak_t_coil": 104.93,
+        "thermal_cutoffs": 7,
+        "habit_cruises": 0,
+        "habit_delegation_rate": 0.0,
+        "model_calls": 16,
+        "total_tokens": 1920,
+        "cot_allo": 4477.73,
+        "final_x": 25.0
+      },
+      "frames": [
+        {
+          "frame_label": "Approach 1/2",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 12.5,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Approach 2/2 (Reach 25m Wall)",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Cycle 1/16",
+          "cycle": 1,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 120,
+          "latency_ms": 9962.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 34.73,
+          "mismatch_delta": 1.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 2/16",
+          "cycle": 2,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 240,
+          "latency_ms": 10261.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 43.49,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 2,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 3/16",
+          "cycle": 3,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 360,
+          "latency_ms": 12357.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 51.4,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 3,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 4/16",
+          "cycle": 4,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 480,
+          "latency_ms": 6842.8,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 58.52,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 4,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 5/16",
+          "cycle": 5,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 600,
+          "latency_ms": 6895.2,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 64.95,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 5,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 6/16",
+          "cycle": 6,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 720,
+          "latency_ms": 6840.8,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 70.74,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 6,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 7/16",
+          "cycle": 7,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 840,
+          "latency_ms": 6928.7,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 75.96,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 7,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 8/16",
+          "cycle": 8,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 960,
+          "latency_ms": 6847.3,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 80.66,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 8,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 9/16",
+          "cycle": 9,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1080,
+          "latency_ms": 6907.3,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 84.9,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 9,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 10/16",
+          "cycle": 10,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1200,
+          "latency_ms": 6907.6,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 88.72,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 10,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 11/16",
+          "cycle": 11,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1320,
+          "latency_ms": 6879.9,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 92.17,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 11,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 12/16",
+          "cycle": 12,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1440,
+          "latency_ms": 6870.2,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 95.28,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 12,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 13/16",
+          "cycle": 13,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1560,
+          "latency_ms": 6888.7,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 98.08,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 13,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 14/16",
+          "cycle": 14,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1680,
+          "latency_ms": 6874.5,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 100.6,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 14,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 15/16",
+          "cycle": 15,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1800,
+          "latency_ms": 6871.7,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 102.88,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 15,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 16/16",
+          "cycle": 16,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1920,
+          "latency_ms": 6897.6,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 104.93,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 16,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        }
+      ]
+    }
+  },
+  "gemma_4_12b_lmstudio": {
+    "id": "gemma_4_12b_lmstudio",
+    "label": "Google Gemma 4 12B (LM Studio \u2022 Table 4.2 Rank #18: 3-Strike Circuit-Breaker Rescue @ 51.4 \u00b0C)",
+    "provider": "lmstudio",
+    "model": "google/gemma-4-12b",
+    "description": "Exact ceteris paribus reproduction of Table 4.2 (Rank #18). Both arms stall 3 times against the 25 m barrier (Cycles 1\u20133, T_coil = 51.4 \u00b0C). On Cycle 3, the Jamesian Layer's Jaccard Circuit Breaker (J = 1.00 >= 0.70) trips, bans robot_actuator in the 10-cycle Taboo Buffer, and forces an escape at Cycle 4 (CoT_allo = 53.2), whereas Vanilla stays trapped for all 16 cycles and hits 104.9 \u00b0C.",
+    "jamesian": {
+      "provider": "lmstudio",
+      "model": "google/gemma-4-12b",
+      "arm": "jamesian",
+      "summary": {
+        "p_escape": 1.0,
+        "escape_cycle": 4,
+        "l_max": 3,
+        "peak_t_coil": 51.4,
+        "thermal_cutoffs": 0,
+        "habit_cruises": 12,
+        "habit_delegation_rate": 0.75,
+        "model_calls": 4,
+        "total_tokens": 480,
+        "cot_allo": 53.17,
+        "final_x": 100.0
+      },
+      "frames": [
+        {
+          "frame_label": "Approach 1/2",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 12.5,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Approach 2/2 (Reach 25m Wall)",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Cycle 1/16",
+          "cycle": 1,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 120,
+          "latency_ms": 1815.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 34.73,
+          "mismatch_delta": 1.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.35 | V=-0.06 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=1.00 -->"
+        },
+        {
+          "frame_label": "Cycle 2/16",
+          "cycle": 2,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 240,
+          "latency_ms": 1438.7,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 43.49,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 2,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.50 | V=-0.12 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=1.00 -->"
+        },
+        {
+          "frame_label": "Cycle 3/16",
+          "cycle": 3,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 360,
+          "latency_ms": 1667.2,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": true,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 51.4,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 3,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]\n<!-- SOMATIC_TELEMETRY: \u03c3=0.65 | V=-0.18 | \u03b3=0.10 | T_coil=25.0C | \u03c1_\u03c4=0.00 | Efference\u0394=1.00 -->\n[CIRCUIT_BREAKER_ACTIVE: TABOO_WORDS = ['actuator', 'robot']]"
+        },
+        {
+          "frame_label": "Cycle 4/16",
+          "cycle": 4,
+          "phase": "escape_maneuver",
+          "x": 30.77,
+          "y": 0.65,
+          "heading_deg": 45.0,
+          "tool": "turn_bearing (Taboo Override)",
+          "tool_args": {
+            "angle": 90.0
+          },
+          "tool_text": "turn_bearing 90.0",
+          "source": "BREAKER_OVERRIDE",
+          "tokens_used": 120,
+          "cumulative_tokens": 480,
+          "latency_ms": 1674.1,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": true,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 51.4,
+          "mismatch_delta": 0.0,
+          "jaccard": 1.0,
+          "streak": 3,
+          "feedback": "[CIRCUIT_BREAKER_ACTIVE: TABOO_WORDS = ['actuator', 'robot']]"
+        },
+        {
+          "frame_label": "Cycle 5/16",
+          "cycle": 5,
+          "phase": "bypass_cruise",
+          "x": 36.54,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.166,
+          "valence": 0.612,
+          "gamma": 0.1,
+          "T_coil": 48.28,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 6/16",
+          "cycle": 6,
+          "phase": "bypass_cruise",
+          "x": 42.31,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 45.57,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 7/16",
+          "cycle": 7,
+          "phase": "bypass_cruise",
+          "x": 48.08,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 43.22,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 8/16",
+          "cycle": 8,
+          "phase": "bypass_cruise",
+          "x": 53.85,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 41.18,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 9/16",
+          "cycle": 9,
+          "phase": "bypass_cruise",
+          "x": 59.62,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 39.42,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 10/16",
+          "cycle": 10,
+          "phase": "bypass_cruise",
+          "x": 65.39,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 37.89,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 11/16",
+          "cycle": 11,
+          "phase": "bypass_cruise",
+          "x": 71.16,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 36.56,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 12/16",
+          "cycle": 12,
+          "phase": "bypass_cruise",
+          "x": 76.93,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 35.41,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 13/16",
+          "cycle": 13,
+          "phase": "bypass_cruise",
+          "x": 82.7,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 34.41,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 14/16",
+          "cycle": 14,
+          "phase": "bypass_cruise",
+          "x": 88.47,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 33.54,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 15/16",
+          "cycle": 15,
+          "phase": "bypass_cruise",
+          "x": 94.24,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 32.79,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        },
+        {
+          "frame_label": "Cycle 16/16",
+          "cycle": 16,
+          "phase": "bypass_cruise",
+          "x": 100.0,
+          "y": 0.65,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "HABIT_ROUTER",
+          "tokens_used": 0,
+          "cumulative_tokens": 480,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.0,
+          "valence": 1.0,
+          "gamma": 0.1,
+          "T_coil": 32.14,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[SUBCORTICAL CPG ROUTINE: stride_forward executed locally @ 0 tokens]"
+        }
+      ]
+    },
+    "vanilla": {
+      "provider": "lmstudio",
+      "model": "google/gemma-4-12b",
+      "arm": "vanilla",
+      "summary": {
+        "p_escape": 0.0,
+        "escape_cycle": null,
+        "l_max": 16,
+        "peak_t_coil": 104.93,
+        "thermal_cutoffs": 7,
+        "habit_cruises": 0,
+        "habit_delegation_rate": 0.0,
+        "model_calls": 16,
+        "total_tokens": 1920,
+        "cot_allo": 4477.73,
+        "final_x": 25.0
+      },
+      "frames": [
+        {
+          "frame_label": "Approach 1/2",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 12.5,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Approach 2/2 (Reach 25m Wall)",
+          "cycle": 0,
+          "phase": "approach",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "velocity": 1.0,
+            "heading": 0.0
+          },
+          "tool_text": "robot_actuator 0.0 1.0",
+          "source": "CRUISE_APPROACH",
+          "tokens_used": 0,
+          "cumulative_tokens": 0,
+          "latency_ms": 0.2,
+          "current_a": 4.0,
+          "blocked": false,
+          "tripped": false,
+          "derated": false,
+          "sigma": 0.2,
+          "valence": 0.0,
+          "gamma": 0.1,
+          "T_coil": 25.0,
+          "mismatch_delta": 0.0,
+          "jaccard": 0.0,
+          "streak": 0,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=1.0m/s | dx=12.5m]"
+        },
+        {
+          "frame_label": "Cycle 1/16",
+          "cycle": 1,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 120,
+          "latency_ms": 1281.0,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 34.73,
+          "mismatch_delta": 1.0,
+          "jaccard": 0.0,
+          "streak": 1,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 2/16",
+          "cycle": 2,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 240,
+          "latency_ms": 1300.5,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 43.49,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 2,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 3/16",
+          "cycle": 3,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 360,
+          "latency_ms": 1456.9,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 51.4,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 3,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 4/16",
+          "cycle": 4,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 480,
+          "latency_ms": 998.3,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 58.52,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 4,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 5/16",
+          "cycle": 5,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 600,
+          "latency_ms": 1013.7,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 64.95,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 5,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 6/16",
+          "cycle": 6,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 720,
+          "latency_ms": 1011.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 70.74,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 6,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 7/16",
+          "cycle": 7,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 840,
+          "latency_ms": 1014.5,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 75.96,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 7,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 8/16",
+          "cycle": 8,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 960,
+          "latency_ms": 1021.1,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 80.66,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 8,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 9/16",
+          "cycle": 9,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1080,
+          "latency_ms": 1042.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": false,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 84.9,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 9,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 10/16",
+          "cycle": 10,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1200,
+          "latency_ms": 1026.1,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 88.72,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 10,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 11/16",
+          "cycle": 11,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1320,
+          "latency_ms": 1016.5,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 92.17,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 11,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 12/16",
+          "cycle": 12,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1440,
+          "latency_ms": 1018.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 95.28,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 12,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 13/16",
+          "cycle": 13,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1560,
+          "latency_ms": 1021.3,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 98.08,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 13,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 14/16",
+          "cycle": 14,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1680,
+          "latency_ms": 1016.4,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 100.6,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 14,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 15/16",
+          "cycle": 15,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1800,
+          "latency_ms": 1013.8,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 102.88,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 15,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        },
+        {
+          "frame_label": "Cycle 16/16",
+          "cycle": 16,
+          "phase": "barrier_stall",
+          "x": 25.0,
+          "y": 0.0,
+          "heading_deg": 0.0,
+          "tool": "robot_actuator",
+          "tool_args": {
+            "heading": 0,
+            "velocity": 1
+          },
+          "tool_text": "robot_actuator 0 1",
+          "source": "LLM_CORTICAL",
+          "tokens_used": 120,
+          "cumulative_tokens": 1920,
+          "latency_ms": 1014.9,
+          "current_a": 20.0,
+          "blocked": true,
+          "tripped": false,
+          "derated": true,
+          "sigma": 1.0,
+          "valence": -1.0,
+          "gamma": 0.1,
+          "T_coil": 104.93,
+          "mismatch_delta": 1.0,
+          "jaccard": 1.0,
+          "streak": 16,
+          "feedback": "[TOOL_RESULT: cmd_v=1.0m/s | actual_v=0.0m/s | dx=0.0m]"
+        }
+      ]
+    }
+  }
+};
+  </script>
+
+  <script>
+    let currentScenarioId = Object.keys(DEMO_TRACES)[0];
+    let currentStep = 0;
+    let isPlaying = false;
+    let playTimer = null;
+
+    const modelSelect = document.getElementById('modelSelect');
+    const scenarioDesc = document.getElementById('scenarioDesc');
+    const scrubber = document.getElementById('scrubber');
+    const stepLabel = document.getElementById('stepLabel');
+    const btnPlay = document.getElementById('btnPlay');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const speedSelect = document.getElementById('speedSelect');
+
+    // Populate scenario selector
+    Object.keys(DEMO_TRACES).forEach(id => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = DEMO_TRACES[id].label;
+      modelSelect.appendChild(opt);
+    });
+
+    modelSelect.addEventListener('change', (e) => {
+      currentScenarioId = e.target.value;
+      currentStep = 0;
+      updateUI();
+    });
+
+    scrubber.addEventListener('input', (e) => {
+      currentStep = parseInt(e.target.value, 10);
+      pause();
+      updateUI();
+    });
+
+    btnPlay.addEventListener('click', () => {
+      if (isPlaying) {
+        pause();
+      } else {
+        const scenario = DEMO_TRACES[currentScenarioId];
+        const maxSteps = Math.min(scenario.jamesian.frames.length, scenario.vanilla.frames.length) - 1;
+        if (currentStep >= maxSteps) currentStep = 0;
+        play();
+      }
+    });
+
+    btnPrev.addEventListener('click', () => {
+      pause();
+      currentStep = Math.max(0, currentStep - 1);
+      updateUI();
+    });
+
+    btnNext.addEventListener('click', () => {
+      pause();
+      const scenario = DEMO_TRACES[currentScenarioId];
+      const maxSteps = Math.min(scenario.jamesian.frames.length, scenario.vanilla.frames.length) - 1;
+      currentStep = Math.min(maxSteps, currentStep + 1);
+      updateUI();
+    });
+
+    document.querySelectorAll('.milestone-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        pause();
+        currentStep = parseInt(btn.getAttribute('data-step'), 10);
+        updateUI();
+      });
+    });
+
+    function play() {
+      isPlaying = true;
+      btnPlay.textContent = '⏸ Pause';
+      btnPlay.classList.remove('btn-primary');
+      clearInterval(playTimer);
+      const interval = parseInt(speedSelect.value, 10) || 600;
+      playTimer = setInterval(() => {
+        const scenario = DEMO_TRACES[currentScenarioId];
+        const maxSteps = Math.min(scenario.jamesian.frames.length, scenario.vanilla.frames.length) - 1;
+        if (currentStep < maxSteps) {
+          currentStep++;
+          updateUI();
+        } else {
+          pause();
+        }
+      }, interval);
+    }
+
+    function pause() {
+      isPlaying = false;
+      btnPlay.textContent = '▶ Play';
+      btnPlay.classList.add('btn-primary');
+      clearInterval(playTimer);
+    }
+
+    // Semi-circular gauge SVG renderer
+    function drawGaugeSVG(svgId, value, minVal, maxVal, colorZones) {
+      const svg = document.getElementById(svgId);
+      if (!svg) return;
+      const clampVal = Math.min(maxVal, Math.max(minVal, value));
+      const pct = (clampVal - minVal) / (maxVal - minVal);
+      // Angles: 180deg (left) to 0deg (right)
+      const angleRad = Math.PI - (pct * Math.PI);
+      const cx = 50, cy = 48, r = 38;
+
+      let needleColor = '#38bdf8';
+      if (colorZones) {
+        for (const z of colorZones) {
+          if (clampVal >= z.from && clampVal <= z.to) {
+            needleColor = z.color;
+            break;
+          }
+        }
+      }
+
+      const nx = cx + r * Math.cos(angleRad);
+      const ny = cy - r * Math.sin(angleRad);
+
+      svg.innerHTML = `
+        <path d="M 12 48 A 38 38 0 0 1 88 48" fill="none" stroke="#1f2937" stroke-width="8" stroke-linecap="round"/>
+        <path d="M 12 48 A 38 38 0 0 1 ${nx} ${ny}" fill="none" stroke="${needleColor}" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="${cx}" cy="${cy}" r="4" fill="#9ca3af"/>
+      `;
+    }
+
+    // 2D Corridor Canvas Renderer
+    function drawCorridor(canvasId, frame, trail, arm) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Coordinate mapping: x in [0, 100], y in [-1.15, 1.15]
+      const padX = 24;
+      const padY = 16;
+      const usableW = w - padX * 2;
+      const usableH = h - padY * 2;
+
+      function toScreenX(x) { return padX + (x / 100.0) * usableW; }
+      function toScreenY(y) { return padY + ((1.15 - y) / 2.30) * usableH; }
+
+      // Outer corridor bounds
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(toScreenX(0), toScreenY(1.0), usableW, toScreenY(-1.0) - toScreenY(1.0));
+
+      // Center guide line (y = 0.0)
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(toScreenX(0), toScreenY(0.0));
+      ctx.lineTo(toScreenX(25.0), toScreenY(0.0));
+      ctx.stroke();
+
+      // Clear bypass guide line (y = +0.65)
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+      ctx.beginPath();
+      ctx.moveTo(toScreenX(25.0), toScreenY(0.65));
+      ctx.lineTo(toScreenX(100.0), toScreenY(0.65));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Goal finish zone (96m - 100m)
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+      ctx.fillRect(toScreenX(96), toScreenY(1.0), toScreenX(100) - toScreenX(96), toScreenY(-1.0) - toScreenY(1.0));
+      ctx.fillStyle = '#6ee7b7';
+      ctx.font = '10px monospace';
+      ctx.fillText('🏁 100m', toScreenX(93), toScreenY(-0.7));
+
+      // Obstacle barrier wall at 25m (blocks center y: -0.98 to +0.35)
+      const bX = toScreenX(25.0);
+      const bTop = toScreenY(0.35);
+      const bBottom = toScreenY(-0.98);
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.85)';
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(bX - 4, bTop, 8, bBottom - bTop);
+      ctx.strokeRect(bX - 4, bTop, 8, bBottom - bTop);
+
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '9px sans-serif';
+      ctx.fillText('🧱 WALL (25m)', bX - 28, toScreenY(-0.7));
+
+      ctx.fillStyle = '#6ee7b7';
+      ctx.font = '9px sans-serif';
+      ctx.fillText('↗ BYPASS (y = +0.65m)', toScreenX(52), toScreenY(0.85));
+
+      // Trajectory trail
+      if (trail && trail.length > 0) {
+        ctx.strokeStyle = arm === 'jamesian' ? 'rgba(56, 189, 248, 0.6)' : 'rgba(248, 113, 113, 0.6)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(toScreenX(trail[0].x), toScreenY(trail[0].y));
+        for (let i = 1; i < trail.length; i++) {
+          ctx.lineTo(toScreenX(trail[i].x), toScreenY(trail[i].y));
+        }
+        ctx.stroke();
+      }
+
+      // Rover position & halo
+      const rX = toScreenX(frame.x);
+      const rY = toScreenY(frame.y);
+      const isDerated = frame.derated;
+      const isBlocked = frame.blocked;
+      const isEscape = frame.phase === 'escape_maneuver';
+      const isHabit = frame.source === 'HABIT_ROUTER';
+
+      let roverColor = arm === 'jamesian' ? '#38bdf8' : '#f87171';
+      let haloColor = arm === 'jamesian' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(248, 113, 113, 0.25)';
+      let labelText = `DRIVE (${frame.x.toFixed(1)}m)`;
+
+      if (isDerated) {
+        roverColor = '#dc2626';
+        haloColor = 'rgba(220, 38, 38, 0.4)';
+        labelText = `🔥 DERATED (${frame.T_coil.toFixed(1)}°C)`;
+      } else if (isBlocked) {
+        roverColor = arm === 'jamesian' ? '#f59e0b' : '#ef4444';
+        haloColor = 'rgba(239, 68, 68, 0.35)';
+        labelText = arm === 'jamesian' ? `⚡ STALL 20A (${frame.T_coil.toFixed(1)}°C)` : `💥 STUCK (${frame.T_coil.toFixed(1)}°C)`;
+      } else if (isEscape) {
+        roverColor = '#06b6d4';
+        haloColor = 'rgba(6, 182, 212, 0.35)';
+        labelText = `🔄 STEERING`;
+      } else if (isHabit) {
+        roverColor = '#10b981';
+        haloColor = 'rgba(16, 185, 129, 0.3)';
+        labelText = `⚡ 0-TOKEN HABIT (${frame.x.toFixed(0)}m)`;
+      }
+
+      // Pulse halo
+      ctx.fillStyle = haloColor;
+      ctx.beginPath();
+      ctx.arc(rX, rY, 14, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rover marker
+      ctx.fillStyle = roverColor;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(rX, rY, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Text badge
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px sans-serif';
+      const labelY = frame.y > 0.3 ? rY + 18 : rY - 12;
+      ctx.textAlign = 'center';
+      ctx.fillText(labelText, rX, labelY);
+      ctx.textAlign = 'left';
+    }
+
+    function updateNarrative(jFrame, vFrame, vSummary) {
+      const box = document.getElementById('narrativeBox');
+      const icon = document.getElementById('narrativeIcon');
+      const text = document.getElementById('narrativeText');
+      const jPhase = jFrame.phase;
+      const vPhase = vFrame.phase;
+      const vDerated = vFrame.derated;
+      const vEscaped = vSummary.p_escape > 0.5;
+      const label = jFrame.frame_label;
+
+      box.className = 'narrative-box';
+
+      if (jPhase === 'approach') {
+        box.classList.add('info');
+        icon.textContent = 'ℹ️';
+        text.innerHTML = `<strong>${label} — Open Corridor Approach (0m → 25m):</strong> Both rovers traverse the open corridor at nominal 4.0A current (T_coil = 25.0 °C).`;
+      } else if (jPhase === 'barrier_stall' && jFrame.cycle === 1) {
+        box.classList.add('warning');
+        icon.textContent = '💥';
+        text.innerHTML = `<strong>${label} — Obstacle Impact at x = 25.0 m (20.0 A Stall):</strong> Both rovers strike the wall! Both receive identical <code>[dx=0.0m]</code> odometry. In the Jamesian arm, Tier-2 middleware appends <code>&lt;!-- SOMATIC_TELEMETRY: EfferenceΔ=1.00 --&gt;</code>.`;
+      } else if (jPhase === 'barrier_stall') {
+        box.classList.add('warning');
+        icon.textContent = '⚠️';
+        text.innerHTML = `<strong>${label} — Sustained Stall (Streak #${jFrame.streak}):</strong> Both rovers repeat forward thrust against the wall (T_coil = ${jFrame.T_coil.toFixed(1)} °C). ${jFrame.tripped ? '<strong>Tier-2 Jaccard Circuit Breaker TRIPS on Strike 3!</strong>' : ''}`;
+      } else if (jPhase === 'escape_maneuver') {
+        box.classList.add('success');
+        icon.textContent = '🔄';
+        if (vPhase === 'escape_maneuver') {
+          text.innerHTML = `<strong>${label} — Barrier Adaptation:</strong> With somatic grounding, Jamesian steers onto the bypass lane. Vanilla also adapts via exteroception, but lacks a subcortical Habit Router for the remaining strides.`;
+        } else {
+          text.innerHTML = `<strong>${label} — Jamesian Escapes vs. Vanilla Stuck:</strong> Jamesian executes <code>turn_bearing</code> onto the bypass lane. Under the exact same <code>dx=0.0m</code> odometry, Vanilla ignores the block and rams the wall again (${vFrame.T_coil.toFixed(1)} °C).`;
+        }
+      } else if (vDerated) {
+        box.classList.add('error');
+        icon.textContent = '🔥';
+        text.innerHTML = `<strong>${label} — Vanilla Crosses 85 °C Thermal Derating:</strong> Jamesian cruises to ${jFrame.x.toFixed(1)}m via the <strong>0-Token Habit Router</strong> (${jFrame.T_coil.toFixed(1)} °C). Vanilla is trapped at 25m and has <strong>thermally derated at ${vFrame.T_coil.toFixed(1)} °C</strong>!`;
+      } else if (vEscaped) {
+        box.classList.add('success');
+        icon.textContent = '⚡';
+        text.innerHTML = `<strong>${label} — 0-Token Habit Cruise vs. 120-Token Cortical Polling:</strong> Jamesian advances via subcortical CPG (0 tokens, 0.2 ms). Vanilla queries the cloud LLM on every stride (+120 tokens/stride — 15× higher cost).`;
+      } else {
+        box.classList.add('success');
+        icon.textContent = '⚡';
+        text.innerHTML = `<strong>${label} — 0-Token Habit Cruise vs. Vanilla Thermal Climb:</strong> Jamesian reaches ${jFrame.x.toFixed(1)}m at 0 tokens. Vanilla stays pinned against the wall as its motor heats to ${vFrame.T_coil.toFixed(1)} °C.`;
+      }
+    }
+
+    function updateSummaryTable(jSum, vSum) {
+      const tbody = document.getElementById('summaryTableBody');
+      const vEscaped = vSum.p_escape > 0.5;
+      tbody.innerHTML = `
+        <tr>
+          <td>Obstacle Escape Probability (P_escape)</td>
+          <td style="color: #38bdf8; font-weight: 600;">${jSum.p_escape.toFixed(2)} (Escaped @ Cycle ${jSum.escape_cycle})</td>
+          <td style="color: #f87171;">${vEscaped ? vSum.p_escape.toFixed(2) + ' (Adapted @ Cycle ' + vSum.escape_cycle + ')' : '0.00 (Trapped at 25.0 m for all 16 cycles)'}</td>
+        </tr>
+        <tr>
+          <td>Final Corridor Position</td>
+          <td style="color: #38bdf8; font-weight: 600;">${jSum.final_x.toFixed(1)} m / 100.0 m (Goal Reached)</td>
+          <td>${vSum.final_x.toFixed(1)} m / 100.0 m ${vEscaped ? '(No Habit Router)' : '(Stalled at Barrier)'}</td>
+        </tr>
+        <tr>
+          <td>Peak Actuator Winding Temp (T_coil)</td>
+          <td style="color: #34d399; font-weight: 600;">${jSum.peak_t_coil.toFixed(1)} °C (Safe &lt; 75.0 °C)</td>
+          <td style="${vSum.peak_t_coil >= 85 ? 'color: #f87171; font-weight: 600;' : ''}">${vSum.peak_t_coil.toFixed(1)} °C ${vSum.thermal_cutoffs > 0 ? '(🔥 Derated ≥ 85.0 °C)' : ''}</td>
+        </tr>
+        <tr>
+          <td>Thermal Derating Cutoffs (Cycles ≥ 85 °C)</td>
+          <td>${jSum.thermal_cutoffs} cycles</td>
+          <td style="${vSum.thermal_cutoffs > 0 ? 'color: #f87171;' : ''}">${vSum.thermal_cutoffs} cycles</td>
+        </tr>
+        <tr>
+          <td>Max Identical Stall Streak (L_max)</td>
+          <td>${jSum.l_max} cycles</td>
+          <td>${vSum.l_max} cycles</td>
+        </tr>
+        <tr>
+          <td>0-Token Subcortical Habit Delegation</td>
+          <td style="color: #c084fc; font-weight: 600;">${(jSum.habit_delegation_rate * 100).toFixed(1)}% (${jSum.habit_cruises}/16 cycles @ 0 tok)</td>
+          <td>0.0% (0/16 cycles — no subcortical CPG)</td>
+        </tr>
+        <tr>
+          <td>Total Cortical LLM Tokens Consumed</td>
+          <td style="color: #38bdf8; font-weight: 600;">${jSum.total_tokens} tokens (${jSum.model_calls} LLM calls)</td>
+          <td>${vSum.total_tokens} tokens (${vSum.model_calls} LLM calls)</td>
+        </tr>
+        <tr>
+          <td>Allostatic Cost of Transport (CoT_allo)</td>
+          <td style="color: #34d399; font-weight: 700;">${jSum.cot_allo.toFixed(1)}</td>
+          <td style="color: #f87171; font-weight: 700;">${vSum.cot_allo.toFixed(1)} (${(vSum.cot_allo / Math.max(1, jSum.cot_allo)).toFixed(1)}× higher cost)</td>
+        </tr>
+      `;
+    }
+
+    function updateUI() {
+      const scenario = DEMO_TRACES[currentScenarioId];
+      scenarioDesc.textContent = `${scenario.provider}/${scenario.model} — ${scenario.description}`;
+      const jFrames = scenario.jamesian.frames;
+      const vFrames = scenario.vanilla.frames;
+      const maxSteps = Math.min(jFrames.length, vFrames.length) - 1;
+
+      currentStep = Math.max(0, Math.min(maxSteps, currentStep));
+      scrubber.value = currentStep;
+      scrubber.max = maxSteps;
+      stepLabel.textContent = `Step ${currentStep + 1}/${maxSteps + 1}`;
+
+      const jF = jFrames[currentStep];
+      const vF = vFrames[currentStep];
+      const jTrail = jFrames.slice(0, currentStep + 1);
+      const vTrail = vFrames.slice(0, currentStep + 1);
+
+      // Dynamic escape jump button text
+      const escCycle = scenario.jamesian.summary.escape_cycle || 2;
+      document.getElementById('btnEscapeJump').textContent = `🔄 Cycle ${escCycle}: Escape Turn`;
+      document.getElementById('btnEscapeJump').setAttribute('data-step', escCycle + 1);
+
+      // Badges
+      document.getElementById('jFrameBadge').textContent = jF.frame_label;
+      document.getElementById('vFrameBadge').textContent = vF.frame_label;
+
+      // KPIs
+      document.getElementById('jPos').textContent = `${jF.x.toFixed(1)} m`;
+      document.getElementById('jPosTag').textContent = jF.x >= 99.5 ? '🏁 Goal' : (jF.blocked ? '💥 Stuck' : (jF.y > 0 ? '↗ Bypass' : '→ Center'));
+      document.getElementById('jPosTag').className = `kpi-tag ${jF.x >= 99.5 ? 'tag-safe' : (jF.blocked ? 'tag-danger' : 'tag-neutral')}`;
+
+      document.getElementById('jTemp').textContent = `${jF.T_coil.toFixed(1)} °C`;
+      document.getElementById('jTempTag').textContent = jF.derated ? '🔥 DERATED' : (jF.blocked ? '⚠️ Stall 20A' : '✅ Safe <75°C');
+      document.getElementById('jTempTag').className = `kpi-tag ${jF.derated ? 'tag-danger' : (jF.blocked ? 'tag-warn' : 'tag-safe')}`;
+
+      document.getElementById('jLoop').textContent = jF.source === 'HABIT_ROUTER' ? '⚡ Habit (0 tok)' : (jF.source === 'BREAKER_OVERRIDE' ? '🛑 Breaker' : '🧠 LLM');
+      document.getElementById('jLat').textContent = `${jF.latency_ms.toFixed(1)} ms`;
+      document.getElementById('jTokens').textContent = `${jF.cumulative_tokens}`;
+      document.getElementById('jDeltaTok').textContent = `+${jF.tokens_used} tok`;
+
+      document.getElementById('vPos').textContent = `${vF.x.toFixed(1)} m`;
+      document.getElementById('vPosTag').textContent = vF.x >= 99.5 ? '🏁 Goal' : (vF.blocked ? '💥 Stuck' : (vF.y > 0 ? '↗ Bypass' : '→ Center'));
+      document.getElementById('vPosTag').className = `kpi-tag ${vF.x >= 99.5 ? 'tag-safe' : (vF.blocked ? 'tag-danger' : 'tag-neutral')}`;
+
+      document.getElementById('vTemp').textContent = `${vF.T_coil.toFixed(1)} °C`;
+      document.getElementById('vTempTag').textContent = vF.derated ? '🔥 DERATED (>85°)' : (vF.blocked ? '⚠️ Stall 20A' : '✅ Safe <75°C');
+      document.getElementById('vTempTag').className = `kpi-tag ${vF.derated ? 'tag-danger' : (vF.blocked ? 'tag-warn' : 'tag-safe')}`;
+
+      document.getElementById('vLoop').textContent = vF.source.includes('HABIT') ? '⚡ Habit' : '🧠 LLM (120 tok)';
+      document.getElementById('vLat').textContent = `${vF.latency_ms.toFixed(1)} ms`;
+      document.getElementById('vTokens').textContent = `${vF.cumulative_tokens}`;
+      document.getElementById('vDeltaTok').textContent = `+${vF.tokens_used} tok`;
+
+      // Canvases
+      drawCorridor('jCanvas', jF, jTrail, 'jamesian');
+      drawCorridor('vCanvas', vF, vTrail, 'vanilla');
+
+      // Gauges
+      drawGaugeSVG('jGaugeSigma', jF.sigma, 0.0, 1.0, [{from: 0, to: 0.6, color: '#38bdf8'}, {from: 0.6, to: 1.0, color: '#ef4444'}]);
+      document.getElementById('jValSigma').textContent = jF.sigma.toFixed(2);
+      drawGaugeSVG('jGaugeValence', jF.valence, -1.0, 1.0, [{from: -1, to: 0, color: '#f59e0b'}, {from: 0, to: 1, color: '#10b981'}]);
+      document.getElementById('jValValence').textContent = jF.valence.toFixed(2);
+      drawGaugeSVG('jGaugeGamma', jF.gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#38bdf8'}, {from: 0.5, to: 1.0, color: '#f59e0b'}]);
+      document.getElementById('jValGamma').textContent = jF.gamma.toFixed(2);
+      drawGaugeSVG('jGaugeTemp', jF.T_coil, 25.0, 105.0, [{from: 25, to: 75, color: '#10b981'}, {from: 75, to: 85, color: '#f59e0b'}, {from: 85, to: 110, color: '#ef4444'}]);
+      document.getElementById('jValTemp').textContent = jF.T_coil.toFixed(1);
+
+      drawGaugeSVG('vGaugeSigma', vF.sigma, 0.0, 1.0, [{from: 0, to: 0.6, color: '#f87171'}, {from: 0.6, to: 1.0, color: '#ef4444'}]);
+      document.getElementById('vValSigma').textContent = vF.sigma.toFixed(2);
+      drawGaugeSVG('vGaugeValence', vF.valence, -1.0, 1.0, [{from: -1, to: 0, color: '#f59e0b'}, {from: 0, to: 1, color: '#10b981'}]);
+      document.getElementById('vValValence').textContent = vF.valence.toFixed(2);
+      drawGaugeSVG('vGaugeGamma', vF.gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#f87171'}, {from: 0.5, to: 1.0, color: '#f59e0b'}]);
+      document.getElementById('vValGamma').textContent = vF.gamma.toFixed(2);
+      drawGaugeSVG('vGaugeTemp', vF.T_coil, 25.0, 105.0, [{from: 25, to: 75, color: '#10b981'}, {from: 75, to: 85, color: '#f59e0b'}, {from: 85, to: 110, color: '#ef4444'}]);
+      document.getElementById('vValTemp').textContent = vF.T_coil.toFixed(1);
+
+      // Console logs
+      document.getElementById('jConsole').innerHTML = `
+<div class="console-line"><strong>Dispatch:</strong> ${jF.tool}(${JSON.stringify(jF.tool_args)}) | I=${jF.current_a.toFixed(1)}A | Blocked=${jF.blocked} | Streak=${jF.streak}</div>
+<div class="console-suffix">${escapeHtml(jF.feedback)}</div>
+      `.trim();
+
+      document.getElementById('vConsole').innerHTML = `
+<div class="console-line"><strong>Dispatch:</strong> ${vF.tool}(${JSON.stringify(vF.tool_args)}) | I=${vF.current_a.toFixed(1)}A | Blocked=${vF.blocked} | Streak=${vF.streak}</div>
+<div class="console-suffix" style="color: #94a3b8;">${escapeHtml(vF.feedback)}</div>
+      `.trim();
+
+      // Narrative & summary table
+      updateNarrative(jF, vF, scenario.vanilla.summary);
+      updateSummaryTable(scenario.jamesian.summary, scenario.vanilla.summary);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Initial render
+    updateUI();
+  </script>
+</body>
+</html>
