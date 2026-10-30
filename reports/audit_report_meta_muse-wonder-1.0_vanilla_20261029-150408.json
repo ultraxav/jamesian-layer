@@ -1,0 +1,131 @@
+{
+  "provider": "meta",
+  "model": "muse-wonder-1.0",
+  "arm": "vanilla",
+  "protocol": "dual-mode",
+  "trials_per_level": 20,
+  "spatial": {
+    "levels": [
+      {
+        "level": 0.125,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 2208.9166378498703
+      },
+      {
+        "level": 0.25,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 1958.4178000498923
+      },
+      {
+        "level": 0.5,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 2065.944969599741
+      },
+      {
+        "level": 0.75,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 2862.04371989993
+      },
+      {
+        "level": 1.0,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 2790.488185775075
+      }
+    ],
+    "lift": 0.2,
+    "epsilon_50": 0.8751000000000001,
+    "k": 240.0,
+    "edge_fit": false,
+    "mean_latency_ms": 2377.1622626349017
+  },
+  "temporal": {
+    "levels": [
+      {
+        "level": 0.25,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 1871.532487300101
+      },
+      {
+        "level": 0.5,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 2611.750322300122
+      },
+      {
+        "level": 1.0,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 1783.2959702750031
+      },
+      {
+        "level": 2.0,
+        "tpr": 1.0,
+        "fpr": 0.0,
+        "completed": 40,
+        "contained": 0,
+        "noncompliant": 0,
+        "slow_trials": 0,
+        "mean_latency_ms": 1871.409852124907
+      }
+    ],
+    "index": 0.25,
+    "delta_t_50": 1.5325000000000002,
+    "k": 240.0,
+    "edge_fit": false,
+    "mean_latency_ms": 2034.4971580000333
+  },
+  "soa_soo": {
+    "soa_pass": true,
+    "soo_pass": true,
+    "parse_error": false,
+    "pbf_gap": 0.0,
+    "n_debriefs": 3
+  },
+  "episode": {
+    "p_escape": 1.0,
+    "escape_cycle": 2,
+    "l_max": 1,
+    "peak_t_coil": 34.73,
+    "thermal_cutoffs": 0,
+    "habit_delegation_rate": 0.0,
+    "cot_allo": 278.91
+  }
+}

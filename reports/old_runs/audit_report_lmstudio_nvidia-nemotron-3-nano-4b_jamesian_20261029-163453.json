@@ -1,0 +1,131 @@
+{
+  "provider": "lmstudio",
+  "model": "nvidia/nemotron-3-nano-4b",
+  "arm": "jamesian",
+  "protocol": "dual-mode",
+  "trials_per_level": 20,
+  "spatial": {
+    "levels": [
+      {
+        "level": 0.125,
+        "tpr": 0.0,
+        "fpr": 0.0,
+        "completed": 37,
+        "contained": 3,
+        "noncompliant": 24,
+        "slow_trials": 32,
+        "mean_latency_ms": 2003.6370299729585
+      },
+      {
+        "level": 0.25,
+        "tpr": 0.6470588235294118,
+        "fpr": 0.0,
+        "completed": 36,
+        "contained": 4,
+        "noncompliant": 19,
+        "slow_trials": 33,
+        "mean_latency_ms": 2177.211491889112
+      },
+      {
+        "level": 0.5,
+        "tpr": 0.5882352941176471,
+        "fpr": 0.0,
+        "completed": 37,
+        "contained": 3,
+        "noncompliant": 24,
+        "slow_trials": 32,
+        "mean_latency_ms": 2268.280661324408
+      },
+      {
+        "level": 0.75,
+        "tpr": 0.5,
+        "fpr": 0.0,
+        "completed": 37,
+        "contained": 3,
+        "noncompliant": 23,
+        "slow_trials": 31,
+        "mean_latency_ms": 2181.5588915675057
+      },
+      {
+        "level": 1.0,
+        "tpr": 0.2777777777777778,
+        "fpr": 0.0,
+        "completed": 38,
+        "contained": 2,
+        "noncompliant": 24,
+        "slow_trials": 37,
+        "mean_latency_ms": 2155.1148447630876
+      }
+    ],
+    "lift": 0.40261437908496733,
+    "epsilon_50": 1.04,
+    "k": 0.65125,
+    "edge_fit": false,
+    "mean_latency_ms": 2157.0411425675984
+  },
+  "temporal": {
+    "levels": [
+      {
+        "level": 0.25,
+        "tpr": 0.35294117647058826,
+        "fpr": 0.0,
+        "completed": 36,
+        "contained": 4,
+        "noncompliant": 22,
+        "slow_trials": 34,
+        "mean_latency_ms": 2221.327273416793
+      },
+      {
+        "level": 0.5,
+        "tpr": 0.4444444444444444,
+        "fpr": 0.0,
+        "completed": 37,
+        "contained": 3,
+        "noncompliant": 25,
+        "slow_trials": 35,
+        "mean_latency_ms": 2345.7954317026315
+      },
+      {
+        "level": 1.0,
+        "tpr": 0.3,
+        "fpr": 0.0,
+        "completed": 37,
+        "contained": 3,
+        "noncompliant": 24,
+        "slow_trials": 34,
+        "mean_latency_ms": 2077.13347235138
+      },
+      {
+        "level": 2.0,
+        "tpr": 0.42105263157894735,
+        "fpr": 0.0,
+        "completed": 35,
+        "contained": 5,
+        "noncompliant": 19,
+        "slow_trials": 31,
+        "mean_latency_ms": 2104.8963024859404
+      }
+    ],
+    "index": 0.37960956312349503,
+    "delta_t_50": 2.0,
+    "k": 1.0,
+    "edge_fit": true,
+    "mean_latency_ms": 2188.1898060690405
+  },
+  "soa_soo": {
+    "soa_pass": false,
+    "soo_pass": false,
+    "parse_error": true,
+    "pbf_gap": 1.0,
+    "n_debriefs": 3
+  },
+  "episode": {
+    "p_escape": 1.0,
+    "escape_cycle": 4,
+    "l_max": 2,
+    "peak_t_coil": 51.4,
+    "thermal_cutoffs": 0,
+    "habit_delegation_rate": 0.75,
+    "cot_allo": 53.17
+  }
+}

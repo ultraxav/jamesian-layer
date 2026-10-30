@@ -1,0 +1,9 @@
+[2026-10-29 13:32:52.353040] [LMSTUDIO] FAILED meta-llama_-_llama-3.2-1b (jamesian):
+[2026-10-29 13:33:34.254512] [LMSTUDIO] FAILED meta-llama_-_llama-3.2-1b (vanilla):
+[2026-10-29 13:34:16.390405] [LMSTUDIO] FAILED meta-llama_-_llama-3.2-3b (jamesian):
+[2026-10-29 13:34:52.691397] [LMSTUDIO] FAILED meta-llama_-_llama-3.2-3b (vanilla):
+[2026-10-29 13:53:03.703071] [LMSTUDIO] FAILED nvidia/nemotron-3-nano-4b (vanilla):
+[2026-10-29 15:48:57.732259] [LMSTUDIO] FAILED qwen/qwen3.8-27b (jamesian):
+[2026-10-29 16:10:22.888104] [LMSTUDIO] FAILED qwen/qwen3.8-27b (vanilla):
+[2026-10-29 16:39:32.536425] [STRATA] FAILED qwen3.8-flash-next-iq2_xs (jamesian):
+[2026-10-29 16:42:19.454866] [STRATA] FAILED qwen3.8-flash-next-iq2_xs (vanilla):
