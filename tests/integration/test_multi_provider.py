@@ -102,7 +102,7 @@ def make_transport(expected_key, seen, mode="completion", status=200):
 
 
 def test_list_providers():
-    assert set(list_providers()) == {"meta", "baseten", "modal", "fireworks"}
+    assert set(list_providers()) == {"meta", "baseten", "modal", "fireworks", "lmstudio", "strata"}
 
 
 def test_unknown_provider_raises():
