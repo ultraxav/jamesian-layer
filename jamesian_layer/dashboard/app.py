@@ -1,6 +1,6 @@
 """Real-time Jamesian telemetry dashboard (100% pure Python, spec 5.8).
 
-Runs an autonomic biophysical daemon and provides an ultra-smooth, 60 FPS
+Runs an autonomic biophysical daemon and provides an ultra-smooth
 client-side hardware-accelerated biophysical oscilloscope and perturbation
 sandbox embedded via Streamlit.
 """
@@ -37,10 +37,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-st.title("🛰️ Jamesian Layer — Live Interoceptive Telemetry Daemon")
-st.caption(
-    "High-performance client-side biophysical oscilloscope (60 FPS continuous RK4 ODE integration). "
-    "Inject mechanical stalls, efference surprise bursts, and vagal recovery maneuvers in real time."
+st.markdown(
+    """
+    <style>
+      .block-container { padding-top: 1rem; padding-bottom: 0rem; }
+      iframe { border: none; }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 if _MONITOR_HTML_PATH.exists():

@@ -7,7 +7,7 @@ Both arms receive identical prompts, CorridorEnv (200 Hz) physics, and exterocep
 tool results ([TOOL_RESULT: cmd_v=... | actual_v=... | dx=...]); the ONLY difference
 is the presence of LlamaStackInteroceptiveHook in the Jamesian arm.
 
-The simulation runs client-side in an ultra-smooth 60 FPS HTML5/Canvas viewer (with
+The simulation runs client-side in an ultra-smooth HTML5/Canvas viewer (with
 instant scrubbing, play/pause, zero server lag, and hardware-accelerated gauges),
 embedded seamlessly via Streamlit.
 """
@@ -54,11 +54,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-st.title("🛰️ Attractor Trap: Jamesian Layer vs. Vanilla Baseline (Side-by-Side)")
-st.caption(
-    "High-performance client-side simulation viewer. Replays real LLM closed-loop trajectories "
-    "under strict *ceteris paribus* conditions with zero server lag, instant timeline scrubbing, "
-    "and hardware-accelerated 2D corridor physics."
+st.markdown(
+    """
+    <style>
+      .block-container { padding-top: 1rem; padding-bottom: 0rem; }
+      iframe { border: none; }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 if _VIEWER_HTML_PATH.exists():

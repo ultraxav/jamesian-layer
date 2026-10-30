@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jamesian Layer — Live 60 FPS Biophysical Oscilloscope</title>
+  <title>Jamesian Layer — Live Interoceptive Telemetry Daemon</title>
   <style>
     :root {
       --bg: #0b0f19;
@@ -250,12 +250,12 @@
 
   <div class="header">
     <div class="title-area">
-      <h1>🛰️ Jamesian Layer — Live 60 FPS Biophysical Oscilloscope</h1>
+      <h1>🛰️ Jamesian Layer — Live Interoceptive Telemetry Daemon</h1>
       <p>Continuous Runge-Kutta 4th Order (RK4) integration of sympathetic tone, valence, somatic strain, and Joule coil heating (Δt = 16.6 ms).</p>
     </div>
     <div class="live-badge">
       <span class="pulse-dot"></span>
-      <span id="fpsCounter">LIVE 60 FPS</span>
+      <span id="fpsCounter">LIVE TELEMETRY</span>
     </div>
   </div>
 
@@ -297,10 +297,10 @@
     </div>
   </div>
 
-  <!-- 60 FPS ROLLING OSCILLOSCOPE CANVAS -->
+  <!-- ROLLING OSCILLOSCOPE CANVAS -->
   <div class="oscilloscope-card">
     <div class="card-header-row">
-      <span class="card-title">📈 Real-Time Biophysical Waveforms (60 FPS Continuous Roll)</span>
+      <span class="card-title">📈 Real-Time Biophysical Waveforms (Continuous Roll)</span>
       <div class="legend-row">
         <span class="legend-item"><span class="legend-line" style="background: var(--accent-blue);"></span> Tone (σ)</span>
         <span class="legend-item"><span class="legend-line" style="background: var(--accent-green);"></span> Valence (V)</span>
@@ -398,7 +398,7 @@
 
     let isRunning = true;
     let history = [];
-    const maxHistory = 400; // ~6.6 seconds of history at 60 FPS
+    const maxHistory = 400; // ~6.6 seconds of rolling history
 
     // Derivative evaluation
     function derivs(s, inp) {
@@ -518,7 +518,7 @@
       plotTrace(s => s[3], '#ef4444', 25.0, 105.0); // T_coil
     }
 
-    // Main 60 FPS animation loop
+    // Main continuous animation loop
     let lastTime = performance.now();
     function loop(now) {
       if (isRunning) {
@@ -663,3 +663,4 @@
   </script>
 </body>
 </html>
+
