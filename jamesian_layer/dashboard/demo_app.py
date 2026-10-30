@@ -57,8 +57,19 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-      .block-container { padding-top: 1rem; padding-bottom: 0rem; }
-      iframe { border: none; }
+      /* Hide Streamlit top header bar so it doesn't overlap the title */
+      header[data-testid="stHeader"] {
+        display: none !important;
+      }
+      .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 0rem !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+      iframe {
+        border: none;
+      }
     </style>
     """,
     unsafe_allow_html=True,
