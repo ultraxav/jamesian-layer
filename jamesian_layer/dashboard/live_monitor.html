@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jamesian Layer — Live 60 FPS Biophysical Oscilloscope</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #c084fc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      line-height: 1.4;
+    }
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .title-area h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .title-area p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 14px;
+      color: #34d399;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+    .controls-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    button {
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: #1f2937;
+      color: #fff;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    button:hover { background: #374151; }
+    button.btn-danger { background: rgba(220, 38, 38, 0.25); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5; }
+    button.btn-danger:hover { background: rgba(220, 38, 38, 0.45); }
+    button.btn-warn { background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.5); color: #fde68a; }
+    button.btn-warn:hover { background: rgba(245, 158, 11, 0.35); }
+    button.btn-blue { background: rgba(2, 132, 199, 0.25); border-color: rgba(56, 189, 248, 0.5); color: #bae6fd; }
+    button.btn-blue:hover { background: rgba(2, 132, 199, 0.45); }
+    button.btn-green { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #a7f3d0; }
+    button.btn-green:hover { background: rgba(16, 185, 129, 0.35); }
+    button.active { box-shadow: 0 0 0 2px #fff; }
+
+    .grid-top {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 900px) {
+      .grid-top { grid-template-columns: repeat(2, 1fr); }
+    }
+    .gauge-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .gauge-card svg {
+      width: 100%;
+      max-width: 140px;
+      height: 70px;
+    }
+    .gauge-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    .gauge-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .gauge-status {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 2px;
+      display: inline-block;
+    }
+    .status-safe { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-warn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .status-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    .oscilloscope-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .legend-row {
+      display: flex;
+      gap: 14px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .legend-item { display: inline-flex; align-items: center; gap: 4px; }
+    .legend-line { width: 12px; height: 3px; border-radius: 2px; }
+
+    canvas.oscilloscope-canvas {
+      width: 100%;
+      height: 200px;
+      background: #070a13;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      display: block;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 800px) {
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .jaccard-input-row {
+      display: flex;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    input[type="text"] {
+      flex: 1;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      padding: 6px 10px;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: #fff;
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 0.78rem;
+    }
+    .bar-label { min-width: 75px; color: var(--text-muted); }
+    .bar-track {
+      flex: 1;
+      height: 18px;
+      background: #1f2937;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .bar-val { min-width: 60px; text-align: right; font-weight: 600; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="title-area">
+      <h1>🛰️ Jamesian Layer — Live 60 FPS Biophysical Oscilloscope</h1>
+      <p>Continuous Runge-Kutta 4th Order (RK4) integration of sympathetic tone, valence, somatic strain, and Joule coil heating (Δt = 16.6 ms).</p>
+    </div>
+    <div class="live-badge">
+      <span class="pulse-dot"></span>
+      <span id="fpsCounter">LIVE 60 FPS</span>
+    </div>
+  </div>
+
+  <div class="controls-panel">
+    <span style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">Inject Perturbation:</span>
+    <button id="btnStall" class="btn-danger">💥 Stall Actuator (20 A)</button>
+    <button id="btnSurprise" class="btn-warn">⚡ Surprise Burst (η=0.9)</button>
+    <button id="btnBrace" class="btn-blue">🛡️ Toggle Brace</button>
+    <button id="btnRecover" class="btn-green">🧊 Active Cool Down</button>
+    <button id="btnReset">🔄 Reset to Cruise</button>
+    <button id="btnPause" style="margin-left: auto;">⏸ Pause</button>
+  </div>
+
+  <!-- 4 LIVE RADIAL GAUGES -->
+  <div class="grid-top">
+    <div class="gauge-card">
+      <svg viewBox="0 0 100 55" id="gSigma"></svg>
+      <div class="gauge-title">Sympathetic Tone (σ)</div>
+      <div class="gauge-val" id="valSigma">0.20</div>
+      <div class="gauge-status status-safe" id="tagSigma">Nominal &lt; 0.60</div>
+    </div>
+    <div class="gauge-card">
+      <svg viewBox="0 0 100 55" id="gValence"></svg>
+      <div class="gauge-title">Affective Valence (V)</div>
+      <div class="gauge-val" id="valValence">0.00</div>
+      <div class="gauge-status status-safe" id="tagValence">Homeostatic Equilibrium</div>
+    </div>
+    <div class="gauge-card">
+      <svg viewBox="0 0 100 55" id="gGamma"></svg>
+      <div class="gauge-title">Somatic Strain (γ)</div>
+      <div class="gauge-val" id="valGamma">0.10</div>
+      <div class="gauge-status status-safe" id="tagGamma">Resting Tension</div>
+    </div>
+    <div class="gauge-card">
+      <svg viewBox="0 0 100 55" id="gTemp"></svg>
+      <div class="gauge-title">Coil Temp (T_coil)</div>
+      <div class="gauge-val" id="valTemp">25.0 °C</div>
+      <div class="gauge-status status-safe" id="tagTemp">Safe &lt; 75.0 °C</div>
+    </div>
+  </div>
+
+  <!-- 60 FPS ROLLING OSCILLOSCOPE CANVAS -->
+  <div class="oscilloscope-card">
+    <div class="card-header-row">
+      <span class="card-title">📈 Real-Time Biophysical Waveforms (60 FPS Continuous Roll)</span>
+      <div class="legend-row">
+        <span class="legend-item"><span class="legend-line" style="background: var(--accent-blue);"></span> Tone (σ)</span>
+        <span class="legend-item"><span class="legend-line" style="background: var(--accent-green);"></span> Valence (V)</span>
+        <span class="legend-item"><span class="legend-line" style="background: var(--accent-purple);"></span> Strain (γ)</span>
+        <span class="legend-item"><span class="legend-line" style="background: var(--accent-red);"></span> T_coil (°C, Right Axis)</span>
+      </div>
+    </div>
+    <canvas id="scopeCanvas" class="oscilloscope-canvas" width="900" height="200"></canvas>
+  </div>
+
+  <!-- BOTTOM PANELS: JACCARD BREAKER & LATENCY BENCHMARKS -->
+  <div class="bottom-grid">
+    <div class="panel-card">
+      <div class="card-title">🛑 Jaccard Circuit Breaker & Taboo Buffer (k=3 Strikes)</div>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+        Type repeated action turns below to trigger the 3-strike Jaccard anti-recidivism breaker (J ≥ 0.70).
+      </p>
+      <div class="jaccard-input-row">
+        <input type="text" id="jaccardInput" value="robot_actuator 1.0 0.0" placeholder="tool command...">
+        <button id="btnTurn" class="btn-blue">Execute Turn</button>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <span style="font-size: 0.82rem; color: var(--text-muted);">Current Turn Score: <strong id="jScoreText" style="color: #fff;">0.00</strong></span>
+        <span id="jStatusBadge" class="gauge-status status-safe">NOMINAL (0/3 Strikes)</span>
+      </div>
+      <div class="bar-track" style="margin-top: 8px; height: 10px;">
+        <div id="jScoreBar" class="bar-fill" style="width: 0%; background: var(--accent-blue);"></div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="card-title">⚡ Multi-Provider Response Latencies (Cached from Reports)</div>
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; margin-bottom: 12px;">
+        Mean tool execution turn latencies captured across our 18-model campaign matrix.
+      </p>
+      <div class="bar-row">
+        <span class="bar-label">LM Studio</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width: 63%; background: #06b6d4;"></div>
+        </div>
+        <span class="bar-val">1,898 ms</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Meta API</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width: 79%; background: #3b82f6;"></div>
+        </div>
+        <span class="bar-val">2,377 ms</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Baseten</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width: 81%; background: #a855f7;"></div>
+        </div>
+        <span class="bar-val">2,440 ms</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Biophysical parameters (exact match to ode_solvers.py)
+    const PARAMS = {
+      sigma_0: 0.20,
+      tau_sigma: 45.0,
+      alpha_vagal: 0.80,
+      beta_fail: 1.50,
+      tau_V: 60.0,
+      kappa_succ: 0.40,
+      kappa_fail: 0.60,
+      lambda_res: 0.15,
+      gamma_0: 0.10,
+      tau_gamma: 30.0,
+      delta_brace: 0.50,
+      R0: 0.32,
+      alpha_cu: 0.00393,
+      Cth: 50.0,
+      h_cool: 1.8,
+      T_amb: 25.0,
+      T_warning: 75.0,
+      T_derate: 85.0,
+      T_recovery: 72.0
+    };
+
+    // State vector: [sigma, V, gamma, T_coil]
+    let state = [0.20, 0.0, 0.10, 25.0];
+    let inputs = {
+      mismatch: 0.0,
+      u_recovery: 0.0,
+      success: 0.0,
+      fail: 0.0,
+      resonance: 0.0,
+      u_brace: 0.0,
+      current: 4.0
+    };
+
+    let isRunning = true;
+    let history = [];
+    const maxHistory = 400; // ~6.6 seconds of history at 60 FPS
+
+    // Derivative evaluation
+    function derivs(s, inp) {
+      const sigma = s[0];
+      const V = s[1];
+      const gamma = s[2];
+      const T_coil = s[3];
+
+      const dSigma = -(sigma - PARAMS.sigma_0) / PARAMS.tau_sigma + PARAMS.beta_fail * inp.mismatch - PARAMS.alpha_vagal * inp.u_recovery;
+      const dV = -V / PARAMS.tau_V + PARAMS.kappa_succ * inp.success - PARAMS.kappa_fail * inp.fail + inp.resonance;
+      const dGamma = -(gamma - PARAMS.gamma_0) / PARAMS.tau_gamma + PARAMS.delta_brace * inp.u_brace;
+
+      const R = PARAMS.R0 * (1.0 + PARAMS.alpha_cu * (T_coil - 25.0));
+      const power = inp.current * inp.current * R;
+      const dT_coil = (power - PARAMS.h_cool * (T_coil - PARAMS.T_amb)) / PARAMS.Cth;
+
+      return [dSigma, dV, dGamma, dT_coil];
+    }
+
+    // Runge-Kutta 4th order step
+    function rk4Step(s, dt, inp) {
+      const k1 = derivs(s, inp);
+      const s2 = [s[0] + 0.5*dt*k1[0], s[1] + 0.5*dt*k1[1], s[2] + 0.5*dt*k1[2], s[3] + 0.5*dt*k1[3]];
+      const k2 = derivs(s2, inp);
+      const s3 = [s[0] + 0.5*dt*k2[0], s[1] + 0.5*dt*k2[1], s[2] + 0.5*dt*k2[2], s[3] + 0.5*dt*k2[3]];
+      const k3 = derivs(s3, inp);
+      const s4 = [s[0] + dt*k3[0], s[1] + dt*k3[1], s[2] + dt*k3[2], s[3] + dt*k3[3]];
+      const k4 = derivs(s4, inp);
+
+      const next = [
+        s[0] + (dt / 6.0) * (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]),
+        s[1] + (dt / 6.0) * (k1[1] + 2*k2[1] + 2*k3[1] + k4[1]),
+        s[2] + (dt / 6.0) * (k1[2] + 2*k2[2] + 2*k3[2] + k4[2]),
+        s[3] + (dt / 6.0) * (k1[3] + 2*k2[3] + 2*k3[3] + k4[3]),
+      ];
+
+      // Clamping
+      next[0] = Math.min(1.0, Math.max(0.0, next[0]));
+      next[1] = Math.min(1.0, Math.max(-1.0, next[1]));
+      next[2] = Math.min(1.0, Math.max(0.0, next[2]));
+      return next;
+    }
+
+    // Semi-circular gauge SVG renderer
+    function drawGauge(svgId, val, minVal, maxVal, zones) {
+      const svg = document.getElementById(svgId);
+      if (!svg) return;
+      const clampVal = Math.min(maxVal, Math.max(minVal, val));
+      const pct = (clampVal - minVal) / (maxVal - minVal);
+      const angleRad = Math.PI - (pct * Math.PI);
+      const cx = 50, cy = 48, r = 38;
+
+      let color = '#38bdf8';
+      if (zones) {
+        for (const z of zones) {
+          if (clampVal >= z.from && clampVal <= z.to) {
+            color = z.color;
+            break;
+          }
+        }
+      }
+
+      const nx = cx + r * Math.cos(angleRad);
+      const ny = cy - r * Math.sin(angleRad);
+
+      svg.innerHTML = `
+        <path d="M 12 48 A 38 38 0 0 1 88 48" fill="none" stroke="#1f2937" stroke-width="8" stroke-linecap="round"/>
+        <path d="M 12 48 A 38 38 0 0 1 ${nx} ${ny}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="${cx}" cy="${cy}" r="4" fill="#9ca3af"/>
+      `;
+    }
+
+    // Oscilloscope canvas renderer
+    const canvas = document.getElementById('scopeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawOscilloscope() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid lines
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let y = 20; y < h; y += 35) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      if (history.length < 2) return;
+
+      const pad = 10;
+      const plotH = h - pad * 2;
+      const stepX = w / (maxHistory - 1);
+
+      function plotTrace(getter, color, minV, maxV) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < history.length; i++) {
+          const val = getter(history[i]);
+          const norm = (val - minV) / (maxV - minV);
+          const x = i * stepX;
+          const y = h - pad - norm * plotH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      // Traces
+      plotTrace(s => s[0], '#38bdf8', 0.0, 1.0);  // sigma
+      plotTrace(s => s[1], '#10b981', -1.0, 1.0); // valence
+      plotTrace(s => s[2], '#c084fc', 0.0, 1.0);  // gamma
+      plotTrace(s => s[3], '#ef4444', 25.0, 105.0); // T_coil
+    }
+
+    // Main 60 FPS animation loop
+    let lastTime = performance.now();
+    function loop(now) {
+      if (isRunning) {
+        const dt = Math.min(0.05, (now - lastTime) / 1000.0);
+        state = rk4Step(state, dt, inputs);
+
+        history.push([...state]);
+        if (history.length > maxHistory) history.shift();
+
+        // Update gauges and labels
+        const [sigma, valence, gamma, tCoil] = state;
+        document.getElementById('valSigma').textContent = sigma.toFixed(2);
+        document.getElementById('valValence').textContent = valence.toFixed(2);
+        document.getElementById('valGamma').textContent = gamma.toFixed(2);
+        document.getElementById('valTemp').textContent = `${tCoil.toFixed(1)} °C`;
+
+        const tagSigma = document.getElementById('tagSigma');
+        if (sigma >= 0.60) {
+          tagSigma.textContent = '⚠️ Sympathetic Alarm (≥0.60)';
+          tagSigma.className = 'gauge-status status-danger';
+        } else {
+          tagSigma.textContent = 'Nominal < 0.60';
+          tagSigma.className = 'gauge-status status-safe';
+        }
+
+        const tagTemp = document.getElementById('tagTemp');
+        if (tCoil >= 85.0) {
+          tagTemp.textContent = '🔥 DERATED (≥ 85.0 °C)';
+          tagTemp.className = 'gauge-status status-danger';
+        } else if (tCoil >= 75.0) {
+          tagTemp.textContent = '⚠️ Warning (≥ 75.0 °C)';
+          tagTemp.className = 'gauge-status status-warn';
+        } else {
+          tagTemp.textContent = 'Safe < 75.0 °C';
+          tagTemp.className = 'gauge-status status-safe';
+        }
+
+        drawGauge('gSigma', sigma, 0.0, 1.0, [{from: 0, to: 0.6, color: '#38bdf8'}, {from: 0.6, to: 1.0, color: '#ef4444'}]);
+        drawGauge('gValence', valence, -1.0, 1.0, [{from: -1, to: 0, color: '#f59e0b'}, {from: 0, to: 1, color: '#10b981'}]);
+        drawGauge('gGamma', gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#c084fc'}, {from: 0.5, to: 1.0, color: '#f59e0b'}]);
+        drawGauge('gTemp', tCoil, 25.0, 110.0, [{from: 25, to: 75, color: '#10b981'}, {from: 75, to: 85, color: '#f59e0b'}, {from: 85, to: 110, color: '#ef4444'}]);
+
+        drawOscilloscope();
+      }
+      lastTime = now;
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // Interactive button event listeners
+    const btnStall = document.getElementById('btnStall');
+    btnStall.addEventListener('click', () => {
+      inputs.current = inputs.current === 20.0 ? 4.0 : 20.0;
+      btnStall.classList.toggle('active', inputs.current === 20.0);
+    });
+
+    const btnSurprise = document.getElementById('btnSurprise');
+    btnSurprise.addEventListener('click', () => {
+      inputs.mismatch = 0.90;
+      inputs.fail = 1.0;
+      setTimeout(() => { inputs.mismatch = 0.0; inputs.fail = 0.0; }, 1200);
+    });
+
+    const btnBrace = document.getElementById('btnBrace');
+    btnBrace.addEventListener('click', () => {
+      inputs.u_brace = inputs.u_brace === 1.0 ? 0.0 : 1.0;
+      btnBrace.classList.toggle('active', inputs.u_brace === 1.0);
+    });
+
+    const btnRecover = document.getElementById('btnRecover');
+    btnRecover.addEventListener('click', () => {
+      inputs.u_recovery = inputs.u_recovery === 1.0 ? 0.0 : 1.0;
+      btnRecover.classList.toggle('active', inputs.u_recovery === 1.0);
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      inputs = { mismatch: 0.0, u_recovery: 0.0, success: 0.0, fail: 0.0, resonance: 0.0, u_brace: 0.0, current: 4.0 };
+      state = [0.20, 0.0, 0.10, 25.0];
+      btnStall.classList.remove('active');
+      btnBrace.classList.remove('active');
+      btnRecover.classList.remove('active');
+    });
+
+    const btnPause = document.getElementById('btnPause');
+    btnPause.addEventListener('click', () => {
+      isRunning = !isRunning;
+      btnPause.textContent = isRunning ? '⏸ Pause' : '▶ Resume';
+    });
+
+    // Jaccard Breaker Interactive Simulation
+    let prevTokens = null;
+    let jaccardRun = 0;
+    const jInput = document.getElementById('jaccardInput');
+    const jScoreText = document.getElementById('jScoreText');
+    const jStatusBadge = document.getElementById('jStatusBadge');
+    const jScoreBar = document.getElementById('jScoreBar');
+
+    function tokenize(text) {
+      const stop = new Set(["a","an","the","and","or","to","of","in","on","at","for","with"]);
+      const words = (text.toLowerCase().match(/[a-z0-9]+/g) || []).filter(w => !stop.has(w));
+      return new Set(words);
+    }
+
+    function jaccard(a, b) {
+      const union = new Set([...a, ...b]);
+      if (union.size === 0) return 0.0;
+      const inter = new Set([...a].filter(x => b.has(x)));
+      return inter.size / union.size;
+    }
+
+    document.getElementById('btnTurn').addEventListener('click', () => {
+      const text = jInput.value.trim();
+      const tokens = tokenize(text);
+      let score = 0.0;
+
+      if (!prevTokens) {
+        score = 0.0;
+        jaccardRun = 1;
+      } else {
+        score = jaccard(tokens, prevTokens);
+        jaccardRun = score >= 0.70 ? jaccardRun + 1 : 1;
+      }
+      prevTokens = tokens;
+
+      jScoreText.textContent = score.toFixed(2);
+      jScoreBar.style.width = `${score * 100}%`;
+
+      if (jaccardRun >= 3) {
+        jStatusBadge.textContent = '🛑 TRIPPED (3/3 Strikes — Taboo Ban)';
+        jStatusBadge.className = 'gauge-status status-danger';
+        jScoreBar.style.background = 'var(--accent-red)';
+      } else if (jaccardRun === 2) {
+        jStatusBadge.textContent = '⚠️ STRIKE 2/3 (Warning)';
+        jStatusBadge.className = 'gauge-status status-warn';
+        jScoreBar.style.background = 'var(--accent-yellow)';
+      } else {
+        jStatusBadge.textContent = 'NOMINAL (1/3 Strike)';
+        jStatusBadge.className = 'gauge-status status-safe';
+        jScoreBar.style.background = 'var(--accent-blue)';
+      }
+    });
+  </script>
+</body>
+</html>
