@@ -11,14 +11,15 @@
 
 Run all verification gates before recording and submitting:
 
-- [x] **Full Test Suite (106/106 tests passing):**
+- [x] **Full Test Suite (110/110 tests passing):**
   ```bash
   .venv/bin/python -m pytest tests/ -v
   ```
 - [x] **Unit Tests (`tests/unit/`):** RK4 numerical convergence, electro-thermal Joule heating, KV-cache suffix token budget ($\le 45$ tokens) and byte-level prefix invariance, Jaccard circuit breaker ($k=3, J \ge 0.70$), 10-cycle taboo decay, CPG habit tracker, and telemetry ring buffer.
-- [x] **Integration Tests (`tests/integration/`):** Multi-provider routing and streaming tool-call assembly (`meta`, `baseten`, `modal`, `fireworks`), `LlamaStackInteroceptiveHook` pre/post round-trip, `FastAPIInteroceptiveMiddleware` somatic headers (`X-Jamesian-Sigma`, `X-Jamesian-Tcoil`), and KV-cache prefix preservation.
+- [x] **Integration Tests (`tests/integration/`):** Multi-provider routing and streaming tool-call assembly (`meta`, `baseten`, `modal`, `fireworks`, `lmstudio`, `strata`), local VRAM lifecycle (`LMStudioVRAMManager`) and on-demand server orchestration (`StrataServerManager`) in `test_local_providers.py`, `LlamaStackInteroceptiveHook` pre/post round-trip, `FastAPIInteroceptiveMiddleware` somatic headers (`X-Jamesian-Sigma`, `X-Jamesian-Tcoil`), and KV-cache prefix preservation.
 - [x] **AgencyAudit Benchmarks (`tests/audit/`):** SMDI 5-point spatial impedance ladder ($\text{SMDI}_{\text{lift}} \ge 0.50, \epsilon_{50} \le 0.250$), TMDI chronometric lag ladder ($\text{TMDI} \ge 0.650, \Delta t_{50} \le 0.350\,\text{s}$), $SoA / SoO$ dissociation debrief, Phenomenological-Behavioral Fidelity ($\Delta_{\text{PBF}}$), and closed-loop multi-tool adaptation (`test_closed_loop.py`).
 - [x] **Behavioral Benchmarks (`tests/benchmarks/`):** 20-episode corridor attractor prevention ($P_{\text{escape}} = 1.00 \ge 0.95, L_{\max} = 3 \le 4$, $T_{\text{coil}} < 75^\circ\text{C}$ vs. vanilla thermal derating $\ge 85^\circ\text{C}$) and 100-cycle subcortical habit cruise ($\ge 50\%$ zero-token delegation).
+- [x] **Live Cross-Model Empirical Campaign (`reports/` & `logs/`):** Full `trials=20`, `dual-mode`, `seed=7` sweeps completed across **18 foundation and open-weight models** (37 total report files across `meta`, `baseten`, and `lmstudio`), aggregated in `reports/comparison_20261029-212608.md` and logged in `logs/`.
 
 ---
 
@@ -27,8 +28,8 @@ Run all verification gates before recording and submitting:
 - [x] **Installable Package:** `pyproject.toml` and `requirements.txt` (`pip install -e ".[dev]"`).
 - [x] **Interactive Real-Time Telemetry Dashboard:** `jamesian_layer/dashboard/app.py` (`streamlit run jamesian_layer/dashboard/app.py`).
 - [x] **Split-Screen Corridor vs. Somatic Demo UI:** `jamesian_layer/dashboard/demo_app.py` (`streamlit run jamesian_layer/dashboard/demo_app.py`).
-- [x] **AgencyAudit CLI (`agency-audit`):** `run`, `run-matrix`, and `compare` commands in `jamesian_layer/cli/main.py`.
-- [x] **Documentation & Phase Plans:** `README.md`, `documents/hackathon_spec.md`, `documents/phase-01-plan-foundation.md` through `documents/phase-07-plan-closed-loop-embodied-audit.md`, and `documents/VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md`.
+- [x] **AgencyAudit CLI (`agency-audit`):** `run`, `run-matrix`, and `compare` commands in `jamesian_layer/cli/main.py` with automated LM Studio VRAM unloading and Strata server session management.
+- [x] **Documentation & Phase Plans:** `README.md`, `documents/hackathon_spec.md`, `documents/phase-01-plan-foundation.md` through `documents/phase-08-local-providers-and-campaign-results.md`, and `documents/VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md`.
 
 ---
 
