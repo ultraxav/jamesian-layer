@@ -593,7 +593,7 @@ flowchart TD
 * **Core Deliverables:**
   - `jamesian_layer.sim.corridor_env`: Physical simulation environment (`CorridorEnv`) with `reset()` and `step(velocity, heading)` returning `(displacement, velocity, current, blocked)`. Incorporates 35 kg longitudinal inertia ($v \mathrel{+}= (F_{\text{drive}} - F_{\text{drag}})/m \cdot \Delta t$), emitting 4.0 A cruise current and 20.0 A locked-rotor stall current on blocked steps.
   - Full comparative benchmark sweeps (`audit/matrix.py` and `audit/compare.py`) proving attractor loop breaking and $\ge 50\%$ habit delegation.
-  - Split-screen corridor + telemetry demo application (`jamesian_layer/dashboard/demo_app.py`) and video storyboard (`documents/VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md`).
+  - Synchronized side-by-side corridor + biophysical telemetry demo application (`jamesian_layer/dashboard/demo_app.py`, `demo_traces.json`) and video storyboard (`documents/VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md`).
   - Finalizing open-source repository documentation (`README.md`, `documents/SUBMISSION_CHECKLIST.md`).
 * **Validation Target:** `test_attractor_prevention.py`, `test_habit_delegation_efficiency.py`, `test_arms.py`, and `test_matrix.py`.
 

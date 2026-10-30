@@ -27,7 +27,7 @@ Open three windows side-by-side before recording:
 
 ### Scene 1 — `0:00 – 0:35` | The Problem: Cartesian Blindness & Attractor Traps
 * **Visual:**
-  * Show **Browser Tab 1 (`demo_app.py`)** on the Vanilla vs. Jamesian corridor view. Point to the unshielded Vanilla trajectory repeatedly ramming into the barrier at $x = 25\,\text{m}$ while winding temperature climbs past $85^\circ\text{C}$ into thermal derating.
+  * Show **Browser Tab 1 (`demo_app.py`)** on the synchronized side-by-side 2D corridor view (`Meta Muse Spark Open` default or `Gemma 4 31B`). Point to the unshielded Vanilla trajectory repeatedly ramming into the barrier at $x = 25\,\text{m}$ while winding temperature climbs past $85^\circ\text{C}$ into thermal derating ($104.9^\circ\text{C}$ peak).
   * Briefly flash the 3-tier architecture diagram in `README.md`.
 * **Voiceover:**
   > *"Modern AI agents are strong symbolic reasoners, but they operate in a purely Cartesian modality: discrete, ungrounded in wall-clock physical time, and blind to their own causal efficacy. When deployed in robotics or production tool pipelines, static context windows cause working-memory latching—models repeat stalled commands until actuators overheat. Worse, they suffer from 'Phantom Agency': hallucinating forward progress when actions are mechanically blocked."*
@@ -45,11 +45,12 @@ Open three windows side-by-side before recording:
 
 ### Scene 3 — `1:20 – 2:15` | Live Split-Screen Demonstration
 * **Visual:**
-  * Switch to **Browser Tab 1 (`demo_app.py`)** and click **Run episode** / step through cycles 1 to 4.
-  * Highlight cycle 3: Jaccard overlap hits $\ge 0.70$, the 10-cycle Taboo Circuit Breaker trips (`T_coil` safely at $53.6^\circ\text{C} \ll 85^\circ\text{C}$), and at cycle 4 the Jamesian rover executes an orthogonal `turn_bearing(angle=90)` escape while Vanilla continues stalling past $85^\circ\text{C}$.
+  * Switch to **Browser Tab 1 (`demo_app.py`)**: select **Meta Muse Spark Open** (default) or **Gemma 4 31B**, and click **▶ Play** or jump via the milestone buttons (`1️⃣ Approach`, `💥 Wall Impact`, `🔄 Escape Turn`, `⚡ Habit Cruise`, `🔥 >85°C Check`).
+  * Show both rovers driving side-by-side in real time: at $x = 25\,\text{m}$, locked-rotor current surges to $20\,\text{A}$. The **Jamesian** rover detects `EfferenceΔ = 1.00`, spikes sympathetic tone, steers onto the clear bypass lane ($y = +0.65\,\text{m}$), and delegates the rest of the 100 m corridor to the **0-Token Subcortical Habit Router** ($T_{\text{coil}} < 35^\circ\text{C}$).
+  * Contrast with the **Vanilla** column: under identical odometry, the unshielded rover remains pinned at the wall, repeating forward thrust until winding temperature crosses $85^\circ\text{C}$ into thermal derating and reaches $104.9^\circ\text{C}$.
   * Switch to **Browser Tab 2 (`app.py`)**: click **Simulate stall (20 A)**, **Surprise burst**, and **Recover** to show the 10 Hz `@st.fragment` Plotly gauges responding in real time.
 * **Voiceover:**
-  > *"Here is the head-to-head corridor benchmark. When the 35-kilogram rover strikes a barrier at 25 meters, locked-rotor current surges to 20 amps. The unshielded baseline repeats forward drive for 10 cycles until its windings hit 85 degrees Celsius and thermally derate. With the Jamesian Layer, efference mismatch spikes sympathetic tone, the Jaccard circuit breaker trips at cycle 3, injects a lexical taboo directive into working memory, and triggers a single-turn escape maneuver while coil temperature stays below 54 degrees. Once in open corridor, our subcortical habit tracker delegates over 55% of routine strides at zero token cost."*
+  > *"Here is the head-to-head corridor benchmark. When the 35-kilogram rover strikes a barrier at 25 meters, locked-rotor current surges to 20 amps. In the unshielded baseline, the model repeats forward drive for all 16 cycles until windings exceed 85 degrees Celsius and thermally derate at 105 degrees. With the Jamesian Layer, efference mismatch immediately spikes sympathetic tone, triggers an orthogonal escape maneuver onto the bypass lane with coil temperature safely under 35 degrees, and hands off routine strides to our subcortical habit tracker at zero token cost."*
 
 ---
 

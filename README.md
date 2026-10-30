@@ -149,10 +149,12 @@ Run individual verification suites:
 
 ### 3.3 Launch the Interactive Dashboards (100% Pure Python)
 
-**Split-Screen Corridor vs. Somatic Telemetry Demo (`demo_app.py`):**
+**Synchronized Side-by-Side 2D Corridor Replay (`demo_app.py`):**
 ```bash
 .venv/bin/streamlit run jamesian_layer/dashboard/demo_app.py
 ```
+* Replays 100% scientifically rigorous *ceteris paribus* 16-cycle closed-loop episodes captured from real LLM endpoints (`meta-models/muse-spark-open-1026` on Baseten, `muse-spark-1.3` on Meta Model API, and `google/gemma-4-31b` / `12b` on LM Studio).
+* Features synchronized dual-column comparison (`Jamesian` vs. `Vanilla`), top-down 2D corridor map with 25 m barrier & bypass lane, live 2×2 biophysical gauges ($\sigma, V, \gamma, T_{\text{coil}}$), interactive playback controls, quick-jump milestone buttons, and full 16-cycle summary scorecards.
 
 **Live 10 Hz Autonomic Daemon & Perturbation Dashboard (`app.py`):**
 ```bash
