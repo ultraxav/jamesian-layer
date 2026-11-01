@@ -3,26 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jamesian Layer — Live Interoceptive Telemetry Daemon</title>
+  <title>The Jamesian Layer — Live Interoceptive Telemetry Daemon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    if (window.self !== window.top) {
+      document.documentElement.classList.add('in-iframe');
+    }
+  </script>
   <style>
+    html.in-iframe, html.in-iframe body {
+      overflow: hidden !important;
+    }
     :root {
-      --bg: #0b0f19;
-      --card-bg: #111827;
-      --card-border: #1f2937;
-      --text: #f9fafb;
-      --text-muted: #9ca3af;
-      --accent-blue: #38bdf8;
-      --accent-green: #10b981;
-      --accent-yellow: #f59e0b;
-      --accent-red: #ef4444;
-      --accent-purple: #c084fc;
+      /* The Jamesian Layer Design System (personal_notes/design.md) */
+      --bg: #111314;               /* Carbon Obsidian */
+      --surface: #181c1f;          /* Deep Slate */
+      --card-bg: #181c1f;          /* Deep Slate */
+      --card-border: #282e34;      /* Muted Hairline */
+      --border: #282e34;           /* Muted Hairline */
+      --text: #ffffff;             /* Crisp White */
+      --text-muted: #9da3ae;       /* Neutral Gray */
+      --accent: #FDC57E;           /* Sympathetic Gold (high-signal alerts, warnings) */
+      --accent-secondary: #1C4286; /* Cognitive Navy (Tier 1 reasoning, brand actions) */
+      --accent-tertiary: #A36AA5;  /* Interoceptive Amethyst (Tier 2 ODE daemon, valence) */
+
+      --navy-light: #27529d;
+      --navy-border: #2e5dae;
+      --gold: #FDC57E;
+      --amethyst: #A36AA5;
+      --safe-green: #34d399;
+      --danger-red: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      padding: 24px 18px 16px 18px;
+      padding: 24px 16px 16px 16px;
       line-height: 1.4;
     }
     .header {
@@ -31,14 +50,14 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--border);
     }
     .title-area h1 {
       font-size: 1.35rem;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -48,24 +67,24 @@
     .title-area p {
       font-size: 0.82rem;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 4px;
     }
     .live-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 14px;
-      color: #34d399;
+      padding: 6px 12px;
+      background: rgba(28, 66, 134, 0.25);
+      border: 1px solid var(--navy-border);
+      border-radius: 8px;
+      color: #ffffff;
       font-size: 0.75rem;
       font-weight: 600;
     }
     .pulse-dot {
       width: 8px;
       height: 8px;
-      background: #10b981;
+      background: var(--gold);
       border-radius: 50%;
       animation: pulse 1.5s infinite;
     }
@@ -75,11 +94,11 @@
       100% { transform: scale(0.9); opacity: 0.7; }
     }
     .controls-panel {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px 16px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -89,42 +108,72 @@
       font-family: inherit;
       font-size: 0.82rem;
       font-weight: 600;
-      border-radius: 6px;
-      border: 1px solid var(--card-border);
-      background: #1f2937;
-      color: #fff;
-      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #20262b;
+      color: #ffffff;
+      padding: 7px 14px;
       cursor: pointer;
       transition: all 0.15s ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
     }
-    button:hover { background: #374151; }
-    button.btn-danger { background: rgba(220, 38, 38, 0.25); border-color: rgba(239, 68, 68, 0.5); color: #fca5a5; }
-    button.btn-danger:hover { background: rgba(220, 38, 38, 0.45); }
-    button.btn-warn { background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.5); color: #fde68a; }
-    button.btn-warn:hover { background: rgba(245, 158, 11, 0.35); }
-    button.btn-blue { background: rgba(2, 132, 199, 0.25); border-color: rgba(56, 189, 248, 0.5); color: #bae6fd; }
-    button.btn-blue:hover { background: rgba(2, 132, 199, 0.45); }
-    button.btn-green { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #a7f3d0; }
-    button.btn-green:hover { background: rgba(16, 185, 129, 0.35); }
-    button.active { box-shadow: 0 0 0 2px #fff; }
+    button:hover { background: #2b333a; border-color: var(--text-muted); }
+    button.btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fca5a5;
+    }
+    button.btn-danger:hover {
+      background: rgba(239, 68, 68, 0.35);
+      border-color: #ef4444;
+    }
+    button.btn-warn {
+      background: rgba(253, 197, 126, 0.18);
+      border-color: rgba(253, 197, 126, 0.5);
+      color: var(--gold);
+    }
+    button.btn-warn:hover {
+      background: rgba(253, 197, 126, 0.3);
+      border-color: var(--gold);
+    }
+    button.btn-blue {
+      background: var(--accent-secondary);
+      border-color: var(--navy-border);
+      color: #ffffff;
+    }
+    button.btn-blue:hover {
+      background: var(--navy-light);
+      border-color: #4a88e8;
+    }
+    button.btn-green {
+      background: rgba(52, 211, 153, 0.18);
+      border-color: rgba(52, 211, 153, 0.5);
+      color: #6ee7b7;
+    }
+    button.btn-green:hover {
+      background: rgba(52, 211, 153, 0.3);
+      border-color: var(--safe-green);
+    }
+    button.active {
+      box-shadow: 0 0 0 2px var(--gold);
+    }
 
     .grid-top {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     @media (max-width: 900px) {
       .grid-top { grid-template-columns: repeat(2, 1fr); }
     }
     .gauge-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px;
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -137,115 +186,143 @@
     }
     .gauge-title {
       font-size: 0.75rem;
+      font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-top: 4px;
+      margin-top: 6px;
     }
     .gauge-val {
-      font-size: 1.25rem;
+      font-size: 1.35rem;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin-top: 2px;
     }
     .gauge-status {
       font-size: 0.68rem;
       font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-top: 2px;
+      padding: 3px 8px;
+      border-radius: 8px;
+      margin-top: 4px;
       display: inline-block;
+      border: 1px solid transparent;
     }
-    .status-safe { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .status-warn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-    .status-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .status-safe {
+      background: rgba(52, 211, 153, 0.15);
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.3);
+    }
+    .status-warn {
+      background: rgba(253, 197, 126, 0.18);
+      color: var(--gold);
+      border-color: rgba(253, 197, 126, 0.4);
+    }
+    .status-danger {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
 
     .oscilloscope-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
     }
     .card-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .card-title {
       font-size: 0.92rem;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
     }
     .legend-row {
       display: flex;
-      gap: 14px;
-      font-size: 0.72rem;
+      gap: 16px;
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
-    .legend-item { display: inline-flex; align-items: center; gap: 4px; }
-    .legend-line { width: 12px; height: 3px; border-radius: 2px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+    .legend-line { width: 14px; height: 3px; border-radius: 2px; }
 
     canvas.oscilloscope-canvas {
       width: 100%;
       height: 200px;
-      background: #070a13;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
+      background: #0d0f11;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       display: block;
     }
 
     .bottom-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 16px;
     }
     @media (max-width: 800px) {
       .bottom-grid { grid-template-columns: 1fr; }
     }
     .panel-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 14px;
+      padding: 16px;
     }
     .jaccard-input-row {
       display: flex;
       gap: 8px;
-      margin: 10px 0;
+      margin: 12px 0;
     }
     input[type="text"] {
       flex: 1;
-      font-family: ui-monospace, monospace;
-      font-size: 0.8rem;
-      padding: 6px 10px;
-      background: #090d16;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      color: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.82rem;
+      padding: 8px 12px;
+      background: #111314;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #ffffff;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--navy-border);
+      box-shadow: 0 0 0 2px rgba(28, 66, 134, 0.4);
     }
     .bar-row {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 8px;
-      font-size: 0.78rem;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
     }
-    .bar-label { min-width: 75px; color: var(--text-muted); }
+    .bar-label { min-width: 80px; color: var(--text-muted); font-weight: 600; }
     .bar-track {
       flex: 1;
       height: 18px;
-      background: #1f2937;
-      border-radius: 4px;
+      background: #111314;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       overflow: hidden;
       position: relative;
     }
     .bar-fill {
       height: 100%;
-      border-radius: 4px;
+      border-radius: 6px;
       transition: width 0.3s ease;
     }
-    .bar-val { min-width: 60px; text-align: right; font-weight: 600; color: #fff; }
+    .bar-val {
+      min-width: 70px;
+      text-align: right;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
   </style>
 </head>
 <body>
@@ -304,10 +381,10 @@
     <div class="card-header-row">
       <span class="card-title">📈 Real-Time Biophysical Waveforms (Continuous Roll)</span>
       <div class="legend-row">
-        <span class="legend-item"><span class="legend-line" style="background: var(--accent-blue);"></span> Tone (σ)</span>
-        <span class="legend-item"><span class="legend-line" style="background: var(--accent-green);"></span> Valence (V)</span>
-        <span class="legend-item"><span class="legend-line" style="background: var(--accent-purple);"></span> Strain (γ)</span>
-        <span class="legend-item"><span class="legend-line" style="background: var(--accent-red);"></span> T_coil (°C, Right Axis)</span>
+        <span class="legend-item"><span class="legend-line" style="background: var(--gold);"></span> Tone (σ)</span>
+        <span class="legend-item"><span class="legend-line" style="background: var(--amethyst);"></span> Valence (V)</span>
+        <span class="legend-item"><span class="legend-line" style="background: #60a5fa;"></span> Strain (γ)</span>
+        <span class="legend-item"><span class="legend-line" style="background: var(--danger-red);"></span> T_coil (°C, Right Axis)</span>
       </div>
     </div>
     <canvas id="scopeCanvas" class="oscilloscope-canvas"></canvas>
@@ -317,7 +394,7 @@
   <div class="bottom-grid">
     <div class="panel-card">
       <div class="card-title">🛑 Jaccard Circuit Breaker & Taboo Buffer (k=3 Strikes)</div>
-      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
         Type repeated action turns below to trigger the 3-strike Jaccard anti-recidivism breaker (J ≥ 0.70).
       </p>
       <div class="jaccard-input-row">
@@ -325,23 +402,23 @@
         <button id="btnTurn" class="btn-blue">Execute Turn</button>
       </div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-        <span style="font-size: 0.82rem; color: var(--text-muted);">Current Turn Score: <strong id="jScoreText" style="color: #fff;">0.00</strong></span>
+        <span style="font-size: 0.82rem; color: var(--text-muted);">Current Turn Score: <strong id="jScoreText" style="color: var(--gold); font-family: ui-monospace, monospace;">0.00</strong></span>
         <span id="jStatusBadge" class="gauge-status status-safe">NOMINAL (0/3 Strikes)</span>
       </div>
       <div class="bar-track" style="margin-top: 8px; height: 10px;">
-        <div id="jScoreBar" class="bar-fill" style="width: 0%; background: var(--accent-blue);"></div>
+        <div id="jScoreBar" class="bar-fill" style="width: 0%; background: var(--accent-secondary);"></div>
       </div>
     </div>
 
     <div class="panel-card">
       <div class="card-title">⚡ Multi-Provider Response Latencies (Cached from Reports)</div>
-      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; margin-bottom: 12px;">
+      <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; margin-bottom: 12px;">
         Mean tool execution turn latencies captured across our 18-model campaign matrix.
       </p>
       <div class="bar-row">
         <span class="bar-label">LM Studio</span>
         <div class="bar-track">
-          <div class="bar-fill" style="width: 63%; background: #06b6d4;"></div>
+          <div class="bar-fill" style="width: 63%; background: var(--gold);"></div>
         </div>
         <span class="bar-val">1,898 ms</span>
       </div>
@@ -355,7 +432,7 @@
       <div class="bar-row">
         <span class="bar-label">Baseten</span>
         <div class="bar-track">
-          <div class="bar-fill" style="width: 81%; background: #a855f7;"></div>
+          <div class="bar-fill" style="width: 81%; background: var(--amethyst);"></div>
         </div>
         <span class="bar-val">2,440 ms</span>
       </div>
@@ -453,7 +530,7 @@
       const angleRad = Math.PI - (pct * Math.PI);
       const cx = 50, cy = 48, r = 38;
 
-      let color = '#38bdf8';
+      let color = '#FDC57E';
       if (zones) {
         for (const z of zones) {
           if (clampVal >= z.from && clampVal <= z.to) {
@@ -467,9 +544,9 @@
       const ny = cy - r * Math.sin(angleRad);
 
       svg.innerHTML = `
-        <path d="M 12 48 A 38 38 0 0 1 88 48" fill="none" stroke="#1f2937" stroke-width="8" stroke-linecap="round"/>
+        <path d="M 12 48 A 38 38 0 0 1 88 48" fill="none" stroke="#282e34" stroke-width="8" stroke-linecap="round"/>
         <path d="M 12 48 A 38 38 0 0 1 ${nx} ${ny}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round"/>
-        <circle cx="${cx}" cy="${cy}" r="4" fill="#9ca3af"/>
+        <circle cx="${cx}" cy="${cy}" r="4" fill="#9da3ae"/>
       `;
     }
 
@@ -498,8 +575,8 @@
       const h = displayH;
       ctx.clearRect(0, 0, w, h);
 
-      // Grid lines
-      ctx.strokeStyle = '#1e293b';
+      // Grid lines - muted hairline
+      ctx.strokeStyle = '#282e34';
       ctx.lineWidth = 1;
       for (let y = 20; y < h; y += 35) {
         ctx.beginPath();
@@ -528,11 +605,15 @@
           ctx.stroke();
         }
 
-        // Traces
-        plotTrace(s => s[0], '#38bdf8', 0.0, 1.0);  // sigma
-        plotTrace(s => s[1], '#10b981', -1.0, 1.0); // valence
-        plotTrace(s => s[2], '#c084fc', 0.0, 1.0);  // gamma
-        plotTrace(s => s[3], '#ef4444', 25.0, 105.0); // T_coil
+        // Traces - palette mapping:
+        // sigma: Sympathetic Gold (#FDC57E)
+        // valence: Interoceptive Amethyst (#A36AA5)
+        // gamma: Cognitive Blue (#60a5fa)
+        // T_coil: Thermal Danger (#ef4444)
+        plotTrace(s => s[0], '#FDC57E', 0.0, 1.0);
+        plotTrace(s => s[1], '#A36AA5', -1.0, 1.0);
+        plotTrace(s => s[2], '#60a5fa', 0.0, 1.0);
+        plotTrace(s => s[3], '#ef4444', 25.0, 105.0);
       }
 
       ctx.restore();
@@ -576,10 +657,10 @@
           tagTemp.className = 'gauge-status status-safe';
         }
 
-        drawGauge('gSigma', sigma, 0.0, 1.0, [{from: 0, to: 0.6, color: '#38bdf8'}, {from: 0.6, to: 1.0, color: '#ef4444'}]);
-        drawGauge('gValence', valence, -1.0, 1.0, [{from: -1, to: 0, color: '#f59e0b'}, {from: 0, to: 1, color: '#10b981'}]);
-        drawGauge('gGamma', gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#c084fc'}, {from: 0.5, to: 1.0, color: '#f59e0b'}]);
-        drawGauge('gTemp', tCoil, 25.0, 110.0, [{from: 25, to: 75, color: '#10b981'}, {from: 75, to: 85, color: '#f59e0b'}, {from: 85, to: 110, color: '#ef4444'}]);
+        drawGauge('gSigma', sigma, 0.0, 1.0, [{from: 0, to: 0.6, color: '#FDC57E'}, {from: 0.6, to: 1.0, color: '#ef4444'}]);
+        drawGauge('gValence', valence, -1.0, 1.0, [{from: -1, to: 0, color: '#FDC57E'}, {from: 0, to: 1, color: '#A36AA5'}]);
+        drawGauge('gGamma', gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#60a5fa'}, {from: 0.5, to: 1.0, color: '#FDC57E'}]);
+        drawGauge('gTemp', tCoil, 25.0, 110.0, [{from: 25, to: 75, color: '#34d399'}, {from: 75, to: 85, color: '#FDC57E'}, {from: 85, to: 110, color: '#ef4444'}]);
 
         drawOscilloscope();
       }
@@ -669,17 +750,24 @@
       if (jaccardRun >= 3) {
         jStatusBadge.textContent = '🛑 TRIPPED (3/3 Strikes — Taboo Ban)';
         jStatusBadge.className = 'gauge-status status-danger';
-        jScoreBar.style.background = 'var(--accent-red)';
+        jScoreBar.style.background = 'var(--danger-red)';
       } else if (jaccardRun === 2) {
         jStatusBadge.textContent = '⚠️ STRIKE 2/3 (Warning)';
         jStatusBadge.className = 'gauge-status status-warn';
-        jScoreBar.style.background = 'var(--accent-yellow)';
+        jScoreBar.style.background = 'var(--gold)';
       } else {
         jStatusBadge.textContent = 'NOMINAL (1/3 Strike)';
         jStatusBadge.className = 'gauge-status status-safe';
-        jScoreBar.style.background = 'var(--accent-blue)';
+        jScoreBar.style.background = 'var(--accent-secondary)';
       }
     });
+
+    // Suppress inner scrollbars when embedded in an iframe (e.g. Streamlit st.iframe)
+    // allowing the outer parent window to handle single-page scrolling cleanly
+    if (window.self !== window.top) {
+      document.documentElement.style.overflowY = 'hidden';
+      document.body.style.overflowY = 'hidden';
+    }
   </script>
 </body>
 </html>

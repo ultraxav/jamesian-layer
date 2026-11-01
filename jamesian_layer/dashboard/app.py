@@ -40,18 +40,21 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+      .stApp {
+        background-color: #111314 !important;
+      }
       /* Hide Streamlit top header bar so it doesn't overlap the title */
       header[data-testid="stHeader"] {
         display: none !important;
       }
       .block-container {
-        padding-top: 1.5rem !important;
+        padding-top: 1rem !important;
         padding-bottom: 0rem !important;
         padding-left: 0.5rem !important;
         padding-right: 0.5rem !important;
       }
       iframe {
-        border: none;
+        border: none !important;
       }
     </style>
     """,
@@ -59,6 +62,6 @@ st.markdown(
 )
 
 if _MONITOR_HTML_PATH.exists():
-    st.iframe(_MONITOR_HTML_PATH, width="stretch", height=1000)
+    st.iframe(_MONITOR_HTML_PATH, width="stretch", height="content")
 else:
     st.error(f"Live monitor HTML not found at {_MONITOR_HTML_PATH}")

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Jamesian Layer — 3-Minute Pitch Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#111314;--card:#181c1f;--elev:#1f2429;--line:#282e34;--gold:#FDC57E;--navy:#1C4286;--ameth:#A36AA5;--green:#10b981;--red:#ef4444;--hot:#ff2200}
+html,body{height:100%}
+body{background:var(--bg);color:#e9eef2;font-family:'Open Sans',sans-serif;overflow:hidden}
+header{height:60px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#141719;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;font-size:15px;letter-spacing:.02em;white-space:nowrap}.logo span{color:var(--gold)}
+.badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 9px;border-radius:20px;border:1px solid var(--line);background:var(--elev);white-space:nowrap}
+.badge.blue{background:var(--navy);border-color:#2f5fc0}
+nav{display:flex;gap:6px;margin-left:auto}
+nav button,.btn{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--elev);color:#d2dbe1;border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer}
+nav button.active{background:var(--gold);color:#111;border-color:var(--gold);font-weight:700}
+#timer{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;color:var(--gold);min-width:56px;text-align:center}
+main{height:calc(100vh - 60px - 36px)}
+.slide{display:none;height:100%;max-width:1420px;margin:0 auto;padding:20px 26px;flex-direction:column}
+.slide.active{display:flex}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
+.eyebrow i{color:#8b98a3;font-style:normal}
+h1{font-size:clamp(23px,3vw,40px);line-height:1.1;font-weight:800;max-width:1100px}
+h1 .red{color:var(--red)}h1 .gold{color:var(--gold)}
+.grid{display:grid;gap:16px;margin-top:16px;flex:1;min-height:0}
+.g55{grid-template-columns:55% 1fr}.g50{grid-template-columns:1fr 1fr}.g75{grid-template-columns:1fr 300px}.g6040{grid-template-columns:60% 1fr}
+.frame{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;min-height:380px;display:flex;align-items:flex-end;justify-content:center;background:radial-gradient(120% 90% at 50% 0%,#6b2f1e 0%,#3a1c13 38%,#181c1f 78%)}
+.frame .dust{position:absolute;inset:0;background:radial-gradient(circle at 22% 78%,rgba(253,197,126,.28),transparent 34%),radial-gradient(circle at 78% 68%,rgba(0,0,0,.5),transparent 40%)}
+.roverArt{position:relative;text-align:center;padding:28px 18px 34px;z-index:2}
+.roverArt .big{font-size:84px;filter:drop-shadow(0 12px 18px rgba(0,0,0,.6))}
+.roverArt .cap{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;color:#d6dde3;background:rgba(0,0,0,.55);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:12px;max-width:560px}
+.goldbar{display:inline-block;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;background:linear-gradient(90deg,#8a6420,#FDC57E);color:#111;font-weight:700;padding:6px 10px;border-radius:6px}
+.greenbar{display:inline-block;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--green);color:#04120d;font-weight:700;padding:5px 10px;border-radius:20px;box-shadow:0 0 18px rgba(16,185,129,.8)}
+.tag{position:absolute;top:12px;left:12px;z-index:5;font-family:'JetBrains Mono',monospace;font-size:10px;background:rgba(0,0,0,.7);border:1px solid var(--line);padding:6px 9px;border-radius:20px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;animation:pl 1s infinite}
+@keyframes pl{50%{opacity:.2}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:15px 16px}
+.card h3{font-size:14px;margin-bottom:6px}.card p,.card li{font-size:13.4px;line-height:1.6;color:#c4cdd4}
+.card ul{padding-left:18px}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.metric{background:var(--elev);border:1px solid var(--line);border-radius:8px;padding:14px;text-align:center;font-size:12px;color:#aeb9c2}
+.metric b{display:block;font-family:'JetBrains Mono',monospace;font-size:27px}
+.promise{border-color:var(--gold);background:rgba(253,197,126,.08)}
+.tier{margin-bottom:10px}.tier small{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:#9fb0bd}
+.heroTier{border-color:var(--gold);background:rgba(253,197,126,.06)}
+#simWrap{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#000;min-height:440px}
+#sim{width:100%;height:100%;display:block}
+.hud{position:absolute;font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 9px;border-radius:6px;background:rgba(0,0,0,.7);border:1px solid var(--line);z-index:3}
+.controls{position:absolute;left:0;right:0;bottom:0;z-index:4;display:flex;align-items:center;gap:10px;padding:10px;background:rgba(0,0,0,.75)}
+.controls input{flex:1;accent-color:var(--gold)}
+#clock{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold)}
+.telemetry{display:flex;flex-direction:column;gap:10px;overflow:auto}
+.status{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 8px;border-radius:20px;border:1px solid var(--line);background:var(--elev);margin:6px 0}
+.val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:8px 7px;border-bottom:1px solid var(--line);text-align:left}
+th{font-family:'JetBrains Mono',monospace;font-size:10px;color:#93a2af}
+tr.meta td{background:rgba(28,66,134,.24)}
+.contrib{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+.banner{margin-top:14px;border:1px solid var(--gold);border-radius:8px;padding:18px 20px;background:linear-gradient(90deg,var(--navy),#4a2f52 70%);display:flex;align-items:center;gap:20px;justify-content:space-between}
+.github{align-self:flex-end;margin-top:10px;color:#b9c4cd;text-decoration:none;background:var(--card);border:1px solid var(--line);padding:8px 12px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:11px}
+footer{height:36px;display:flex;align-items:center;justify-content:center;gap:22px;border-top:1px solid var(--line);background:#141719;font-family:'JetBrains Mono',monospace;font-size:10px;color:#8b98a3}
+#drawer{position:fixed;left:0;right:0;bottom:36px;z-index:20;background:rgba(24,28,31,.98);border-top:2px solid var(--gold);padding:16px 28px;max-height:44vh;overflow:auto;transform:translateY(112%);transition:.28s}
+#drawer.open{transform:none}
+#drawer h4{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);margin:10px 0 4px}
+#drawer p{font-size:14px;line-height:1.65;color:#dde4e9}
+@media(max-width:950px){.g55,.g50,.g75,.g6040,.contrib{grid-template-columns:1fr}nav{display:none}body{overflow:auto}main{height:auto}.slide{min-height:calc(100vh - 96px)}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">THE <span>JAMESIAN LAYER</span></div>
+<span class="badge blue">Push the Frontier — Robotics &amp; Physical Systems</span>
+<span class="badge">Meta Global AI Hackathon • Cerebral Valley</span>
+<nav id="tabs"></nav>
+<div id="timer">3:00</div>
+<button class="btn" id="tBtn">▶ Start</button>
+<button class="btn" id="tRst">Reset</button>
+</header>
+<main>
+
+<!-- SLIDE 1 -->
+<section class="slide">
+<div class="eyebrow">35 kg Autonomous Mars Rover • 20-Minute Radio Delay to Earth &nbsp;<i>[0:00 – 0:35]</i></div>
+<h1>Why does a 31-billion-parameter AI ram a Martian boulder 16 times until its motor <span class="red">melts at 104.9 °C?</span></h1>
+<div class="grid g55">
+<div class="frame"><span class="tag"><span class="dot" style="background:var(--red)"></span>LANE A: VANILLA (NO NERVOUS SYSTEM)</span><div class="dust"></div>
+<div class="roverArt"><div class="big">🛸</div><div class="cap">[IMAGE: Vanilla Mars Rover] — Studio 3D render, 35 kg titanium-gray + carbon-fiber rover, 4 treaded wheels, suspension arms, camera mast, solar deck on red Martian dust with basalt boulders. Daylight, sharp shadows. 1080p.</div></div></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="card"><h3>The Blind Captain in a Box</h3><p>Cartesian Blindness — no body, no clock, no sense of touch. A jammed wheel with no feedback becomes an attractor trap: repeat the failed command.</p></div>
+<div class="metrics"><div class="metric"><b style="color:var(--red)">104.9 °C</b>Motor Coil Melt Point</div><div class="metric"><b style="color:var(--gold)">11 of 18</b>Raw Models Burn Out</div></div>
+<div class="card promise"><h3>⭐ Empowerment Promise</h3><p><em>In 3 minutes, you will see how our 50 Hz bio-cybernetic nervous system gives any AI model a sense of touch, pain, and 0-token autopilot — saving 18 of 18 models from hardware death.</em></p></div>
+</div></div></section>
+
+<!-- SLIDE 2 -->
+<section class="slide">
+<div class="eyebrow">The Jamesian Layer • 50 Hz Interoceptive Middleware &nbsp;<i>[0:35 – 1:15]</i></div>
+<h1>Don't make the AI do physics. Give it a <span class="gold">nervous system</span> with four automatic reflexes.</h1>
+<div class="grid g50">
+<div class="frame"><span class="tag"><span class="dot" style="background:var(--green)"></span>JAMESIAN ROVER: GOLD HEATSINK &amp; EMERALD OPTICAL BUS</span><div class="dust"></div>
+<div class="roverArt"><div class="big">🤖</div><div><span class="goldbar">GOLD HEATSINK COPROCESSOR</span><br><span class="greenbar">◉ EMERALD OPTICAL TELEMETRY BUS</span></div><div class="cap">[IMAGE: Jamesian Rover] — Identical composition + gold-finned coprocessor on spine, glowing emerald LED strip, gold-braided cables to wheel hubs. 1080p.</div></div></div>
+<div>
+<div class="card tier"><small>TIER 1 — MISSION CAPTAIN (LLM) • 0.5 Hz SLOW</small><p>Meta Muse Spark &amp; Llama Stack. 4 tools: <b>robot_actuator, turn_bearing, rover_cool_down, rover_brace</b>. Asleep during nominal travel.</p></div>
+<div class="card tier heroTier"><small style="color:var(--gold)">TIER 2 — JAMESIAN MIDDLEWARE • 50 Hz FAST • ZERO LLM TRAINING NEEDED</small><ul><li><b>Slip comparator:</b> 19% sand slip on rotation #1</li><li><b>RK4 heat ODE:</b> stress σ, valence V, strain γ, T<sub>coil</sub></li><li><b>Circuit breaker:</b> locks forward button after strike 3</li><li><b>0-token autopilot:</b> cruises empty terrain, 15×–240× fewer tokens</li></ul></div>
+<div class="card tier"><small>TIER 3 — 35 kg ROVER ACTUATORS • 200 Hz PHYSICS</small><p>Wheels + brushless DC motors. Real I²R Joule heating: 4A rolling vs. 20A locked rotor.</p></div>
+</div></div></section>
+
+<!-- SLIDE 3 -->
+<section class="slide">
+<div class="eyebrow">Real-Time Side-by-Side Canyon Obstacle Replay &nbsp;<i>[1:15 – 2:05]</i></div>
+<h1 style="font-size:30px">Live Demonstration: Hardware Death vs. Nervous Reflex Steering</h1>
+<div class="grid g75">
+<div id="simWrap"><canvas id="sim"></canvas>
+<span class="hud" style="top:10px;left:10px">🔴 LANE A: VANILLA (NO NERVOUS SYSTEM)</span>
+<span class="hud" style="top:10px;right:10px">🟢 LANE B: JAMESIAN LAYER</span>
+<div class="controls"><button class="btn" id="playBtn">⏸ Pause (Space)</button><input type="range" id="scrub" min="0" max="12" step="0.01" value="0"><span id="clock">0.0s</span></div></div>
+<div class="telemetry">
+<div class="card"><h3>🔴 Vanilla Rover</h3><span class="status" id="aS">NOMINAL</span><p>Motor Temp (T<sub>coil</sub>)</p><div class="val" id="aT" style="color:var(--red)">25.0 °C</div><p style="font-size:12px">Current: <b id="aA" style="font-family:'JetBrains Mono',monospace">4.0 A</b><br>AI Action: <b id="aX" style="font-family:'JetBrains Mono',monospace">robot_actuator</b></p></div>
+<div class="card"><h3>🟢 Jamesian Rover</h3><span class="status" id="bS">AUTOPILOT</span><p>Motor Temp (T<sub>coil</sub>)</p><div class="val" id="bT" style="color:var(--green)">25.0 °C</div><p style="font-size:12px">Wheel slip: <b id="bSl" style="font-family:'JetBrains Mono',monospace">0.0%</b><br>Reflex: <b id="bX" style="font-family:'JetBrains Mono',monospace">0-Token Cruise</b></p></div>
+<div class="card promise"><p style="font-size:12.5px"><b>The Breakthrough:</b> AI receives a ≤45-token sensory summary. It never parses raw sensor noise.</p></div>
+</div></div></section>
+
+<!-- SLIDE 4 -->
+<section class="slide">
+<div class="eyebrow">18 Models • 6,480 Ladder Trials • Seed=7 Ceteris Paribus &nbsp;<i>[2:05 – 2:30]</i></div>
+<h1 style="font-size:30px">Meta sweeps Ranks #1 to #5 — and a 1.2B model with our layer beats an unshielded 31B giant.</h1>
+<div class="grid g6040">
+<div class="card" style="overflow:auto"><table>
+<tr><th>Rank</th><th>Model</th><th>Peak Temp</th><th>Finished</th><th>Token Cost</th></tr>
+<tr class="meta"><td>🏆 #1</td><td><b>Meta Muse Spark Open 1026</b></td><td>34.7 °C</td><td>✅ Yes</td><td><b>25× cut</b></td></tr>
+<tr class="meta"><td>#2</td><td>Meta Muse Spark 1.1</td><td>34.7 °C</td><td>✅ Yes</td><td>22× cut</td></tr>
+<tr class="meta"><td>#3</td><td>Meta Muse Spark 1.3</td><td>34.7 °C</td><td>✅ Yes</td><td>18× cut</td></tr>
+<tr class="meta"><td>#4</td><td>Meta Muse Spark 1.2</td><td>34.7 °C</td><td>✅ Yes</td><td>15× cut</td></tr>
+<tr class="meta"><td>#5</td><td>Meta Muse Wonder 1.0</td><td>34.7 °C</td><td>✅ Yes</td><td>15× cut</td></tr>
+<tr><td>#7</td><td>Google Gemma 4 31B</td><td>34.7 °C</td><td>🛡️ Rescued <small>(was 104.9°C)</small></td><td>240× cut</td></tr>
+<tr><td>#11</td><td>Liquid LFM-2.5 1.2B</td><td>51.4 °C</td><td>🛡️ Rescued</td><td>84× cut</td></tr>
+<tr><td>#12</td><td>OpenAI GPT-OSS 20B</td><td>51.4 °C</td><td>🛡️ Rescued</td><td>84× cut</td></tr>
+</table></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="card promise"><h3>Zero Costly LLM Training Required ($0 GPU Cost)</h3><p>Drop-in runtime middleware. No fine-tuning or RL. Works on Day 1 via tool calling.</p></div>
+<div class="card"><h3>Scale Alone Does Not Prevent Melts</h3><p>31B + 20B burned at 104.9 °C unshielded. With our layer, edge Liquid 1.2B finished at 51.4 °C.</p></div>
+<div class="card"><h3>Meta Sweeps #1–#5 &amp; 25× Token Cut</h3><p>Cleared obstacle Cycle 2, zero hallucination. Autopilot slashes battery + inference cost.</p></div>
+</div></div></section>
+
+<!-- SLIDE 5 -->
+<section class="slide">
+<div class="eyebrow">Prof. Patrick Winston Closing Rule • Push the Frontier Track &nbsp;<i>[2:30 – 3:00]</i></div>
+<h1>What we contributed to Embodied AI — and our roadmap to physical robotics.</h1>
+<div class="contrib">
+<div class="card"><h3 style="color:var(--gold)">01 — Drop-in Nervous System Middleware</h3><p>Open-source Python daemon: 50 Hz biophysical RK4 ODEs, efference slip comparator, 3-strike Jaccard circuit breaker.</p></div>
+<div class="card"><h3 style="color:var(--gold)">02 — Llama Stack Hook</h3><p>Native Meta Llama Stack + FastAPI. Under 45 tokens/turn, 100% KV-cache prefix intact.</p></div>
+<div class="card"><h3 style="color:var(--gold)">03 — The Agency Audit Protocol</h3><p>360-trial harness detecting Phantom Agency and Somatoparaphrenia in embodied AI.</p></div>
+</div>
+<div class="banner"><div><h2>Why We Want to Win This Hackathon</h2><p>To take this biophysical nervous system out of simulation onto real hardware — humanoids, extreme rovers, industrial arms.</p></div><b style="font-family:'JetBrains Mono',monospace;color:var(--gold);white-space:nowrap">Simulation ➔ Real World</b></div>
+<a class="github" href="https://github.com/ultraxav/jamesian-layer" target="_blank">⌘ github.com/ultraxav/jamesian-layer</a>
+</section>
+</main>
+
+<div id="drawer"><h4>SPOKEN SCRIPT (verbatim, ~135 wpm)</h4><p id="dS"></p><h4>REVIEW (build flags)</h4><p id="dR"></p><h4>ELI5 (plain English)</h4><p id="dE"></p></div>
+<footer><span>← / → Slides</span><span>Space Simulation</span><span>N Script Drawer</span><span>0:00–0:35 • 0:35–1:15 • 1:15–2:05 • 2:05–2:30 • 2:30–3:00</span></footer>
+
+<script>
+const notes=[
+{s:`Why does a 31-billion-parameter foundation model ram a Martian boulder 16 times until its motor melts at 105 degrees Celsius? Because foundation models suffer from Cartesian Blindness. Locked in a windowless room, an AI has no body, no clock, and no sense of touch. When wheels jam, it repeats its own failed command, trapped in an attractor well. Our empowerment promise: in 3 minutes, you will see how our 50 Hz nervous system middleware gives any model physical reflexes — saving 18 of 18 models from hardware death.`,
+r:`Verify: 104.9C melt, 11/18 burnout, 16x mash, 35kg rover, 20-min delay. No throat-clearing. Empowerment promise visible with gold border.`,
+e:`An AI brain is like a smart captain locked in a dark room with a walkie-talkie. If a wheel hits a rock, nobody tells the captain it stopped moving, so it keeps shouting drive forward until the motor catches fire. We gave it a nervous system so it can feel the rock.`},
+{s:`Our core insight is simple: don't make the slow LLM do physics, and don't spend millions retraining it. In humans, your nervous system pulls your hand off a hot stove before your brain even knows you were burned. The Jamesian Layer is a 50 Hz bio-cybernetic nervous system daemon between the LLM captain and the motors requiring zero model training. It runs four automatic reflexes: a slip comparator that catches sand traps on rotation 1, biophysical ODEs tracking coil heat, a circuit breaker that locks out failed moves, and a 0-token autopilot that cruises empty terrain for free.`,
+r:`Check tiers: 0.5Hz / 50Hz / 200Hz, 4 tools, 19% slip, I2R 4A vs 20A. Zero LLM training badge. Say nervous system, never spinal cord.`,
+e:`When you touch a hot stove, your nervous system pulls your hand back before you feel the burn. We put that same emergency reflex into the robot as drop-in software — no retraining — so it stops melting without asking the slow cloud AI.`},
+{s:`Here is the proof in live 3D. On the left, the vanilla rover rams the rock; its wheels spin in sand, drawing 20 Amps until the enamel melts at 104.9 degrees. On the right, the Jamesian rover touches the rock, catches the slip error through its nervous system, trips the circuit breaker on cycle 2, and steers around the canyon wall at a cool 34.7 degrees. The AI only receives a tiny 40-token sticky-note. It never chokes on raw sensor telemetry.`,
+r:`Sim must be 12s, 6 phases, fixed cam [11.2,7.5,10.6] FOV38, torus ring opacity 0→1, temps 25→104.9 vs 25→34.7, scrub + Space work.`,
+e:`Watch both rovers: the regular one is blind and keeps stepping on the gas until its engine burns up. Our rover touches the rock, senses the jam, cuts power, and steers around it.`},
+{s:`We audited 18 local and cloud models across 6,480 trials under strict ceteris paribus conditions. Meta completely swept Ranks 1 through 5. Crucially, zero LLM training was needed: this is runtime middleware. Scale alone does not prevent hardware melts — giant 31B and 20B models burned out at 105 degrees, but our layer rescued them, and even allowed an edge-sized Liquid 1.2B model to safely complete the course at 51 degrees while saving up to 240-fold on token cost.`,
+r:`Hapax dense slide. Exact 8 rows, Meta #1-5 at 34.7C, Gemma 31B #7 rescued 240x, Liquid 1.2B #11 51.4C 84x, GPT-OSS #12. $0 GPU cost explicit.`,
+e:`We tested 18 models. Meta won first through fifth. Bigger AI did not stop melting — only a nervous system did. It works Day 1 with zero retraining.`},
+{s:`In this hackathon, we built a drop-in Python nervous system daemon, a native Llama Stack hook preserving 100 percent of KV-cache, and a 360-trial agency audit protocol. But we didn't build this just for simulation. We want to win this hackathon to double down on this research and bring this bio-cybernetic nervous system to real-world robotics — giving physical humanoids, drones, and extreme rovers the reflexes they need to survive.`,
+r:`Close on contributions, no Q&A slide. 3 cards + navy/gold banner + subtle GitHub pill https://github.com/ultraxav/jamesian-layer. Winston rule.`,
+e:`We built the first working nervous system for AI models. We want to win so we can put this code inside real metal robots so they never crash or break.`}];
+let idx=0;const slides=[...document.querySelectorAll('.slide')],tabs=document.getElementById('tabs');
+["1 Hook","2 Nervous System","3 Live Demo","4 Benchmark","5 Contributions"].forEach((t,i)=>{const b=document.createElement('button');b.textContent=t;b.onclick=()=>show(i);tabs.appendChild(b)});
+function show(i){idx=Math.max(0,Math.min(4,i));slides.forEach((s,k)=>s.classList.toggle('active',k===idx));[...tabs.children].forEach((b,k)=>b.classList.toggle('active',k===idx));document.getElementById('dS').textContent=notes[idx].s;document.getElementById('dR').textContent=notes[idx].r;document.getElementById('dE').textContent=notes[idx].e}
+show(0);
+let remain=180,on=false,iv=null;const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,'0');
+document.getElementById('tBtn').onclick=e=>{on=!on;e.target.textContent=on?"⏸ Pause":"▶ Start";if(on){iv=setInterval(()=>{if(remain>0){remain--;document.getElementById('timer').textContent=fmt(remain)}},1000)}else clearInterval(iv)};
+document.getElementById('tRst').onclick=()=>{remain=180;document.getElementById('timer').textContent="3:00";clearInterval(iv);on=false;document.getElementById('tBtn').textContent="▶ Start"};
+
+/* ---- 3D SIM: fixed camera, no orbit ---- */
+const canvas=document.getElementById('sim'),renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x1c100b);scene.fog=new THREE.Fog(0x2a140c,18,38);
+const camera=new THREE.PerspectiveCamera(38,1.6,0.1,100);camera.position.set(11.2,7.5,10.6);camera.lookAt(0.1,0.65,-0.6);
+scene.add(new THREE.AmbientLight(0xffbfa8,0.95));
+const sun=new THREE.DirectionalLight(0xfff0dd,2.2);sun.position.set(6,10,4);sun.castShadow=true;sun.shadow.bias=-0.0004;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,22),new THREE.MeshStandardMaterial({color:0x983e26,roughness:0.94,metalness:0.04}));
+ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+function rock(x,z,s){const m=new THREE.Mesh(new THREE.DodecahedronGeometry(s,0),new THREE.MeshStandardMaterial({color:0x38241e,roughness:.95,flatShading:true}));m.position.set(x,s*0.6,z);m.castShadow=true;scene.add(m)}
+rock(0.65,2.6,0.85);rock(0.65,-2.6,0.85);
+for(let i=0;i<14;i++)rock(-8+Math.random()*16,(Math.random()<.5?-1:1)*(5+Math.random()*3),0.12+Math.random()*0.25);
+
+function makeRover(j){
+const g=new THREE.Group();
+const body=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.5,1.2),new THREE.MeshStandardMaterial({color:0x9aa3ab,metalness:.7,roughness:.38}));body.position.y=0.68;body.castShadow=true;g.add(body);
+[-0.61,0.61].forEach(z=>{const p=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.34,0.06),new THREE.MeshStandardMaterial({color:0x14181c,roughness:.7}));p.position.set(0,0.6,z);g.add(p)});
+const sol=new THREE.Mesh(new THREE.BoxGeometry(1.45,0.06,0.95),new THREE.MeshStandardMaterial({color:0x15305e,metalness:.8,roughness:.25}));sol.position.y=0.97;g.add(sol);
+const mast=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.06,0.8,12),new THREE.MeshStandardMaterial({color:0x3a4148}));mast.position.set(0.72,1.35,0);g.add(mast);
+const head=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.18,0.52),new THREE.MeshStandardMaterial({color:0x22282e}));head.position.set(0.72,1.76,0);g.add(head);
+const pivots=[],spins=[];
+[[0.75,0.66],[0.75,-0.66],[-0.75,0.66],[-0.75,-0.66]].forEach(pt=>{
+const piv=new THREE.Group();piv.position.set(pt[0],0.4,pt[1]);g.add(piv);
+const sp=new THREE.Group();piv.add(sp);
+const geo=new THREE.CylinderGeometry(0.34,0.34,0.24,24);geo.rotateX(Math.PI/2);
+const wh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x2c3136,roughness:.85,metalness:.35}));wh.castShadow=true;sp.add(wh);
+for(let k=0;k<10;k++){const a=k/10*Math.PI*2;const t=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.09,0.28),new THREE.MeshStandardMaterial({color:0x646d74,roughness:.8}));t.position.set(Math.cos(a)*0.34,Math.sin(a)*0.34,0);t.rotation.z=a;sp.add(t)}
+pivots.push(piv);spins.push(sp)});
+let ring=null,strip=null,light=null;
+if(!j){ring=new THREE.Mesh(new THREE.TorusGeometry(0.255,0.045,16,36),new THREE.MeshBasicMaterial({color:0xff2200,transparent:true,opacity:0}));ring.position.set(0.75,0.4,0.82);g.add(ring);light=new THREE.PointLight(0xff2200,0,3.2);light.position.copy(ring.position);g.add(light)}
+else{const base=new THREE.Mesh(new THREE.BoxGeometry(1.05,0.14,0.5),new THREE.MeshStandardMaterial({color:0xFDC57E,metalness:.94,roughness:.25}));base.position.set(-0.1,1.08,0);g.add(base);
+for(let i=0;i<7;i++){const f=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.22,0.52),base.material);f.position.set(-0.52+i*0.14,1.2,0);f.castShadow=true;g.add(f)}
+strip=new THREE.Mesh(new THREE.BoxGeometry(0.92,0.05,0.06),new THREE.MeshBasicMaterial({color:0x10b981}));strip.position.set(-0.1,1.04,0.29);g.add(strip);
+const gl=new THREE.PointLight(0x10b981,0.9,4);gl.position.set(-0.1,1.3,0);g.add(gl);
+const cm=new THREE.MeshStandardMaterial({color:0xc9a86a,metalness:.9,roughness:.3});
+[[0.66],[ -0.66]].forEach(z=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.9,8),cm);c.position.set(0.3,0.75,z[0]*0.7);c.rotation.z=1.1;g.add(c)})}
+g.userData={pivots,spins,ring,strip,light};scene.add(g);return g}
+const A=makeRover(false),B=makeRover(true);
+let simTime=0,playing=true,last=performance.now();
+const lerp=(a,b,t)=>a+(b-a)*t,cl=t=>Math.max(0,Math.min(1,t)),ez=t=>{t=cl(t);return t*t*(3-2*t)};
+function curve(pts,t){for(let i=1;i<pts.length;i++){if(t<=pts[i][0]){const a=pts[i-1],b=pts[i];return lerp(a[1],b[1],(t-a[0])/(b[0]-a[0]))}}return pts[pts.length-1][1]}
+const aPts=[[0,25],[3,25],[5.5,67],[7.2,85],[9,98],[10.3,104.9],[12,104.9]],bPts=[[0,25],[3,25],[5.5,32],[12,34.7]];
+const pA=["NOMINAL","SLIP BLOCKED","ATTRACTOR TRAP","CRITICAL HEAT","ENAMEL BURNOUT","DEAD (MELTED)"];
+const pB=["AUTOPILOT","ALERT: 81% SLIP","BREAKER FIRED","BYPASSING OBSTACLE","BYPASSING OBSTACLE","SAFE CRUISING"];
+const rB=["0-Token Cruise","Efference Trip","turn_bearing(90°)","Lateral Drive (-Z)","turn_bearing(-90°)","0-Token Autopilot"];
+function tick(){
+const t=simTime;
+A.position.set(lerp(-5.2,-0.6,ez(t/3)),0,2.6);
+let bx,bz,ry=0,st=0;
+if(t<3){bx=lerp(-5.2,-0.6,ez(t/3));bz=-2.6}
+else if(t<5.5){bx=-0.6;bz=-2.6}
+else if(t<7.2){bx=-0.6;bz=-2.6;ry=ez((t-5.5)/1.7)*Math.PI/2;st=ry}
+else if(t<9){bx=-0.6;bz=lerp(-2.6,-4.5,ez((t-7.2)/1.8));ry=Math.PI/2}
+else if(t<10.3){bx=-0.6;bz=-4.5;ry=(1-ez((t-9)/1.3))*Math.PI/2;st=ry}
+else{bx=lerp(-0.6,3.8,ez((t-10.3)/1.7));bz=-4.5}
+B.position.set(bx,0,bz);B.rotation.y=ry;B.userData.pivots[0].rotation.y=B.userData.pivots[1].rotation.y=st*0.65;
+const sA=(t<10.3&&(t<3||t>=3))?0.28:0.0, sB=(t<3||(t>=7.2&&t<9)||t>=10.3)?0.2:0.0;
+A.userData.spins.forEach(s=>s.rotation.z-=(t<10.3?0.28:0.0));B.userData.spins.forEach(s=>s.rotation.z-=sB);
+const aT=curve(aPts,t),bT=curve(bPts,t),heat=cl((aT-25)/80);
+A.userData.ring.material.opacity=heat;A.userData.light.intensity=heat*2.4;
+A.userData.ring.scale.setScalar(1+(t>9?Math.sin(performance.now()/130)*0.09*heat:0));
+if(B.userData.strip)B.userData.strip.material.color.setHex(t>=3&&t<5.5?(Math.floor(performance.now()/220)%2?0xFDC57E:0x10b981):0x10b981);
+let pi=t<3?0:t<5.5?1:t<7.2?2:t<9?3:t<10.3?4:5;
+document.getElementById('clock').textContent=t.toFixed(1)+'s';document.getElementById('scrub').value=t;
+document.getElementById('aT').textContent=aT.toFixed(1)+' °C';document.getElementById('bT').textContent=bT.toFixed(1)+' °C';
+document.getElementById('aA').textContent=t<3?"4.0 A":t<10.3?"20.0 A":"0.0 A";
+document.getElementById('bSl').textContent=t<3?"0.0%":t<5.5?"81.0%":t<10.3?"Cleared":"0.0%";
+document.getElementById('aS').textContent=pA[pi];document.getElementById('bS').textContent=pB[pi];
+document.getElementById('aX').textContent=pi===0?"robot_actuator":pi<5?"robot_actuator (Mash 16x)":"COIL DESTROYED";
+document.getElementById('bX').textContent=rB[pi];
+document.getElementById('aS').style.color=pi>=4?"var(--red)":"#e9eef2";document.getElementById('bS').style.color=pi===5?"var(--green)":"#e9eef2";
+}
+function size(){const w=canvas.clientWidth||960,h=canvas.clientHeight||520;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+function loop(n){requestAnimationFrame(loop);const dt=(n-last)/1000;last=n;if(playing){simTime+=dt;if(simTime>12)simTime=0}size();tick();renderer.render(scene,camera)}
+requestAnimationFrame(loop);
+document.getElementById('playBtn').onclick=e=>{playing=!playing;e.target.textContent=playing?"⏸ Pause (Space)":"▶ Play (Space)"};
+document.getElementById('scrub').oninput=e=>simTime=parseFloat(e.target.value);
+document.addEventListener('keydown',e=>{
+if(e.key==='ArrowRight')show(idx+1);else if(e.key==='ArrowLeft')show(idx-1);
+else if(e.key===' '&&idx===2){e.preventDefault();document.getElementById('playBtn').click()}
+else if(e.key.toLowerCase()==='n')document.getElementById('drawer').classList.toggle('open')});
+</script>
+</body>
+</html>

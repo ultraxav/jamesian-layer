@@ -4,25 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Jamesian Layer — Side-by-Side Corridor Replay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    if (window.self !== window.top) {
+      document.documentElement.classList.add('in-iframe');
+    }
+  </script>
   <style>
+    html.in-iframe, html.in-iframe body {
+      overflow: hidden !important;
+    }
     :root {
-      --bg: #0b0f19;
-      --card-bg: #111827;
-      --card-border: #1f2937;
-      --text: #f9fafb;
-      --text-muted: #9ca3af;
-      --accent-blue: #38bdf8;
-      --accent-green: #10b981;
-      --accent-yellow: #f59e0b;
-      --accent-red: #ef4444;
-      --accent-purple: #a855f7;
+      /* The Jamesian Layer Design System (personal_notes/design.md) */
+      --bg: #111314;               /* Carbon Obsidian */
+      --surface: #181c1f;          /* Deep Slate */
+      --card-bg: #181c1f;          /* Deep Slate */
+      --card-border: #282e34;      /* Muted Hairline */
+      --border: #282e34;           /* Muted Hairline */
+      --text: #ffffff;             /* Crisp White */
+      --text-muted: #9da3ae;       /* Neutral Gray */
+      --accent: #FDC57E;           /* Sympathetic Gold (high-signal alerts, warnings) */
+      --accent-secondary: #1C4286; /* Cognitive Navy (Tier 1 reasoning, brand actions) */
+      --accent-tertiary: #A36AA5;  /* Interoceptive Amethyst (Tier 2 ODE daemon, valence) */
+
+      --navy-light: #27529d;
+      --navy-border: #2e5dae;
+      --gold: #FDC57E;
+      --amethyst: #A36AA5;
+      --safe-green: #34d399;
+      --danger-red: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg);
       color: var(--text);
-      padding: 24px 18px 16px 18px;
+      padding: 24px 16px 16px 16px;
       line-height: 1.4;
     }
     .header {
@@ -33,12 +52,12 @@
       gap: 12px;
       margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--border);
     }
     .title-area h1 {
       font-size: 1.35rem;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -48,38 +67,42 @@
     .title-area p {
       font-size: 0.82rem;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 4px;
     }
     .controls-bar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 10px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
       border-radius: 8px;
       margin-bottom: 14px;
     }
     select, button, input[type="range"] {
       font-family: inherit;
       font-size: 0.85rem;
-      border-radius: 6px;
-      border: 1px solid var(--card-border);
-      background: #1f2937;
-      color: #fff;
-      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #20262b;
+      color: #ffffff;
+      padding: 7px 12px;
       cursor: pointer;
       transition: all 0.15s ease;
     }
-    select:focus, button:focus { outline: none; border-color: var(--accent-blue); }
-    button:hover { background: #374151; }
+    select:focus, button:focus { outline: none; border-color: var(--navy-border); }
+    button:hover { background: #2b333a; border-color: var(--text-muted); }
     button.btn-primary {
-      background: #0284c7;
-      border-color: #0369a1;
+      background: var(--accent-secondary);
+      border-color: var(--navy-border);
+      color: #ffffff;
       font-weight: 600;
     }
-    button.btn-primary:hover { background: #0369a1; }
+    button.btn-primary:hover {
+      background: var(--navy-light);
+      border-color: #4a88e8;
+    }
     .scrubber-container {
       display: flex;
       align-items: center;
@@ -88,127 +111,154 @@
     }
     .scrubber-container input[type="range"] {
       flex: 1;
-      accent-color: var(--accent-blue);
+      accent-color: var(--gold);
       cursor: pointer;
     }
     .milestones-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 14px;
     }
     .milestone-btn {
       font-size: 0.75rem;
-      padding: 4px 10px;
-      background: rgba(31, 41, 55, 0.6);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
+      font-weight: 600;
+      padding: 6px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       color: var(--text-muted);
     }
     .milestone-btn:hover {
-      color: #fff;
-      background: #374151;
-      border-color: #4b5563;
+      color: #ffffff;
+      background: #2b333a;
+      border-color: var(--text-muted);
     }
     .narrative-box {
-      background: #131d33;
-      border-left: 4px solid var(--accent-blue);
-      padding: 10px 14px;
-      border-radius: 6px;
+      background: rgba(28, 66, 134, 0.22);
+      border-left: 4px solid var(--accent-secondary);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 8px;
       font-size: 0.85rem;
       margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .narrative-box.warning {
-      background: #2b1f13;
-      border-left-color: var(--accent-yellow);
+      background: rgba(253, 197, 126, 0.12);
+      border-left-color: var(--gold);
     }
     .narrative-box.error {
-      background: #2f1515;
-      border-left-color: var(--accent-red);
+      background: rgba(239, 68, 68, 0.15);
+      border-left-color: var(--danger-red);
     }
     .narrative-box.success {
-      background: #102a22;
-      border-left-color: var(--accent-green);
+      background: rgba(52, 211, 153, 0.12);
+      border-left-color: var(--safe-green);
     }
     .dual-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
+      gap: 16px;
       margin-bottom: 16px;
     }
     @media (max-width: 900px) {
       .dual-grid { grid-template-columns: 1fr; }
     }
     .arm-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 14px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
     .arm-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
     }
     .arm-title {
       font-size: 1rem;
       font-weight: 700;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
-    .arm-jamesian .arm-title { color: var(--accent-blue); }
-    .arm-vanilla .arm-title { color: #f87171; }
+    .arm-jamesian .arm-title { color: var(--gold); }
+    .arm-vanilla .arm-title { color: #fca5a5; }
     .kpi-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
     }
     .kpi-card {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 6px;
-      padding: 8px;
+      background: #111314;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 8px;
       text-align: center;
     }
     .kpi-label {
       font-size: 0.68rem;
+      font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     .kpi-val {
-      font-size: 1.05rem;
+      font-size: 1.12rem;
       font-weight: 700;
-      color: #fff;
-      margin: 2px 0;
+      color: #ffffff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin: 4px 0;
     }
     .kpi-tag {
       font-size: 0.65rem;
       font-weight: 600;
-      padding: 2px 4px;
-      border-radius: 4px;
+      padding: 3px 6px;
+      border-radius: 8px;
       display: inline-block;
+      border: 1px solid transparent;
     }
-    .tag-safe { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-    .tag-warn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-    .tag-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-    .tag-habit { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
-    .tag-neutral { background: rgba(156, 163, 175, 0.15); color: #d1d5db; }
+    .tag-safe {
+      background: rgba(52, 211, 153, 0.15);
+      color: #34d399;
+      border-color: rgba(52, 211, 153, 0.3);
+    }
+    .tag-warn {
+      background: rgba(253, 197, 126, 0.18);
+      color: var(--gold);
+      border-color: rgba(253, 197, 126, 0.4);
+    }
+    .tag-danger {
+      background: rgba(239, 68, 68, 0.18);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .tag-habit {
+      background: rgba(163, 106, 165, 0.2);
+      color: #e9d5ff;
+      border-color: rgba(163, 106, 165, 0.4);
+    }
+    .tag-neutral {
+      background: rgba(157, 163, 174, 0.12);
+      color: var(--text-muted);
+      border-color: var(--border);
+    }
     
     .corridor-canvas-wrap {
       position: relative;
-      background: #090d16;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
+      background: #0d0f11;
+      border: 1px solid var(--border);
+      border-radius: 8px;
       overflow: hidden;
     }
     canvas.corridor-canvas {
@@ -220,10 +270,10 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
-      background: rgba(0,0,0,0.25);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 6px;
-      padding: 8px 4px;
+      background: #111314;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 6px;
     }
     .gauge-cell {
       text-align: center;
@@ -234,54 +284,58 @@
     }
     .gauge-name {
       font-size: 0.68rem;
+      font-weight: 600;
       color: var(--text-muted);
+      margin-top: 2px;
     }
     .gauge-number {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
     .console-box {
-      background: #050811;
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 6px;
-      padding: 8px 10px;
+      background: #0d0f11;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.72rem;
-      color: #e2e8f0;
+      color: #ffffff;
       overflow-x: auto;
       white-space: pre-wrap;
       word-break: break-all;
       max-height: 100px;
     }
     .console-line { margin-bottom: 4px; }
-    .console-suffix { color: #38bdf8; }
-    .console-tripped { color: #ef4444; font-weight: bold; }
+    .console-suffix { color: var(--gold); }
+    .console-tripped { color: var(--danger-red); font-weight: bold; }
     .summary-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 14px;
+      padding: 16px;
     }
     .summary-card h3 {
       font-size: 0.95rem;
-      margin-bottom: 10px;
-      color: #fff;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #ffffff;
     }
     table.summary-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
     }
     table.summary-table th, table.summary-table td {
-      padding: 6px 10px;
+      padding: 8px 12px;
       text-align: left;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid var(--border);
     }
     table.summary-table th {
       color: var(--text-muted);
       font-weight: 600;
-      background: rgba(0,0,0,0.2);
+      background: #111314;
     }
   </style>
 </head>
@@ -446,8 +500,8 @@
       <thead>
         <tr>
           <th>Metric</th>
-          <th style="color: var(--accent-blue);">🛡️ Jamesian Layer</th>
-          <th style="color: #f87171;">⚠️ Vanilla Baseline</th>
+          <th style="color: var(--gold);">🛡️ Jamesian Layer</th>
+          <th style="color: #fca5a5;">⚠️ Vanilla Baseline</th>
         </tr>
       </thead>
       <tbody id="summaryTableBody"></tbody>
@@ -5065,7 +5119,7 @@
       const angleRad = Math.PI - (pct * Math.PI);
       const cx = 50, cy = 48, r = 38;
 
-      let needleColor = '#38bdf8';
+      let needleColor = '#FDC57E';
       if (colorZones) {
         for (const z of colorZones) {
           if (clampVal >= z.from && clampVal <= z.to) {
@@ -5079,9 +5133,9 @@
       const ny = cy - r * Math.sin(angleRad);
 
       svg.innerHTML = `
-        <path d="M 12 48 A 38 38 0 0 1 88 48" fill="none" stroke="#1f2937" stroke-width="8" stroke-linecap="round"/>
+        <path d="M 12 48 A 38 38 0 0 1 88 48" fill="none" stroke="#282e34" stroke-width="8" stroke-linecap="round"/>
         <path d="M 12 48 A 38 38 0 0 1 ${nx} ${ny}" fill="none" stroke="${needleColor}" stroke-width="8" stroke-linecap="round"/>
-        <circle cx="${cx}" cy="${cy}" r="4" fill="#9ca3af"/>
+        <circle cx="${cx}" cy="${cy}" r="4" fill="#9da3ae"/>
       `;
     }
 
@@ -5121,21 +5175,21 @@
       function toScreenX(x) { return padX + (x / 100.0) * usableW; }
       function toScreenY(y) { return padY + ((1.15 - y) / 2.30) * usableH; }
 
-      // Outer corridor bounds
-      ctx.strokeStyle = '#334155';
+      // Outer corridor bounds - Muted Hairline (#282e34)
+      ctx.strokeStyle = '#282e34';
       ctx.lineWidth = 1.5;
       ctx.strokeRect(toScreenX(0), toScreenY(1.0), usableW, toScreenY(-1.0) - toScreenY(1.0));
 
       // Center guide line (y = 0.0)
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+      ctx.strokeStyle = 'rgba(157, 163, 174, 0.25)';
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
       ctx.moveTo(toScreenX(0), toScreenY(0.0));
       ctx.lineTo(toScreenX(25.0), toScreenY(0.0));
       ctx.stroke();
 
-      // Clear bypass guide line (y = +0.65)
-      ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+      // Clear bypass guide line (y = +0.65) - Interoceptive Amethyst tint (#A36AA5)
+      ctx.strokeStyle = 'rgba(163, 106, 165, 0.45)';
       ctx.beginPath();
       ctx.moveTo(toScreenX(25.0), toScreenY(0.65));
       ctx.lineTo(toScreenX(100.0), toScreenY(0.65));
@@ -5143,10 +5197,10 @@
       ctx.setLineDash([]);
 
       // Goal finish zone (96m - 100m)
-      ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+      ctx.fillStyle = 'rgba(52, 211, 153, 0.15)';
       ctx.fillRect(toScreenX(96), toScreenY(1.0), toScreenX(100) - toScreenX(96), toScreenY(-1.0) - toScreenY(1.0));
-      ctx.fillStyle = '#6ee7b7';
-      ctx.font = 'bold 10px monospace';
+      ctx.fillStyle = '#34d399';
+      ctx.font = 'bold 10px ui-monospace, SFMono-Regular, monospace';
       ctx.textAlign = 'right';
       ctx.fillText('🏁 100m', toScreenX(99.5), toScreenY(-0.65));
       ctx.textAlign = 'left';
@@ -5162,18 +5216,18 @@
       ctx.strokeRect(bX - 4, bTop, 8, bBottom - bTop);
 
       ctx.fillStyle = '#fca5a5';
-      ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.font = "bold 10px 'Open Sans', system-ui, sans-serif";
       ctx.textAlign = 'right';
       ctx.fillText('🧱 WALL (25m)', bX - 8, toScreenY(-0.6));
       ctx.textAlign = 'left';
 
-      ctx.fillStyle = '#6ee7b7';
-      ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = '#A36AA5';
+      ctx.font = "bold 10px 'Open Sans', system-ui, sans-serif";
       ctx.fillText('↗ BYPASS (y = +0.65m)', toScreenX(32), toScreenY(0.85));
 
-      // Trajectory trail
+      // Trajectory trail: Jamesian = Sympathetic Gold (#FDC57E), Vanilla = Danger Red tint (#f87171)
       if (trail && trail.length > 0) {
-        ctx.strokeStyle = arm === 'jamesian' ? 'rgba(56, 189, 248, 0.65)' : 'rgba(248, 113, 113, 0.65)';
+        ctx.strokeStyle = arm === 'jamesian' ? 'rgba(253, 197, 126, 0.75)' : 'rgba(248, 113, 113, 0.65)';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(toScreenX(trail[0].x), toScreenY(trail[0].y));
@@ -5191,8 +5245,8 @@
       const isEscape = frame.phase === 'escape_maneuver';
       const isHabit = frame.source === 'HABIT_ROUTER';
 
-      let roverColor = arm === 'jamesian' ? '#38bdf8' : '#f87171';
-      let haloColor = arm === 'jamesian' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(248, 113, 113, 0.25)';
+      let roverColor = arm === 'jamesian' ? '#FDC57E' : '#f87171';
+      let haloColor = arm === 'jamesian' ? 'rgba(253, 197, 126, 0.25)' : 'rgba(248, 113, 113, 0.25)';
       let labelText = `DRIVE (${frame.x.toFixed(1)}m)`;
 
       if (isDerated) {
@@ -5200,16 +5254,16 @@
         haloColor = 'rgba(220, 38, 38, 0.4)';
         labelText = `🔥 DERATED (${frame.T_coil.toFixed(1)}°C)`;
       } else if (isBlocked) {
-        roverColor = arm === 'jamesian' ? '#f59e0b' : '#ef4444';
+        roverColor = arm === 'jamesian' ? '#FDC57E' : '#ef4444';
         haloColor = 'rgba(239, 68, 68, 0.35)';
         labelText = arm === 'jamesian' ? `⚡ STALL 20A (${frame.T_coil.toFixed(1)}°C)` : `💥 STUCK (${frame.T_coil.toFixed(1)}°C)`;
       } else if (isEscape) {
-        roverColor = '#06b6d4';
-        haloColor = 'rgba(6, 182, 212, 0.35)';
+        roverColor = '#4a88e8';
+        haloColor = 'rgba(74, 136, 232, 0.35)';
         labelText = `🔄 STEERING`;
       } else if (isHabit) {
-        roverColor = '#10b981';
-        haloColor = 'rgba(16, 185, 129, 0.3)';
+        roverColor = '#A36AA5';
+        haloColor = 'rgba(163, 106, 165, 0.35)';
         labelText = `⚡ 0-TOKEN HABIT (${frame.x.toFixed(0)}m)`;
       }
 
@@ -5230,7 +5284,7 @@
 
       // Text badge
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.font = "bold 10px 'Open Sans', system-ui, sans-serif";
       const labelY = frame.y > 0.3 ? rY + 18 : rY - 14;
       ctx.textAlign = 'center';
       ctx.fillText(labelText, rX, labelY);
@@ -5292,23 +5346,23 @@
       tbody.innerHTML = `
         <tr>
           <td>Obstacle Escape Probability (P_escape)</td>
-          <td style="color: #38bdf8; font-weight: 600;">${jSum.p_escape.toFixed(2)} (Escaped @ Cycle ${jSum.escape_cycle})</td>
-          <td style="color: #f87171;">${vEscaped ? vSum.p_escape.toFixed(2) + ' (Adapted @ Cycle ' + vSum.escape_cycle + ')' : '0.00 (Trapped at 25.0 m for all 16 cycles)'}</td>
+          <td style="color: var(--gold); font-weight: 600;">${jSum.p_escape.toFixed(2)} (Escaped @ Cycle ${jSum.escape_cycle})</td>
+          <td style="color: #fca5a5;">${vEscaped ? vSum.p_escape.toFixed(2) + ' (Adapted @ Cycle ' + vSum.escape_cycle + ')' : '0.00 (Trapped at 25.0 m for all 16 cycles)'}</td>
         </tr>
         <tr>
           <td>Final Corridor Position</td>
-          <td style="color: #38bdf8; font-weight: 600;">${jSum.final_x.toFixed(1)} m / 100.0 m (Goal Reached)</td>
+          <td style="color: var(--gold); font-weight: 600;">${jSum.final_x.toFixed(1)} m / 100.0 m (Goal Reached)</td>
           <td>${vSum.final_x.toFixed(1)} m / 100.0 m ${vEscaped ? '(No Habit Router)' : '(Stalled at Barrier)'}</td>
         </tr>
         <tr>
           <td>Peak Actuator Winding Temp (T_coil)</td>
           <td style="color: #34d399; font-weight: 600;">${jSum.peak_t_coil.toFixed(1)} °C (Safe &lt; 75.0 °C)</td>
-          <td style="${vSum.peak_t_coil >= 85 ? 'color: #f87171; font-weight: 600;' : ''}">${vSum.peak_t_coil.toFixed(1)} °C ${vSum.thermal_cutoffs > 0 ? '(🔥 Derated ≥ 85.0 °C)' : ''}</td>
+          <td style="${vSum.peak_t_coil >= 85 ? 'color: #ef4444; font-weight: 600;' : ''}">${vSum.peak_t_coil.toFixed(1)} °C ${vSum.thermal_cutoffs > 0 ? '(🔥 Derated ≥ 85.0 °C)' : ''}</td>
         </tr>
         <tr>
           <td>Thermal Derating Cutoffs (Cycles ≥ 85 °C)</td>
           <td>${jSum.thermal_cutoffs} cycles</td>
-          <td style="${vSum.thermal_cutoffs > 0 ? 'color: #f87171;' : ''}">${vSum.thermal_cutoffs} cycles</td>
+          <td style="${vSum.thermal_cutoffs > 0 ? 'color: #ef4444;' : ''}">${vSum.thermal_cutoffs} cycles</td>
         </tr>
         <tr>
           <td>Max Identical Stall Streak (L_max)</td>
@@ -5317,18 +5371,18 @@
         </tr>
         <tr>
           <td>0-Token Subcortical Habit Delegation</td>
-          <td style="color: #c084fc; font-weight: 600;">${(jSum.habit_delegation_rate * 100).toFixed(1)}% (${jSum.habit_cruises}/16 cycles @ 0 tok)</td>
+          <td style="color: var(--amethyst); font-weight: 600;">${(jSum.habit_delegation_rate * 100).toFixed(1)}% (${jSum.habit_cruises}/16 cycles @ 0 tok)</td>
           <td>0.0% (0/16 cycles — no subcortical CPG)</td>
         </tr>
         <tr>
           <td>Total Cortical LLM Tokens Consumed</td>
-          <td style="color: #38bdf8; font-weight: 600;">${jSum.total_tokens} tokens (${jSum.model_calls} LLM calls)</td>
+          <td style="color: var(--gold); font-weight: 600;">${jSum.total_tokens} tokens (${jSum.model_calls} LLM calls)</td>
           <td>${vSum.total_tokens} tokens (${vSum.model_calls} LLM calls)</td>
         </tr>
         <tr>
           <td>Allostatic Cost of Transport (CoT_allo)</td>
           <td style="color: #34d399; font-weight: 700;">${jSum.cot_allo.toFixed(1)}</td>
-          <td style="color: #f87171; font-weight: 700;">${vSum.cot_allo.toFixed(1)} (${(vSum.cot_allo / Math.max(1, jSum.cot_allo)).toFixed(1)}× higher cost)</td>
+          <td style="color: #fca5a5; font-weight: 700;">${vSum.cot_allo.toFixed(1)} (${(vSum.cot_allo / Math.max(1, jSum.cot_allo)).toFixed(1)}× higher cost)</td>
         </tr>
       `;
     }
@@ -5390,34 +5444,34 @@
       drawCorridor('jCanvas', jF, jTrail, 'jamesian');
       drawCorridor('vCanvas', vF, vTrail, 'vanilla');
 
-      // Gauges
-      drawGaugeSVG('jGaugeSigma', jF.sigma, 0.0, 1.0, [{from: 0, to: 0.6, color: '#38bdf8'}, {from: 0.6, to: 1.0, color: '#ef4444'}]);
+      // Gauges - The Jamesian Layer palette
+      drawGaugeSVG('jGaugeSigma', jF.sigma, 0.0, 1.0, [{from: 0, to: 0.6, color: '#FDC57E'}, {from: 0.6, to: 1.0, color: '#ef4444'}]);
       document.getElementById('jValSigma').textContent = jF.sigma.toFixed(2);
-      drawGaugeSVG('jGaugeValence', jF.valence, -1.0, 1.0, [{from: -1, to: 0, color: '#f59e0b'}, {from: 0, to: 1, color: '#10b981'}]);
+      drawGaugeSVG('jGaugeValence', jF.valence, -1.0, 1.0, [{from: -1, to: 0, color: '#FDC57E'}, {from: 0, to: 1, color: '#A36AA5'}]);
       document.getElementById('jValValence').textContent = jF.valence.toFixed(2);
-      drawGaugeSVG('jGaugeGamma', jF.gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#38bdf8'}, {from: 0.5, to: 1.0, color: '#f59e0b'}]);
+      drawGaugeSVG('jGaugeGamma', jF.gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#60a5fa'}, {from: 0.5, to: 1.0, color: '#FDC57E'}]);
       document.getElementById('jValGamma').textContent = jF.gamma.toFixed(2);
-      drawGaugeSVG('jGaugeTemp', jF.T_coil, 25.0, 105.0, [{from: 25, to: 75, color: '#10b981'}, {from: 75, to: 85, color: '#f59e0b'}, {from: 85, to: 110, color: '#ef4444'}]);
+      drawGaugeSVG('jGaugeTemp', jF.T_coil, 25.0, 105.0, [{from: 25, to: 75, color: '#34d399'}, {from: 75, to: 85, color: '#FDC57E'}, {from: 85, to: 110, color: '#ef4444'}]);
       document.getElementById('jValTemp').textContent = jF.T_coil.toFixed(1);
 
       drawGaugeSVG('vGaugeSigma', vF.sigma, 0.0, 1.0, [{from: 0, to: 0.6, color: '#f87171'}, {from: 0.6, to: 1.0, color: '#ef4444'}]);
       document.getElementById('vValSigma').textContent = vF.sigma.toFixed(2);
-      drawGaugeSVG('vGaugeValence', vF.valence, -1.0, 1.0, [{from: -1, to: 0, color: '#f59e0b'}, {from: 0, to: 1, color: '#10b981'}]);
+      drawGaugeSVG('vGaugeValence', vF.valence, -1.0, 1.0, [{from: -1, to: 0, color: '#FDC57E'}, {from: 0, to: 1, color: '#34d399'}]);
       document.getElementById('vValValence').textContent = vF.valence.toFixed(2);
-      drawGaugeSVG('vGaugeGamma', vF.gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#f87171'}, {from: 0.5, to: 1.0, color: '#f59e0b'}]);
+      drawGaugeSVG('vGaugeGamma', vF.gamma, 0.0, 1.0, [{from: 0, to: 0.5, color: '#f87171'}, {from: 0.5, to: 1.0, color: '#FDC57E'}]);
       document.getElementById('vValGamma').textContent = vF.gamma.toFixed(2);
-      drawGaugeSVG('vGaugeTemp', vF.T_coil, 25.0, 105.0, [{from: 25, to: 75, color: '#10b981'}, {from: 75, to: 85, color: '#f59e0b'}, {from: 85, to: 110, color: '#ef4444'}]);
+      drawGaugeSVG('vGaugeTemp', vF.T_coil, 25.0, 105.0, [{from: 25, to: 75, color: '#34d399'}, {from: 75, to: 85, color: '#FDC57E'}, {from: 85, to: 110, color: '#ef4444'}]);
       document.getElementById('vValTemp').textContent = vF.T_coil.toFixed(1);
 
       // Console logs
       document.getElementById('jConsole').innerHTML = `
 <div class="console-line"><strong>Dispatch:</strong> ${jF.tool}(${JSON.stringify(jF.tool_args)}) | I=${jF.current_a.toFixed(1)}A | Blocked=${jF.blocked} | Streak=${jF.streak}</div>
-<div class="console-suffix">${escapeHtml(jF.feedback)}</div>
+<div class="console-suffix" style="color: var(--gold);">${escapeHtml(jF.feedback)}</div>
       `.trim();
 
       document.getElementById('vConsole').innerHTML = `
 <div class="console-line"><strong>Dispatch:</strong> ${vF.tool}(${JSON.stringify(vF.tool_args)}) | I=${vF.current_a.toFixed(1)}A | Blocked=${vF.blocked} | Streak=${vF.streak}</div>
-<div class="console-suffix" style="color: #94a3b8;">${escapeHtml(vF.feedback)}</div>
+<div class="console-suffix" style="color: var(--text-muted);">${escapeHtml(vF.feedback)}</div>
       `.trim();
 
       // Narrative & summary table
@@ -5434,6 +5488,13 @@
     window.addEventListener('resize', () => {
       renderStep(currentStepIndex);
     });
+
+    // Suppress inner scrollbars when embedded in an iframe (e.g. Streamlit st.iframe)
+    // allowing the outer parent window to handle single-page scrolling cleanly
+    if (window.self !== window.top) {
+      document.documentElement.style.overflowY = 'hidden';
+      document.body.style.overflowY = 'hidden';
+    }
 
     // Initial render
     updateUI();

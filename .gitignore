@@ -18,5 +18,6 @@ jamesian_layer.egg-info/
 # OS noise
 .DS_Store
 
-# Personal notes (untracked)
-personal_notes.md
+# Scraped web pages and browser downloads
+personal_notes/Details*
+personal_notes/cerebral_valley_clean.txt
