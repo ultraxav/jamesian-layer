@@ -39,8 +39,8 @@ To record the 3-minute pitch video in a single seamless browser capture without 
 
 ### Scene 1: `0:00 – 0:35` (Slide 1) | The Hook & Empowerment Promise
 
-* **Slide Eyebrow:** `35 kg Autonomous Mars Rover • 20-Minute Radio Delay to Earth`
-* **Slide Title:** Why does a 31-billion-parameter AI ram a Martian boulder 16 times until its motor melts at 104.9 °C?
+* **Slide Eyebrow:** `Autonomous Mars Rover • 20-Minute Radio Delay to Earth`
+* **Slide Title:** Why does a billion-parameter AI ram a Martian boulder 16 times until its motor melts at 104.9 °C?
 * **On-Screen Visuals:**
   * **Left:** Studio render of the unshielded Vanilla Mars exploration rover stranded on Martian basalt rocks with red badge `LANE A: VANILLA (NO NERVOUS SYSTEM)`.
   * **Right Top:** Analytical card explaining Cartesian Blindness (LLM has no clock, no body, and no sense of touch).
@@ -49,11 +49,11 @@ To record the 3-minute pitch video in a single seamless browser capture without 
 * **Camera / Action:**
   * Start on Slide 1. Click **Start** on the timer. Hover pointer briefly over the 104.9 °C callout.
 * **Spoken Script (Voiceover):**
-  > "Why does a 31-billion-parameter foundation model ram a Martian boulder 16 times until its motor melts at 105 degrees Celsius?
+  > "Why does a billion-parameter foundation model ram a Martian boulder 16 times until its motor melts at 105 degrees Celsius?
   > 
   > Because foundation models suffer from Cartesian Blindness. Locked in a windowless room, an AI has no body, no clock, and no sense of touch. When wheels jam, it repeats its own failed command, trapped in an attractor well.
   > 
-  > My empowerment promise: in 3 minutes, you will see how my 50 Hz nervous system middleware gives any model physical reflexes, saving 18 of 18 models from hardware death."
+  > My empowerment promise: in 3 minutes, you will see how my nervous system middleware gives any model physical reflexes, saving 18 of 18 tested models from hardware death."
 * **ELI5 Plain-English Note:**
   > An AI brain is like a smart captain locked in a dark room with a walkie-talkie. If a wheel hits a rock, nobody tells the captain it stopped moving, so it keeps shouting "drive forward!" until the motor catches fire. I gave it a nervous system so it can actually feel the rock.
 
@@ -61,22 +61,20 @@ To record the 3-minute pitch video in a single seamless browser capture without 
 
 ### Scene 2: `0:35 – 1:15` (Slide 2) | The Bio-Cybernetic Nervous System
 
-* **Slide Eyebrow:** `The Jamesian Layer • 50 Hz Interoceptive Middleware`
-* **Slide Title:** Don't make the AI do physics. Give it a nervous system with four automatic reflexes.
+* **Slide Eyebrow:** `The Jamesian Layer • Interoceptive Middleware`
+* **Slide Title:** Don't make the AI do physics. Give it a nervous system with automatic reflexes.
 * **On-Screen Visuals:**
   * **Left:** Studio render of the Jamesian Rover equipped with the gold heatsink spine and emerald optical telemetry bus with green badge `JAMESIAN ROVER: NERVOUS MIDDLEWARE`.
   * **Right (3-Tier Multi-Rate Architecture Stack):**
-    * **Tier 1 (Top):** Mission Captain (LLM) at 0.5 Hz SLOW (Meta Muse Spark & Llama Stack, sleeps during cruise).
+    * **Tier 1 (Top):** Mission Captain (LLM) at 0.5 Hz SLOW (Meta Muse Spark & Meta Stack, sleeps during cruise).
     * **Tier 2 (Hero Center, Gold Border):** The Jamesian Middleware at 50 Hz FAST (`ZERO LLM TRAINING NEEDED` badge, listing the 4 reflexes: Slip Comparator, RK4 Heat ODE, Circuit Breaker, 0-Token Autopilot).
-    * **Tier 3 (Bottom):** 35 kg Rover Actuators at 200 Hz PHYSICS (Brushless DC motors, 4A rolling vs 20A stall).
+    * **Tier 3 (Bottom):** Rover Actuators at 200 Hz PHYSICS (Brushless DC motors, 4A rolling vs 20A stall).
 * **Camera / Action:**
   * Press `→` to advance to Slide 2 at `0:35`. Highlight the 4 automatic reflexes in Tier 2.
 * **Spoken Script (Voiceover):**
   > "My core insight is simple: don't make the slow LLM do physics, and don't spend millions retraining it. In humans, your nervous system pulls your hand off a hot stove before your brain even knows you were burned.
   > 
-  > The Jamesian Layer is a 50 Hz bio-cybernetic nervous system daemon between the LLM captain and the motors requiring zero model training.
-  > 
-  > It runs four automatic reflexes: a slip comparator that catches sand traps on rotation 1, biophysical ODEs tracking coil heat, a circuit breaker that locks out failed moves, and a 0-token autopilot that cruises empty terrain for free."
+  > The Jamesian Layer is a bio-cybernetic nervous system daemon between the LLM captain and the motors requiring zero model training. This time it runs four automatic reflexes: a slip comparator that catches sand traps on rotation 1, biophysical ODEs tracking coil heat, a circuit breaker that locks out failed moves, and a 0-token autopilot that cruises empty terrain for free."
 * **ELI5 Plain-English Note:**
   > When you touch a hot stove, your nervous system pulls your hand back before you even feel the burn. I put that exact same emergency reflex into the robot as drop-in software, no retraining needed, so it does not need to ask the slow cloud AI for permission to stop melting.
 
@@ -133,15 +131,16 @@ To record the 3-minute pitch video in a single seamless browser capture without 
     * Card 1: Zero Costly LLM Training Required ($0 GPU Cost).
     * Card 2: Scale Alone Does Not Prevent Melts.
     * Card 3: Meta Sweeps #1–#5 & 15× to 25× Cost Cut.
+    * Card 4: The Test: Strictly Controlled Dual-Run.
 * **Camera / Action:**
   * Press `→` to advance to Slide 4 at `2:05`.
-  * Highlight the gold Meta sweep rows #1–#5, then point to the rescued 1.2B edge model outperforming the melted 31B giant.
+  * Highlight the gold Meta sweep rows #1–#5, point to Card 4 and the rescued 1.2B edge model outperforming the melted 31B giant.
 * **Spoken Script (Voiceover):**
-  > "I audited 18 local and cloud models across 6,480 trials under strict ceteris paribus conditions. Meta completely swept Ranks #1 through #5.
+  > "I audited 18 cloud and local off-the-shelf models across more than 6,480 trials under strictly controlled conditions. Meta completely swept Ranks 1 through 5.
   > 
   > Crucially, zero LLM training was needed: this is runtime middleware.
   > 
-  > Scale alone does not prevent hardware melts, giant 31B and 20B models burned out at 105 degrees, but my layer rescued them, and even allowed an edge-sized Liquid 1.2B model to safely complete the course at 51 degrees while saving up to 240-fold on token cost."
+  > Scale alone does not prevent hardware melts, giant 31B and 20B models burned out at 105 degrees, but my layer rescued them, and even allowed an edge-sized Liquid 1.2B model to safely complete the course while saving up to 240-fold on token cost. Allowing edge models to do amazing things on edge hardware and conditions."
 * **ELI5 Plain-English Note:**
   > I tested 18 models. Meta won first place across the board. Making an AI bigger didn't save it from melting, only having a nervous system did. And because it's drop-in software, it works on any model on Day 1 with zero retraining costs.
 
@@ -154,7 +153,7 @@ To record the 3-minute pitch video in a single seamless browser capture without 
 * **On-Screen Visuals:**
   * **Top (3 Contribution Cards):**
     * `01 Drop-in Nervous System Middleware`: Open-source Python daemon combining 50 Hz biophysical RK4 ODEs, efference slip comparator, and 3-strike circuit breaker.
-    * `02 Llama Stack Hook`: Native integration with Meta Llama Stack and FastAPI headers. Injects under 45 tokens per turn, keeping 100% of KV-cache prefix intact.
+    * `02 Meta Stack Hook`: Native integration with Meta Stack and FastAPI headers. Injects under 45 tokens per turn, keeping 100% of KV-cache prefix intact.
     * `03 The Agency Audit Protocol`: Standardized 360-trial test harness measuring Youden's J lift, detection thresholds ($\epsilon_{50}, \Delta t_{50}$), and Sense of Agency vs Ownership.
   * **Bottom (Hero Call-to-Win Banner):**
     * Heading: `Why I Want to Win This Hackathon`
@@ -165,7 +164,7 @@ To record the 3-minute pitch video in a single seamless browser capture without 
   * Press `→` to advance to Slide 5 at `2:30`.
   * Leave Slide 5 up on screen as the concluding visual. Do not cut to a blank screen or a generic "Q&A" slide.
 * **Spoken Script (Voiceover):**
-  > "In this hackathon, I built a drop-in Python nervous system daemon, a native Llama Stack hook preserving 100% of KV-cache, and a 360-trial agency audit protocol.
+  > "In this hackathon, I built a drop-in Python nervous system daemon, a native Meta Stack hook preserving 100% of KV-cache, and a 360-trial agency audit protocol.
   > 
   > But I didn't build this just for simulation.
   > 

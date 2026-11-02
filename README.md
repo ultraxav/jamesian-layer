@@ -297,3 +297,15 @@ Models are ranked by **Subjective Grounding Compliance** ($SoA \land SoO$ pass) 
 * [Phase 8 Plan & Empirical Report — Local Providers & 18-Model Campaign Results](documents/phase-08-local-providers-and-campaign-results.md)
 * [Submission Checklist](documents/SUBMISSION_CHECKLIST.md)
 * [3-Minute Video Demo Script & Storyboard](documents/VIDEO_DEMO_SCRIPT_AND_STORYBOARD.md)
+
+---
+
+## 6. Scientific References
+
+* **Baggio, G., & Gallagher, S. (2026).** Minimal self-sentience. *Synthese*, 208(91), 1–23. https://doi.org/10.1007/s11229-026-05742-3
+* **Gallagher, S. (2000).** Philosophical conceptions of the self: Implications for cognitive science. *Trends in Cognitive Sciences*, 4(1), 14–21. https://doi.org/10.1016/S1364-6613(99)01417-5
+* **James, W. (1884).** What is an emotion? *Mind*, 9(34), 188–205. https://doi.org/10.1093/mind/os-IX.34.188
+* **James, W. (1890).** *The Principles of Psychology*. Henry Holt and Company.
+* **Sato, A., & Yasuda, A. (2005).** Illusion of sense of self-agency: Discrepancy between the predicted and actual sensory consequences of actions. *Cognition*, 94(3), 241–255. https://doi.org/10.1016/j.cognition.2004.04.003
+* **Botvinick, M., & Cohen, J. (1998).** Rubber hands ‘feel’ touch that eyes see. *Nature*, 391(6669), 756. https://doi.org/10.1038/35784
+

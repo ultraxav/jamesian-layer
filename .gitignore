@@ -19,5 +19,4 @@ jamesian_layer.egg-info/
 .DS_Store
 
 # Scraped web pages and browser downloads
-personal_notes/Details*
-personal_notes/cerebral_valley_clean.txt
+personal_notes/
